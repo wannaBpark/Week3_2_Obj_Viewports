@@ -38,7 +38,10 @@ public:
         static uint32 instanceID = 0;
         NewObject->UUID = UEngineStatics::GenUUID();
         UClass* ClassInfo = T::StaticClass();
-        NewObject->Name = FName(ClassInfo->GetName() + "_" + FString::FromInt(instanceID++));
+        FString ClassName = ClassInfo->GetName() + TEXT("_");
+		ClassName += FString::FromInt(instanceID);
+		NewObject->Name = FName(ClassName);
+
         auto tmp = NewObject->Name.ToString();
         UE_LOG("%s ", *tmp);
         NewObject->ClassType = ClassInfo;

@@ -165,6 +165,7 @@
     <ClCompile Include="Source\Core\FSceneManager.cpp" />
     <ClCompile Include="Source\Core\Rendering\SubUVManager.cpp" />
     <ClCompile Include="Source\Core\Rendering\TextAtlasManager.cpp" />
+    <ClCompile Include="Source\MeshBuilder.cpp" />
     <ClCompile Include="Source\Object\Actor\Circle.cpp" />
     <ClCompile Include="Source\Object\Actor\SubUV.cpp" />
     <ClCompile Include="Source\Object\Actor\WorldGrid.cpp" />
@@ -202,9 +203,11 @@
     <ClCompile Include="Source\Object\NameTypes.cpp" />
     <ClCompile Include="Source\Object\Gizmo\WorldGizmo.cpp" />
     <ClCompile Include="Source\Object\ObjectFactory.cpp" />
+    <ClCompile Include="Source\Object\StaticMeshComponent\MeshComponent.cpp" />
     <ClCompile Include="Source\Object\UClass.cpp" />
     <ClCompile Include="Source\Object\UtilComponent\UBillboardUtilComponent.cpp" />
     <ClCompile Include="Source\Object\UtilComponent\UStringComponent.cpp" />
+    <ClCompile Include="Source\ObjReader.cpp" />
     <ClCompile Include="Source\ThirdParty\ImGui\imgui.cpp" />
     <ClCompile Include="Source\ThirdParty\ImGui\imgui_demo.cpp" />
     <ClCompile Include="Source\ThirdParty\ImGui\imgui_draw.cpp" />
@@ -303,8 +306,12 @@
   <ItemGroup>
     <ClInclude Include="Source\Core\EngineConfig.h" />
     <ClInclude Include="Source\Core\FSceneManager.h" />
+    <ClInclude Include="Source\Core\Rendering\RendererDefine.h" />
     <ClInclude Include="Source\Core\Rendering\SubUVManager.h" />
     <ClInclude Include="Source\Core\Rendering\TextAtlasManager.h" />
+    <ClInclude Include="Source\Core\Template\RemoveReference.h" />
+    <ClInclude Include="Source\Core\Template\Template.h" />
+    <ClInclude Include="Source\MeshBuilder.h" />
     <ClInclude Include="Source\Object\Actor\SubUV.h" />
     <ClInclude Include="Source\Object\Actor\WorldGrid.h" />
     <ClInclude Include="Circle.h" />
@@ -349,8 +356,10 @@
     <ClInclude Include="Source\Object\ObjectFactory.h" />
     <ClInclude Include="Source\Object\ObjectMacro.h" />
     <ClInclude Include="Source\Object\UClass.h" />
+    <ClInclude Include="Source\Object\StaticMeshComponent\MeshComponent.h" />
     <ClInclude Include="Source\Object\UtilComponent\UBillboardUtilComponent.h" />
     <ClInclude Include="Source\Object\UtilComponent\UStringComponent.h" />
+    <ClInclude Include="Source\ObjReader.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imconfig.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imgui.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imgui_impl_dx11.h" />
