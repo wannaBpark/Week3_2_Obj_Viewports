@@ -1,0 +1,9 @@
+{
+  "AtlasName" : "koverwatch.png",
+  "ColNum" : 16,
+  "RowNum" : 16,
+  "AtlasWidth" : 512,
+  "AtlasHeight" : 512,
+  "TextureIndex" : 1,
+  "TotalFrame" : 256
+}

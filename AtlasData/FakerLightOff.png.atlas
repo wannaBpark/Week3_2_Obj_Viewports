@@ -1,0 +1,9 @@
+{
+  "AtlasName" : "FakerLightOff.png",
+  "ColNum" : 9,
+  "RowNum" : 10,
+  "AtlasWidth" : 3600,
+  "AtlasHeight" : 2230,
+  "TextureIndex" : 4,
+  "TotalFrame" : 90
+}
