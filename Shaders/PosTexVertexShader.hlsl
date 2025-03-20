@@ -1,6 +1,6 @@
 cbuffer constants : register(b0)
 {
-    matrix MVP[4];
+    matrix MVP;
     float4 CustomColor;
     uint bUseVertexColor;
     float3 eyeWorldPos;

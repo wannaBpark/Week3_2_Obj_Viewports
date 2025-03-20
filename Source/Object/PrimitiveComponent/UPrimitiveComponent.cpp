@@ -164,9 +164,15 @@ void UPrimitiveComponent::UpdateLightConstantData(URenderer*& Renderer)
 	modelWorld.M[3][0] = modelWorld.M[3][1] = modelWorld.M[3][2] = 0;
 	modelWorld = modelWorld.Inverse();
 	FMatrix InvTranspose = FMatrix::Transpose(FMatrix::Transpose(modelWorld));
+	FMatrix ViewMatrices[4] = {
+		FMatrix::Transpose(Renderer->GetViewMatrix()),
+		FMatrix::Transpose(Renderer->GetViewportMatrixById(1)),
+		FMatrix::Transpose(Renderer->GetViewportMatrixById(2)),
+		FMatrix::Transpose(Renderer->GetViewportMatrixById(3)),
+	};
 	FLightConstants UpdateInfo{
 		.Model = FMatrix::Transpose(this->GetComponentTransformMatrix()),
-		.View = FMatrix::Transpose(Renderer->GetViewMatrix()),
+		.Views = {ViewMatrices[0],ViewMatrices[1],ViewMatrices[2],ViewMatrices[3]},
 		.Projection = FMatrix::Transpose(Renderer->GetProjectionMatrix()),
 		.InvTranspose = InvTranspose,
 		.Color = this->GetCustomColor(),
@@ -174,14 +180,19 @@ void UPrimitiveComponent::UpdateLightConstantData(URenderer*& Renderer)
 		.eyeWorldPos = FEditorManager::Get().GetCamera()->GetActorTransform().GetPosition(),
 		.indexColor = indexColor,
 		.bIsPicked = (uint32)this->IsPicked(),
-		.Padding = FEditorManager::Get().GetCamera()->GetActorTransform().GetPosition(),
+		.Padding = FVector(0.0f, 0.0f, 0.0f),
+		.ViewportIndex = 0,
+		.Padding2 = FVector(0.0f, 0.0f, 0.0f),
 	};
 
 	if (BillboardUtil != nullptr) {
-		LightConstantData.Model = FMatrix::Transpose(MVP.Model);
-		LightConstantData.View = FMatrix::Transpose(MVP.View); 
-		LightConstantData.Projection = FMatrix::Transpose(MVP.Projection);
-	}
+		UpdateInfo.Model = FMatrix::Transpose(MVP.Model);
+		UpdateInfo.Views[0] = MVP.View;
+		UpdateInfo.Views[1] = ViewMatrices[1];
+		UpdateInfo.Views[2] = ViewMatrices[2];
+		UpdateInfo.Views[3] = ViewMatrices[3];
+		UpdateInfo.Projection = FMatrix::Transpose(MVP.Projection);
+	};
 
 	LightConstantData = UpdateInfo;
 

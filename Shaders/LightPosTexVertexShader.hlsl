@@ -2,7 +2,7 @@
 cbuffer constants : register(b0)
 {
     matrix Model;
-    matrix View;
+    matrix Views[4];
     matrix Projection;
     matrix InvTranspose;
     float4 CustomColor;
@@ -40,9 +40,26 @@ PS_INPUT mainVS(VS_INPUT input)
 
     position = mul(float4(input.position, 1.0f), Model);
     output.posWorld = position;
+    matrix View;
+    if (ViewportIndex == 0)
+    {
+        View = Views[0];
+    }
+    else if (ViewportIndex == 1)
+    {
+        View = Views[1];
+    }
+    else if (ViewportIndex == 2)
+    {
+        View = Views[2];
+    }
+    else if (ViewportIndex == 3)
+    {
+        View = Views[3];
+    }
     position = mul(position, View);
-    position = mul(position, Projection);
-    output.position = position;
+    output.position = mul(position, Projection);
+    //output.position = mul(position, Views[0] * Projection);
     
     output.normal = mul(float4(input.normal, 1.0f), InvTranspose);
     output.texcoord = input.texcoord;

@@ -179,7 +179,12 @@ protected:
     uint32 NumViewports = 4;
 
 public:
-    FMatrix ViewportMatrices[4];
+    
+    FMatrix I = FMatrix::Identity();
+    FMatrix ViewZY = FMatrix::LookAtLH(FVector(-70.0f, 0.0f, 0.0f), FVector(3.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 1.0f));
+    FMatrix ViewZX = FMatrix::LookAtLH(FVector(0.0f, 7.0f, 0.0f), FVector(0.0f, -7.0f, 0.0f), FVector(0.0f, 0.0f, 1.0f));
+    FMatrix ViewYX = FMatrix::LookAtLH(FVector(0.0f, 0.0f, 7.0f), FVector(0.0f, 0.0f, -7.0f), FVector(0.0f, 1.0f, 0.0f));
+    FMatrix ViewportMatrices[4] = {I, ViewZY, ViewZX, ViewYX };
     FMatrix GetViewportMatrixById(uint32 i) { return ViewportMatrices[i]; }
 #pragma endregion
 

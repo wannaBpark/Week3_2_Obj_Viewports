@@ -88,15 +88,32 @@ BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FAtlasConstants)
     SHADER_PARAMETER(FVector4, AtlasSzOffset)
 END_GLOBAL_SHADER_PARAMETER_STRUCT()
 
-BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FLightConstants)
-    SHADER_PARAMETER(FMatrix, Model)
-    SHADER_PARAMETER(FMatrix, View)
-    SHADER_PARAMETER(FMatrix, Projection)
-    SHADER_PARAMETER(FMatrix, InvTranspose)
-    SHADER_PARAMETER(FVector4, Color)
-    SHADER_PARAMETER(uint32, bUseVertexColor)
-    SHADER_PARAMETER(FVector, eyeWorldPos)
-    SHADER_PARAMETER(FVector4, indexColor)
-    SHADER_PARAMETER(uint32, bIsPicked)
-    SHADER_PARAMETER(FVector, Padding)
-END_GLOBAL_SHADER_PARAMETER_STRUCT()
+struct FLightConstants {
+    FMatrix Model;
+    FMatrix Views[4];
+    FMatrix Projection;
+    FMatrix InvTranspose;
+    FVector4 Color;
+    uint32  bUseVertexColor;
+    FVector eyeWorldPos;
+    FVector4 indexColor;
+    uint32  bIsPicked;
+    FVector Padding;
+    uint32 ViewportIndex;
+    FVector Padding2;
+};
+
+//BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FLightConstants)
+//    SHADER_PARAMETER(FMatrix, Model)
+//    SHADER_PARAMETER(FMatrix, Views[4])
+//    SHADER_PARAMETER(FMatrix, Projection)
+//    SHADER_PARAMETER(FMatrix, InvTranspose)
+//    SHADER_PARAMETER(FVector4, Color)
+//    SHADER_PARAMETER(uint32, bUseVertexColor)
+//    SHADER_PARAMETER(FVector, eyeWorldPos)
+//    SHADER_PARAMETER(FVector4, indexColor)
+//    SHADER_PARAMETER(uint32, bIsPicked)
+//    SHADER_PARAMETER(FVector, Padding)
+//    SHADER_PARAMETER(uint32, ViewportIndex)
+//    SHADER_PARAMETER(FVector, Padding2)
+//END_GLOBAL_SHADER_PARAMETER_STRUCT()

@@ -4,7 +4,7 @@ SamplerState g_sampler : register(s0);
 cbuffer constants : register(b0)
 {
     matrix Model;
-    matrix View;
+    matrix Views[4];
     matrix Projection;
     matrix InvTranspose;
     float4 CustomColor;
@@ -13,8 +13,9 @@ cbuffer constants : register(b0)
     float4 indexColor;
     uint bIsPicked;
     float3 Padding;
+    uint ViewportIndex;
+    float3 Padding2;
 }
-
 
 struct PS_INPUT
 {
