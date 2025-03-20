@@ -859,9 +859,6 @@ void URenderer::CreateTextureSRV(const std::string& filename)
 
     image.resize(Width * Height * Channels);
     memcpy(image.data(), img, image.size() * sizeof(uint8_t));
-    //for (size_t i = 0; i < Width * Height * Channels; i++) {
-    //    image[i] = img[i]; // 8비트 → 16비트 변환
-    //}
     stbi_image_free(img);
 
     // Create texture.
@@ -879,10 +876,6 @@ void URenderer::CreateTextureSRV(const std::string& filename)
     InitData.pSysMem = image.data();
     InitData.SysMemPitch = txtDesc.Width * sizeof(uint8_t) * Channels;     // SysMemPitch : 한 행의 바이트 크기
     // InitData.SysMemSlicePitch = 0;
-
-    // ID3D11Device* pd3dDevice; // Don't forget to initialize this
-    // TODO: You should really consider using a COM smart-pointer like
-    // Microsoft::WRL::ComPtr instead
 
     Device->CreateTexture2D(&txtDesc, &InitData, &Texture);                     // 텍스처, 텍스처 리소스뷰 생성
     Device->CreateShaderResourceView(Texture, nullptr, &SRV);
