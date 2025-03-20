@@ -802,6 +802,10 @@ void URenderer::UpdateProjectionMatrix(ACamera* Camera)
 
 void URenderer::OnUpdateWindowSize(int Width, int Height)
 {
+    ReleaseFrameBuffer();
+    ReleasePickingFrameBuffer();
+    ReleaseDepthStencilBuffer();
+
     if (SwapChain)
     {
         SwapChain->ResizeBuffers(0, Width, Height, DXGI_FORMAT_UNKNOWN, 0);
@@ -814,14 +818,6 @@ void URenderer::OnUpdateWindowSize(int Width, int Height)
             static_cast<float>(SwapChainDesc.BufferDesc.Width), static_cast<float>(SwapChainDesc.BufferDesc.Height),
             0.0f, 1.0f
         };
-
-
-        ReleaseFrameBuffer();
-        ReleasePickingFrameBuffer();
-        ReleaseDepthStencilBuffer();
-
-
-
     }
 }
 
