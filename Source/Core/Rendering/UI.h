@@ -50,7 +50,9 @@ private:
 
     ImVec2 GetRatio() const
     {
-    	return {ScreenSize.x / InitialScreenSize.x, ScreenSize.y / InitialScreenSize.y};
+		ImGuiIO& io = ImGui::GetIO();
+
+    	return { io.DisplaySize.x / InitialScreenSize.x, io.DisplaySize.y / InitialScreenSize.y};
     }
 
 	float GetMin() const

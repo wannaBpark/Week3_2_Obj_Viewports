@@ -815,20 +815,26 @@ void URenderer::OnUpdateWindowSize(int Width, int Height)
             0.0f, 1.0f
         };
 
-        // 프레임 버퍼를 다시 생성
+
         ReleaseFrameBuffer();
-        CreateFrameBuffer();
-
         ReleasePickingFrameBuffer();
-		CreatePickingTexture(UEngine::Get().GetWindowHandle());
-
-        RTVs[0] = FrameBufferRTV;
-        RTVs[1] = PickingFrameBufferRTV;
-
-        // 뎁스 스텐실 버퍼를 다시 생성
         ReleaseDepthStencilBuffer();
-        CreateDepthStencilBuffer();
+
+
+
     }
+}
+
+void URenderer::OnResizeComplete()
+{
+    // 프레임 버퍼를 다시 생성
+    CreateFrameBuffer();
+    CreatePickingTexture(UEngine::Get().GetWindowHandle());
+    // 뎁스 스텐실 버퍼를 다시 생성
+    CreateDepthStencilBuffer();
+
+    RTVs[0] = FrameBufferRTV;
+    RTVs[1] = PickingFrameBufferRTV;
 }
 
 void URenderer::RenderPickingTexture()
