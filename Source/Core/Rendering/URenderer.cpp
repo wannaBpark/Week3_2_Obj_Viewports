@@ -29,6 +29,7 @@
 void URenderer::Create(HWND hWindow)
 {
     CreateDeviceAndSwapChain(hWindow);
+    CreateViewportInfos(); // 뷰포트 정보 설정
     CreateFrameBuffer();
     CreateRasterizerState();
     CreateBufferCache();
@@ -388,10 +389,15 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
     DeviceContext->IASetInputLayout(InputLayoutMap[ILType].Get());
     DeviceContext->IASetPrimitiveTopology(Topology);                                    // 실제 토폴로지 세팅
 
-    if (bUseIndexBuffer == true) {
-        RenderPrimitiveIndexed(VertexBufferMap[Type].Get(), IndexBufferMap[Type].Get(), numVertices);
-    } else {
-        RenderPrimitiveInternal(VertexBufferMap[Type].Get(), numVertices);                  // info에 담긴 실제 vertexbuffer, numVertices 전달 및 렌더
+    for (uint32 i{ 0 }; i < NumViewports; ++i)
+    {
+        DeviceContext->RSSetViewports(1, &ViewportInfos[i]);
+        if (bUseIndexBuffer == true) {
+            RenderPrimitiveIndexed(VertexBufferMap[Type].Get(), IndexBufferMap[Type].Get(), numVertices);
+        }
+        else {
+            RenderPrimitiveInternal(VertexBufferMap[Type].Get(), numVertices);                  // info에 담긴 실제 vertexbuffer, numVertices 전달 및 렌더
+        }
     }
 
 }
@@ -467,6 +473,31 @@ void URenderer::CreateDeviceAndSwapChain(HWND hWindow)
         static_cast<float>(SwapChainDesc.BufferDesc.Width), static_cast<float>(SwapChainDesc.BufferDesc.Height),
         0.0f, 1.0f
     };
+}
+
+void URenderer::CreateViewportInfos()
+{
+    uint32 Width = UEngine::Get().GetScreenWidth();
+    uint32 Height = UEngine::Get().GetScreenHeight();
+
+    // 각 뷰포트의 너비와 높이는 화면 크기의 절반
+    float HalfWidth = static_cast<float>(Width) / 2.0f;
+    float HalfHeight = static_cast<float>(Height) / 2.0f;
+
+    // 테스트용 : 뷰포트 두개를 수평으로 나누어 생성
+    for (int i = 0; i < NumViewports; ++i)
+    {
+        D3D11_VIEWPORT Viewport;
+        Viewport = {
+            .TopLeftX = (i % 2) * HalfWidth,  // 짝수 인덱스는 왼쪽, 홀수 인덱스는 오른쪽
+            .TopLeftY = (i / 2) * HalfHeight, // 첫 두 뷰포트는 위쪽, 나머지는 아래쪽
+            .Width = HalfWidth,
+            .Height = HalfHeight,
+            .MinDepth = 0.0f,
+            .MaxDepth = 1.0f
+        };
+        ViewportInfos.Add(Viewport);
+    }
 }
 
 void URenderer::ReleaseDeviceAndSwapChain()

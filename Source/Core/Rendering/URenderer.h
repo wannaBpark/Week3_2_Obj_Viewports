@@ -116,6 +116,7 @@ protected:
     /** Direct3D Device 및 SwapChain을 생성합니다. */
     void CreateDeviceAndSwapChain(HWND hWindow);
 
+
     /** Direct3D Device 및 SwapChain을 해제합니다.  */
     void ReleaseDeviceAndSwapChain();
 
@@ -172,7 +173,15 @@ protected:
 	ID3D11DepthStencilView* DepthStencilView = nullptr;     // DepthStencil버퍼를 렌더 타겟으로 사용하는 뷰
 	ID3D11DepthStencilState* DepthStencilState = nullptr;   // DepthStencil 상태(깊이 테스트, 스텐실 테스트 등 정의)
     ID3D11DepthStencilState* GizmoDepthStencilState = nullptr; // 기즈모용 스텐실 스테이트. Z버퍼 테스트 하지않고 항상 앞에렌더
+#pragma region Viewport TEST
+    void CreateViewportInfos();
+    TArray<D3D11_VIEWPORT> ViewportInfos;
+    uint32 NumViewports = 4;
 
+public:
+    FMatrix ViewportMatrices[4];
+    FMatrix GetViewportMatrixById(uint32 i) { return ViewportMatrices[i]; }
+#pragma endregion
 
 public:
     ID3D11Buffer* LineVertexBuffer = nullptr;

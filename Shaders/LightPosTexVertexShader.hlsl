@@ -11,6 +11,8 @@ cbuffer constants : register(b0)
     float4 indexColor;
     uint bIsPicked;
     float3 Padding;
+    uint ViewportIndex;
+    float3 Padding2;
 }
 
 struct VS_INPUT
