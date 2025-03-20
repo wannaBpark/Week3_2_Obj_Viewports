@@ -234,3 +234,13 @@ inline FVector4& FVector4::operator/=(float Scalar)
     return *this;
 }
 
+struct FVector2D
+{
+	float X, Y;
+
+	FVector2D() : X(0), Y(0) {}
+	FVector2D(float InX, float InY) : X(InX), Y(InY) {}
+
+	static const FVector2D ZeroVector;
+	static const FVector2D OneVector;
+};
