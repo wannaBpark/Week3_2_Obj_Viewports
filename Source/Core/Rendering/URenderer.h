@@ -110,6 +110,8 @@ public:
 
 	void OnUpdateWindowSize(int Width, int Height);
 
+    void OnResizeComplete();
+
 protected:
     /** Direct3D Device 및 SwapChain을 생성합니다. */
     void CreateDeviceAndSwapChain(HWND hWindow);

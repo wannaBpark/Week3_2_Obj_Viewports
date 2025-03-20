@@ -274,6 +274,11 @@ void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
 	{
 		ui.OnUpdateWindowSize(ScreenWidth, ScreenHeight);
 	}
+
+	if (Renderer)
+	{
+		Renderer->OnResizeComplete();
+	}
 }
 
 UObject* UEngine::GetObjectByUUID(uint32 InUUID) const

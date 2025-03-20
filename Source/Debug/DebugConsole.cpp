@@ -1,4 +1,4 @@
-﻿
+
 #include "Debug/DebugConsole.h"
 #include <cstdarg>
 #include <algorithm>
@@ -17,6 +17,7 @@ void Debug::ShowConsole(bool bWasWindowSizeUpdated, ImVec2 PreRatio, ImVec2 CurR
     bool reclaimFocus = false;
 
     ImGui::Begin("Console");
+
     if (bWasWindowSizeUpdated)
     {
         auto* Window = ImGui::GetCurrentWindow();

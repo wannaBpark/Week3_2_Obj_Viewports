@@ -115,7 +115,10 @@ void UI::OnUpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
     ImGui_ImplDX11_InvalidateDeviceObjects();
     ImGui_ImplDX11_CreateDeviceObjects();
    // ImGui 창 크기 업데이트
+
+    ImGuiIO& io = ImGui::GetIO();
 	ScreenSize = ImVec2(static_cast<float>(InScreenWidth), static_cast<float>(InScreenHeight));
+	io.DisplaySize = ScreenSize;
 
     bWasWindowSizeUpdated = true;
 }
@@ -581,6 +584,15 @@ void UI::RenderPropertyWindow()
 void UI::RenderSceneManager()
 {
     ImGui::Begin("SceneManager");
+
+    if (bWasWindowSizeUpdated)
+    {
+        auto* Window = ImGui::GetCurrentWindow();
+
+        ImGui::SetWindowPos(ResizeToScreen(Window->Pos));
+        ImGui::SetWindowSize(ResizeToScreen(Window->Size));
+    }
+
     if (ImGui::TreeNode("Primitives")) {
         TArray<AActor*> actors;
         if (FSceneManager::Get().GetScene(0) != nullptr)
