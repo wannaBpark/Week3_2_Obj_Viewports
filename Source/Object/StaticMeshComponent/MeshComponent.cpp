@@ -16,3 +16,5 @@ void UMeshComponent::Render()
 	//UEngine::Get().GetRenderer()->RenderPrimitive(this);
 	//Renderer->RenderPrimitive(this);
 }
+
+
