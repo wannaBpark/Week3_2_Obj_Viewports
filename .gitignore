@@ -42,7 +42,10 @@ Intermediate/
 
 # Scenes
 *.scene
-imgui.ini
+
+# Settings
+*.ini
+
 t0_BACKUP_1385.vcxproj
 t0_BACKUP_1474.vcxproj
 t0_BASE_1385.vcxproj

@@ -7,6 +7,7 @@
 #include "Core/Container/Array.h"
 #include "Core/Container/Map.h"
 #include "ThirdParty/iniparser.hpp"
+#include "Template/Template.h"
 
 // engine.ini의 Section 타입 
 enum class EEngineConfigSectionType
@@ -86,7 +87,7 @@ static const ConfigMapping ConfigMappings[] = {
 
 class UEngine;
 
-class FEngineConfig
+class FEngineConfig : public FNoncopyable
 {
 	friend class UEngine;
 
@@ -96,7 +97,6 @@ private:
 
 public:
 	void LoadEngineConfig();
-	// !TODO : FString을 지원하도록 수정
 	template<typename T>
 	void SaveEngineConfig(EEngineConfigValueType InConfig, T InValue)
 	{
