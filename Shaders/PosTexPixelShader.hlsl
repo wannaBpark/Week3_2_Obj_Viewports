@@ -18,7 +18,7 @@ struct PS_INPUT
     float4 position : SV_POSITION; // Transformed position to pass to the pixel shader
     float4 color : COLOR; // Color to pass to the pixel shader
     float3 normal : NORMAL;
-    float2 texcoord : TEXCOORD;
+    float2 texcoord : TEXCOORD0;
 };
 
 struct PS_OUTPUT
