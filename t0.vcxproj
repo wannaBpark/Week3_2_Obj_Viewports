@@ -161,6 +161,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Core\Container\ObjectIterator.cpp" />
     <ClCompile Include="Source\Core\EngineConfig.cpp" />
     <ClCompile Include="Source\Core\FSceneManager.cpp" />
     <ClCompile Include="Source\Core\Rendering\SubUVManager.cpp" />
@@ -304,6 +305,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Core\Container\ObjectIterator.h" />
     <ClInclude Include="Source\Core\EngineConfig.h" />
     <ClInclude Include="Source\Core\FSceneManager.h" />
     <ClInclude Include="Source\Core\Rendering\RendererDefine.h" />
@@ -399,6 +401,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Textures\Explosion.PNG" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
