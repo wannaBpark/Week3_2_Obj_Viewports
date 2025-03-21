@@ -1,10 +1,17 @@
 cbuffer constants : register(b0)
 {
-    matrix MVP;
+    matrix Model;
+    matrix Views[4];
+    matrix Projection;
+    matrix InvTranspose;
     float4 CustomColor;
     uint bUseVertexColor;
     float3 eyeWorldPos;
     float4 indexColor;
+    uint bIsPicked;
+    float3 Padding;
+    uint ViewportIndex;
+    float3 Padding2;
 }
 
 struct VS_INPUT
@@ -23,9 +30,27 @@ struct PS_INPUT
 PS_INPUT mainVS(VS_INPUT input)
 {
     PS_INPUT output;
-
-    // 변환된 위치를 MVP 행렬을 통해 클립 공간으로 변환
-    output.position = mul(float4(input.position, 1.0f), MVP);
+    
+    float4 position = mul(float4(input.position, 1.0f), Model);
+    matrix View;
+    if (ViewportIndex == 0)
+    {
+        View = Views[0];
+    }
+    else if (ViewportIndex == 1)
+    {
+        View = Views[1];
+    }
+    else if (ViewportIndex == 2)
+    {
+        View = Views[2];
+    }
+    else if (ViewportIndex == 3)
+    {
+        View = Views[3];
+    }
+    position = mul(position, View);
+    output.position = mul(position, Projection);
 
     output.color = input.color; // 색상 그대로 전달
 

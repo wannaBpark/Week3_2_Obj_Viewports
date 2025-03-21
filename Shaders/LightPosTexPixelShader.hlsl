@@ -23,7 +23,7 @@ struct PS_INPUT
     float4 posWorld : POSITION;
     float4 color : COLOR; // Color to pass to the pixel shader
     float3 normal : NORMAL;
-    float2 texcoord : TEXCOORD;
+    float2 texcoord : TEXCOORD0;
 };
 
 struct PS_OUTPUT

@@ -392,7 +392,7 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
     
     for (uint32 i{ 0 }; i < NumViewports; i++)
     {
-        if (VC == 4 && i != 0)
+        if (VC == 4 && i > 0)
         {
             // 상수 버퍼가 이미 설정된 상태에서 ViewportIndex만 업데이트
             ComPtr<ID3D11Buffer> pBuffer = ConstantBufferMap[VC];
@@ -425,32 +425,7 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
         {
             RenderPrimitiveInternal(VertexBufferMap[Type].Get(), numVertices);
         }
-    }
-    //for (uint32 i{ 0 }; i < NumViewports; i++)
-    //{
-    //    if (VC == 4)
-    //    {
-    //        ComPtr<ID3D11Buffer> pBuffer = ConstantBufferMap[VC];
-    //        D3D11_MAPPED_SUBRESOURCE ms;
-
-    //        // 현재 Rasterizer의 index에 해당하는 뷰 행렬 인덱스를 Vertex Shader에 전송
-    //        DeviceContext->Map(pBuffer.Get(), NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
-    //        FLightConstants* Cbuffer = static_cast<FLightConstants*>(ms.pData); {
-    //            Cbuffer->ViewportIndex = i;
-    //        }
-    //        DeviceContext->Unmap(pBuffer.Get(), NULL);
-    //        // --- Update Constant Buffer -- //
-
-    //    }
-    //    DeviceContext->RSSetViewports(1, &ViewportInfos[i]);
-    //    if (bUseIndexBuffer == true) {
-    //        RenderPrimitiveIndexed(VertexBufferMap[Type].Get(), IndexBufferMap[Type].Get(), numVertices);
-    //    }
-    //    else {
-    //        RenderPrimitiveInternal(VertexBufferMap[Type].Get(), numVertices);                  // info에 담긴 실제 vertexbuffer, numVertices 전달 및 렌더
-    //    }
-    //}
-    
+    }   
 
 }
 

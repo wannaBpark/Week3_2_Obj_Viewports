@@ -170,6 +170,7 @@ void UPrimitiveComponent::UpdateLightConstantData(URenderer*& Renderer)
 		FMatrix::Transpose(Renderer->GetViewportMatrixById(2)),
 		FMatrix::Transpose(Renderer->GetViewportMatrixById(3)),
 	};
+
 	FLightConstants UpdateInfo{
 		.Model = FMatrix::Transpose(this->GetComponentTransformMatrix()),
 		.Views = {ViewMatrices[0],ViewMatrices[1],ViewMatrices[2],ViewMatrices[3]},
@@ -177,7 +178,8 @@ void UPrimitiveComponent::UpdateLightConstantData(URenderer*& Renderer)
 		.InvTranspose = InvTranspose,
 		.Color = this->GetCustomColor(),
 		.bUseVertexColor = (uint32)this->IsUseVertexColor(),
-		.eyeWorldPos = FEditorManager::Get().GetCamera()->GetActorTransform().GetPosition(),
+		.eyeWorldPos = { FEditorManager::Get().GetCamera()->GetActorTransform().GetPosition() },
+		//.bPadding = 0,
 		.indexColor = indexColor,
 		.bIsPicked = (uint32)this->IsPicked(),
 		.Padding = FVector(0.0f, 0.0f, 0.0f),
