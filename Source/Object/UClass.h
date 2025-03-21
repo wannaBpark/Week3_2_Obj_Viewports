@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "Core/HAL/PlatformMemory.h"
 #include "Object/UObject.h"
 #include "Core/Container/Map.h"
 
@@ -31,7 +32,7 @@ struct UClassDeleter
 	void operator()(UClass* ClassPtr) const
 	{
 		ClassPtr->~UClass();
-		FPlatformMemory::DecrementObjectStats(sizeof(UClass));
+		FPlatformMemory::Free<EAT_Object>(ClassPtr, sizeof(UClass));
 		StackAllocator::GetInstance().deleteNode(ClassPtr);
 	}
 };

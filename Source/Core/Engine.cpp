@@ -187,6 +187,7 @@ void UEngine::Run()
 
 void UEngine::Shutdown()
 {
+    World->ClearWorld();
     ShutdownWindow();
 }
 
