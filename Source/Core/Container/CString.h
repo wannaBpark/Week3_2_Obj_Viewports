@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cstring>
 #include <cwchar>
 #include <cctype>
@@ -146,4 +146,21 @@ public:
         }
         return count ? std::tolower(static_cast<unsigned char>(*str1)) - std::tolower(static_cast<unsigned char>(*str2)) : 0;
     }
+
+	static int32 Strlen(const CharType* str)
+	{
+		if constexpr (std::is_same_v<CharType, char>)
+		{
+			return static_cast<int32>(std::strlen(str));
+		}
+		else if constexpr (std::is_same_v<CharType, wchar_t>)
+		{
+			return static_cast<int32>(std::wcslen(str));
+		}
+		else
+		{
+			static_assert(false, "Unsupported character type!");
+			return 0;
+		}
+	}
 };

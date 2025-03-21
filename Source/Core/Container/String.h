@@ -70,6 +70,10 @@ public:
 
     FString(BaseStringType InString) : PrivateString(std::move(InString)) {}
 
+    FORCEINLINE FString(const TCHAR* const InString, const int32 InStringLength)
+        : PrivateString(InString, InStringLength)
+    {
+    }
 #if USE_WIDECHAR
 private:
     static std::wstring ConvertWideChar(const ANSICHAR* NarrowStr);
