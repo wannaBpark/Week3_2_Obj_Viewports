@@ -2,12 +2,13 @@
 #define DEFAULT_INI_FILE_PATH "\\engine.ini"
 
 #define SECTION_MAPPING(Section, Key) { EEngineConfigSectionType::Section, TEXT(Key) }
-#define CONFIG_MAPPING(Config, Key, ValueType, SectionType) { EEngineConfigValueType::Config, TEXT(Key), EConfigValueType::ValueType, EEngineConfigSectionType::SectionType }
+#define CONFIG_MAPPING(Config, Key, SectionType) { EEngineConfigValueType::Config, TEXT(Key), EEngineConfigSectionType::SectionType }
 #include "Core/Container/String.h"
 #include "Core/Container/Array.h"
 #include "Core/Container/Map.h"
 #include "ThirdParty/iniparser.hpp"
 
+// engine.ini의 Section 타입 
 enum class EEngineConfigSectionType
 {
 	ECS_None,
@@ -17,7 +18,7 @@ enum class EEngineConfigSectionType
 	ECS_Max,
 };
 
-
+// engine.ini의 Value 타입
 enum class EEngineConfigValueType
 {
 	EEC_None,
@@ -41,13 +42,6 @@ enum class EEngineConfigValueType
 	EEC_Max,
 };
 
-enum class EConfigValueType
-{
-	Int,
-	Float,
-	String,
-};
-
 struct SectionMapping
 {
 	EEngineConfigSectionType Section;
@@ -58,10 +52,10 @@ struct ConfigMapping
 {
 	EEngineConfigValueType Config;
 	const FString Key;
-	EConfigValueType ValueType;
 	EEngineConfigSectionType Section;
 };
 
+// ini에 정의될 Section 매핑
 static const SectionMapping SectionMappings[] =
 {
 	SECTION_MAPPING(ECS_None, "NONE"),
@@ -70,22 +64,23 @@ static const SectionMapping SectionMappings[] =
 	// !TODO : EngineConfigSection 추가시 추가
 };
 
+// ini에 정의될 Config들을 매핑
 static const ConfigMapping ConfigMappings[] = {
-	CONFIG_MAPPING(EEC_None, "None", Int, ECS_None),
-	CONFIG_MAPPING(EEC_ScreenWidth, "ScreenWidth", Int, ECS_Screen),
-	CONFIG_MAPPING(EEC_ScreenHeight, "ScreenHeight", Int, ECS_Screen),
+	CONFIG_MAPPING(EEC_None, "None", ECS_None),
+	CONFIG_MAPPING(EEC_ScreenWidth, "ScreenWidth", ECS_Screen),
+	CONFIG_MAPPING(EEC_ScreenHeight, "ScreenHeight", ECS_Screen),
 
-	CONFIG_MAPPING(EEC_EditorCameraPosX, "EditorCameraPosX", Float, ECS_Camera),
-	CONFIG_MAPPING(EEC_EditorCameraPosY, "EditorCameraPosY", Float, ECS_Camera),
-	CONFIG_MAPPING(EEC_EditorCameraPosZ, "EditorCameraPosZ", Float, ECS_Camera),
+	CONFIG_MAPPING(EEC_EditorCameraPosX, "EditorCameraPosX", ECS_Camera),
+	CONFIG_MAPPING(EEC_EditorCameraPosY, "EditorCameraPosY", ECS_Camera),
+	CONFIG_MAPPING(EEC_EditorCameraPosZ, "EditorCameraPosZ", ECS_Camera),
 
-	CONFIG_MAPPING(EEC_EditorCameraRotX, "EditorCameraRotX", Float, ECS_Camera),
-	CONFIG_MAPPING(EEC_EditorCameraRotY, "EditorCameraRotY", Float, ECS_Camera),
-	CONFIG_MAPPING(EEC_EditorCameraRotZ, "EditorCameraRotZ", Float, ECS_Camera),
-	CONFIG_MAPPING(EEC_EditorCameraRotW, "EditorCameraRotW", Float, ECS_Camera),
+	CONFIG_MAPPING(EEC_EditorCameraRotX, "EditorCameraRotX", ECS_Camera),
+	CONFIG_MAPPING(EEC_EditorCameraRotY, "EditorCameraRotY", ECS_Camera),
+	CONFIG_MAPPING(EEC_EditorCameraRotZ, "EditorCameraRotZ", ECS_Camera),
+	CONFIG_MAPPING(EEC_EditorCameraRotW, "EditorCameraRotW", ECS_Camera),
 
-	CONFIG_MAPPING(EEC_EditorCameraSpeed, "EditorCameraSpeed", Float, ECS_Camera),
-	CONFIG_MAPPING(EEC_EditorCameraSensitivity, "EditorCameraSensitivity", Float, ECS_Camera)
+	CONFIG_MAPPING(EEC_EditorCameraSpeed, "EditorCameraSpeed", ECS_Camera),
+	CONFIG_MAPPING(EEC_EditorCameraSensitivity, "EditorCameraSensitivity", ECS_Camera)
 	// !TODO : EngineConfig 추가시 추가
 };
 
@@ -101,6 +96,7 @@ private:
 
 public:
 	void LoadEngineConfig();
+	// !TODO : FString을 지원하도록 수정
 	template<typename T>
 	void SaveEngineConfig(EEngineConfigValueType InConfig, T InValue)
 	{
@@ -109,7 +105,19 @@ public:
 		{
 			return;
 		}
-		EngineConfig[Section][InConfig] = FString::SanitizeFloat(InValue);
+
+		if constexpr (std::is_same_v<T, int> || std::is_same_v<T, float>)
+		{
+			EngineConfig[Section][InConfig] = FString::SanitizeFloat(InValue);
+		}
+		else if constexpr(std::is_same_v<T, FString>)
+		{
+			EngineConfig[Section][InConfig] = InValue;
+		}
+		else
+		{
+			static_assert(!sizeof(T*), "Unsupported type for SaveEngineConfig");
+		}
 		
 		std::string SectionStr(SectionMappings[static_cast<int>(Section)].Key.c_char());
 		auto Section_ft = ft.GetSection(SectionStr);

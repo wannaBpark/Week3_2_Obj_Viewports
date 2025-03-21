@@ -38,6 +38,9 @@ public:
         static uint32 instanceID = 0;
         NewObject->UUID = UEngineStatics::GenUUID();
         UClass* ClassInfo = T::StaticClass();
+        if (ClassInfo == nullptr)
+            return nullptr;
+
         FString ClassName = ClassInfo->GetName() + TEXT("_");
 		ClassName += FString::FromInt(instanceID);
 		NewObject->Name = FName(ClassName);

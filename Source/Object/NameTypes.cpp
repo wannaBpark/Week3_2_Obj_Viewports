@@ -218,6 +218,7 @@ public:
 	*/
 	FNameEntry Resolve(uint32 Hash) const
 	{
+		auto* t = this;
 		return *DisplayPool.Find(Hash);
 	}
 

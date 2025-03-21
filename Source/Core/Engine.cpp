@@ -13,6 +13,7 @@
 #include "Static/FEditorManager.h"
 #include "Object/Gizmo/WorldGizmo.h"
 #include "Core/FSceneManager.h"
+#include "EngineConfig.h"
 
 
 class AArrow;
@@ -73,14 +74,24 @@ void UEngine::Initialize(
     EScreenMode InScreenMode
 )
 {
+    EngineConfig = new FEngineConfig();
+    EngineConfig->LoadEngineConfig();
+
+	int StoredWidth = EngineConfig->GetEngineConfigValue<int>(EEngineConfigValueType::EEC_ScreenWidth);
+	int StoredHeight = EngineConfig->GetEngineConfigValue<int>(EEngineConfigValueType::EEC_ScreenHeight);
+
     WindowInstance = hInstance;
     WindowTitle = InWindowTitle;
     WindowClassName = InWindowClassName;
     ScreenMode = InScreenMode;
-    ScreenWidth = InScreenWidth;
-    ScreenHeight = InScreenHeight;
+    ScreenWidth = StoredWidth;
+    ScreenHeight = StoredHeight;
 
-    InitWindow(InScreenWidth, InScreenWidth);
+    InitWindow(ScreenWidth, ScreenHeight);
+
+	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenWidth, ScreenWidth);
+	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenHeight, ScreenHeight);
+
     InitRenderer();
 
     InitWorld();
@@ -233,7 +244,22 @@ void UEngine::InitWorld()
     World->SceneName = "MainScene";
     FSceneManager::Get().AddScene(World);
 
-    FEditorManager::Get().SetCamera(World->SpawnActor<ACamera>());
+	ACamera* Camera = World->SpawnActor<ACamera>();
+    FEditorManager::Get().SetCamera(Camera);
+	FTransform CameraTransform = Camera->GetActorTransform();
+    // Camera ini 세팅
+    float CamPosX = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraPosX);
+	float CamPosY = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraPosY);
+	float CamPosZ = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraPosZ);
+	CameraTransform.SetPosition(FVector(CamPosX, CamPosY, CamPosZ));
+    
+	float CamRotX = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotX);
+	float CamRotY = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotY);
+	float CamRotZ = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotZ);
+	float CamRotW = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotW);
+    CameraTransform.SetRotation(FQuat(CamRotX, CamRotY, CamRotZ, CamRotW));
+
+	Camera->SetActorTransform(CameraTransform);
 
     //// Test
     //AArrow* Arrow = World->SpawnActor<AArrow>();
@@ -247,6 +273,9 @@ void UEngine::InitWorld()
     World->SpawnActor<AWorldGrid>();
     AWorldGizmo* WorldGizmo = World->SpawnActor<AWorldGizmo>();
 	/*World->BeginPlay();*/
+
+	FString DefaultSceneName = "MainScene";
+	World->LoadWorld(*DefaultSceneName);
 }
 
 void UEngine::ShutdownWindow()
@@ -258,6 +287,9 @@ void UEngine::ShutdownWindow()
     WindowInstance = nullptr;
 
 	ui.Shutdown();
+
+    EngineConfig->SaveAllConfig();
+	delete EngineConfig;
 }
 
 void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
@@ -279,6 +311,18 @@ void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
 	{
 		Renderer->OnResizeComplete();
 	}
+
+	// 전체 윈도우 영역 가져와서 ini에 저장
+	RECT WindowRect;
+
+	GetWindowRect(WindowHandle, &WindowRect);
+
+	UINT TotalWidth = WindowRect.right - WindowRect.left;
+	UINT TotalHeignt = WindowRect.bottom - WindowRect.top;
+
+	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenWidth, TotalWidth);
+	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenHeight, TotalHeignt);
+
 }
 
 UObject* UEngine::GetObjectByUUID(uint32 InUUID) const

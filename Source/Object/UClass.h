@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "Object/UObject.h"
+#include "Core/Container/Map.h"
 
 
 class UClass : public UObject
@@ -23,7 +24,6 @@ public:
 	bool IsChildOf() const {
 		return IsA(T::StaticClass());
 	}
-
 };
 
 struct UClassDeleter
