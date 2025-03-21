@@ -107,6 +107,12 @@ private:
 public:
     // TArray<std::shared_ptr<UObject>> GObjects;
     TMap<uint32, std::shared_ptr<UObject>> GObjects;
+
+private:
+    // private 생성자를 갖는 클래스의 인스턴스를 unique_ptr로 선언할 수 없음. Shutdown시 해제 필요
+    class FEngineConfig* EngineConfig;
+public:
+	FEngineConfig* GetEngineConfig() const { return EngineConfig; }
 };
 
 template <typename ObjectType> requires std::derived_from<ObjectType, UObject>

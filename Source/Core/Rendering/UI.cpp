@@ -73,7 +73,7 @@ void UI::Update()
 
         ImVec2 CalculatedMousePos = ResizeToScreenByCurrentRatio(ImVec2(mousePos.x, mousePos.y));
         ImGui::GetIO().MousePos = CalculatedMousePos;
-        UE_LOG("MousePos: (%.1f, %.1f), DisplaySize: (%.1f, %.1f)\n",CalculatedMousePos.x, CalculatedMousePos.y, GetRatio().x, GetRatio().y);
+        //UE_LOG("MousePos: (%.1f, %.1f), DisplaySize: (%.1f, %.1f)\n",CalculatedMousePos.x, CalculatedMousePos.y, GetRatio().x, GetRatio().y);
     }
 
     
@@ -86,7 +86,7 @@ void UI::Update()
     {
         PreRatio = CurRatio;
         CurRatio = GetRatio();
-        UE_LOG("Current Ratio: %f, %f", CurRatio.x, CurRatio.y);
+        //UE_LOG("Current Ratio: %f, %f", CurRatio.x, CurRatio.y);
     }
     
     RenderControlPanel();
@@ -248,14 +248,13 @@ void UI::RenderPrimitiveSelection()
     if (ImGui::Button("New Scene"))
     {
         World->ClearWorld();
-        FEditorManager::Get().SetCamera(World->SpawnActor<ACamera>());
-        World->SpawnActor<AAxis>();
-        APicker* Picker = World->SpawnActor<APicker>();
-        FEditorManager::Get().SetBoundingBox(Picker->GetBoundingBoxComp());
-        FEditorManager::Get().SetStringComp(Picker->GetStringComponent());
+        //FEditorManager::Get().SetCamera(World->SpawnActor<ACamera>());
+        //World->SpawnActor<AAxis>();
+        //FEditorManager::Get().SetBoundingBox(Picker->GetBoundingBoxComp());
+        //FEditorManager::Get().SetStringComp(Picker->GetStringComponent());
 
-		UEngine::Get().GetWorld()->SpawnActor<AWorldGrid>();
-        UEngine::Get().GetWorld()->SpawnActor<AWorldGizmo>();
+		//UEngine::Get().GetWorld()->SpawnActor<AWorldGrid>();
+        //UEngine::Get().GetWorld()->SpawnActor<AWorldGizmo>();
         GetGridScaleFromIni();
         GetCameraStartSpeed();
 		

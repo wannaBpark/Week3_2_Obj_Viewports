@@ -28,7 +28,6 @@ void AActor::Tick(float DeltaTime)
 {
 	for (auto& Component : Components)
 	{
-		auto Name = *Component->GetFName().ToString();
 		if (Component->CanEverTick())
 		{
 			Component->Tick(DeltaTime);

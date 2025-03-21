@@ -11,6 +11,7 @@
 #include "Object/Actor/Circle.h"
 #include "Object/Actor/Sphere.h"
 #include "Object/Actor/WorldGrid.h"
+#include "Object/Gizmo/WorldGizmo.h"
 #include "Object/Actor/WorldText.h"
 #include "Object/Gizmo/Axis.h"
 #include "Object/PrimitiveComponent/UPrimitiveComponent.h"
@@ -237,6 +238,8 @@ void UWorld::LoadWorld(const char* SceneName)
 		Transform.Rotate(ObjectInfo->Rotation);
 
 		AActor* Actor = nullptr;
+
+		//UClass* ClassInfo = UClass::GetClass(ObjectInfo->ObjectType);
 		
 		if (ObjectInfo->ObjectType == "Actor")
 		{
@@ -266,8 +269,19 @@ void UWorld::LoadWorld(const char* SceneName)
 		{
 			Actor = SpawnActor<ACircle>();
 		}
-		
-		Actor->SetActorTransform(Transform);
+		else if (ObjectInfo->ObjectType == "WorldText")
+		{
+			Actor = SpawnActor<AWorldText>();
+		}
+		// !TODO : 추가된 액터에대한 Spawn로직 추가
+		else
+		{
+			UE_LOG("Unknown Actor Type");
+			continue;
+		}
+
+		if(Actor)
+			Actor->SetActorTransform(Transform);
 	}
 }
 
@@ -291,7 +305,8 @@ UWorldInfo UWorld::GetWorldInfo() const
 		WorldInfo.ObjctInfos[i]->Location = Transform.GetPosition();
 		WorldInfo.ObjctInfos[i]->Rotation = Transform.GetRotation();
 		WorldInfo.ObjctInfos[i]->Scale = Transform.GetScale();
-		WorldInfo.ObjctInfos[i]->ObjectType = actor->GetTypeName();
+		const char* ActorName = actor->GetTypeName();
+		WorldInfo.ObjctInfos[i]->ObjectType = ActorName;
 
 		WorldInfo.ObjctInfos[i]->UUID = actor->GetUUID();
 		i++;
