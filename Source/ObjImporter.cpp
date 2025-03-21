@@ -1,23 +1,23 @@
-#include "ObjReader.h"
+#include "ObjImporter.h"
 
 #include <sstream>
 
-ObjReader::ObjReader()
+FObjImporter::FObjImporter()
 {
     FilePath = FString("");
 }
 
-ObjReader::ObjReader(const FString& InFilePath)
+FObjImporter::FObjImporter(const FString& InFilePath)
 {
     SetFilePath(InFilePath);
 }
 
-ObjReader::~ObjReader()
+FObjImporter::~FObjImporter()
 {
     Clear();
 }
 
-TArray<float> ObjReader::GetVertex(int32 Idx)
+TArray<float> FObjImporter::GetVertex(int32 Idx)
 {
     if (0 <= Idx && Idx < Vertices.Num())
     {
@@ -26,7 +26,7 @@ TArray<float> ObjReader::GetVertex(int32 Idx)
     return {};
 }
 
-TArray<float> ObjReader::GetNormal(int32 Idx)
+TArray<float> FObjImporter::GetNormal(int32 Idx)
 {
     if (0 <= Idx && Idx < Normals.Num())
     {
@@ -35,7 +35,7 @@ TArray<float> ObjReader::GetNormal(int32 Idx)
     return {};
 }
 
-TArray<float> ObjReader::GetUV(int32 Idx)
+TArray<float> FObjImporter::GetUV(int32 Idx)
 {
     if (0 <= Idx && Idx < UVs.Num())
     {
@@ -44,7 +44,7 @@ TArray<float> ObjReader::GetUV(int32 Idx)
     return {};
 }
 
-TArray<uint32> ObjReader::GetVertexIndices()
+TArray<uint32> FObjImporter::GetVertexIndices()
 {
     TArray<uint32> Indices(Vertices.Num() * 3);
     int Cnt = 0;
@@ -59,7 +59,7 @@ TArray<uint32> ObjReader::GetVertexIndices()
     return Indices;
 }
 
-void ObjReader::SetFilePath(const FString& InFilePath)
+void FObjImporter::SetFilePath(const FString& InFilePath)
 {
     if (CheckFile(InFilePath))
     {
@@ -68,7 +68,7 @@ void ObjReader::SetFilePath(const FString& InFilePath)
     }
 }
 
-void ObjReader::Clear()
+void FObjImporter::Clear()
 {
     for (TArray<float>& Vertex : Vertices)
     {
@@ -99,14 +99,14 @@ void ObjReader::Clear()
     Faces.Empty();
 }
 
-bool ObjReader::CheckFile(const FString& InFilePath) const
+bool FObjImporter::CheckFile(const FString& InFilePath) const
 {
     std::string path(InFilePath.c_char());
     std::ifstream f(path);
     return f.good();
 }
 
-void ObjReader::ReadFile()
+void FObjImporter::ReadFile()
 {
     if (!File.is_open())
     {

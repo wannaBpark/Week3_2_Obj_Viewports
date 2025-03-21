@@ -161,6 +161,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Object\Mesh\ObjManager.cpp" />
     <ClCompile Include="Source\Core\EngineConfig.cpp" />
     <ClCompile Include="Source\Core\FSceneManager.cpp" />
     <ClCompile Include="Source\Core\Rendering\SubUVManager.cpp" />
@@ -207,7 +208,7 @@
     <ClCompile Include="Source\Object\UClass.cpp" />
     <ClCompile Include="Source\Object\UtilComponent\UBillboardUtilComponent.cpp" />
     <ClCompile Include="Source\Object\UtilComponent\UStringComponent.cpp" />
-    <ClCompile Include="Source\ObjReader.cpp" />
+    <ClCompile Include="Source\ObjImporter.cpp" />
     <ClCompile Include="Source\ThirdParty\ImGui\imgui.cpp" />
     <ClCompile Include="Source\ThirdParty\ImGui\imgui_demo.cpp" />
     <ClCompile Include="Source\ThirdParty\ImGui\imgui_draw.cpp" />
@@ -304,9 +305,9 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Object\Mesh\ObjManager.h" />
     <ClInclude Include="Source\Core\EngineConfig.h" />
     <ClInclude Include="Source\Core\FSceneManager.h" />
-    <ClInclude Include="Source\Core\Rendering\RendererDefine.h" />
     <ClInclude Include="Source\Core\Rendering\SubUVManager.h" />
     <ClInclude Include="Source\Core\Rendering\TextAtlasManager.h" />
     <ClInclude Include="Source\Core\Template\RemoveReference.h" />
@@ -352,6 +353,7 @@
     <ClInclude Include="Source\Object\Actor\Triangle.h" />
     <ClInclude Include="Source\Object\Actor\WorldText.h" />
     <ClInclude Include="Source\Object\Gizmo\WorldGizmo.h" />
+    <ClInclude Include="Source\Object\Mesh\StaticMesh.h" />
     <ClInclude Include="Source\Object\NameTypes.h" />
     <ClInclude Include="Source\Object\ObjectFactory.h" />
     <ClInclude Include="Source\Object\ObjectMacro.h" />
@@ -359,7 +361,7 @@
     <ClInclude Include="Source\Object\StaticMeshComponent\MeshComponent.h" />
     <ClInclude Include="Source\Object\UtilComponent\UBillboardUtilComponent.h" />
     <ClInclude Include="Source\Object\UtilComponent\UStringComponent.h" />
-    <ClInclude Include="Source\ObjReader.h" />
+    <ClInclude Include="Source\ObjImporter.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imconfig.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imgui.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imgui_impl_dx11.h" />

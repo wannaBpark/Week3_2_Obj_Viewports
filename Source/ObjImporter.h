@@ -4,14 +4,14 @@
 
 #include <fstream>
 
-class ObjReader
+class FObjImporter
 {
 public:
-    ObjReader();
+    FObjImporter();
     
-    ObjReader(const FString& InFilePath);
+    FObjImporter(const FString& InFilePath);
     
-    ~ObjReader();
+    ~FObjImporter();
 
     TArray<float> GetVertex(int32 Idx);
     

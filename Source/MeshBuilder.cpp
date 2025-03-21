@@ -1,28 +1,28 @@
 #include "MeshBuilder.h"
 
-#include "ObjReader.h"
+#include "Object/Mesh/StaticMesh.h"
 
-MeshBuilder::MeshBuilder()
+FMeshBuilder::FMeshBuilder()
     : VerticesNum(0)
     , IndicesNum(0)
 {}
 
-MeshBuilder::~MeshBuilder()
+FMeshBuilder::~FMeshBuilder()
 {
     Vertices.Empty();
     Indices.Empty();
 }
 
-bool MeshBuilder::BuildMeshFromObj(const FString& ObjPath)
+bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 {
-    ObjReader Reader(ObjPath);
+    FObjImporter Reader(ObjPath);
     
     TArray<TArray<TArray<uint32>>> Faces = Reader.GetFaces();
     
     VerticesNum = Reader.GetFaceNum() * 3;
     IndicesNum = VerticesNum; // 현재는 정보가 중복된 정점을 하나로 합치지 않음.
     
-    Vertices = TArray<FStaticMeshVertex>(VerticesNum);
+    Vertices = TArray<FNormalVertex>(VerticesNum);
     Indices = TArray<uint32>(IndicesNum);
 
     uint32 VertexCount = 0;
@@ -36,19 +36,19 @@ bool MeshBuilder::BuildMeshFromObj(const FString& ObjPath)
         Position = Reader.GetVertex(Face[0][0]);
         UV = Reader.GetUV(Face[0][1]);
         Normal = Reader.GetNormal(Face[0][2]);
-        FStaticMeshVertex Vertex0;
+        FNormalVertex Vertex0;
         MakeVertex(Position, Normal, UV, Vertex0);
 
         Position = Reader.GetVertex(Face[2][0]);
         UV = Reader.GetUV(Face[2][1]);
         Normal = Reader.GetNormal(Face[2][2]);
-        FStaticMeshVertex Vertex1;
+        FNormalVertex Vertex1;
         MakeVertex(Position, Normal, UV, Vertex1);
 
         Position = Reader.GetVertex(Face[1][0]);
         UV = Reader.GetUV(Face[1][1]);
         Normal = Reader.GetNormal(Face[1][2]);
-        FStaticMeshVertex Vertex2;
+        FNormalVertex Vertex2;
         MakeVertex(Position, Normal, UV, Vertex2);
 
         CalculateTangent(Vertex0, Vertex1, Vertex2, Vertex0.Tangent);
@@ -70,8 +70,8 @@ bool MeshBuilder::BuildMeshFromObj(const FString& ObjPath)
     return true;
 }
 
-void MeshBuilder::MakeVertex(const TArray<float>& Vertex, const TArray<float>& Normal, const TArray<float>& UV, 
-    FStaticMeshVertex& OutVertex)
+void FMeshBuilder::MakeVertex(const TArray<float>& Vertex, const TArray<float>& Normal, const TArray<float>& UV, 
+    FNormalVertex& OutVertex)
 {
     OutVertex = {};
     OutVertex.Position = {Vertex[0], Vertex[1], Vertex[2]};
@@ -79,8 +79,8 @@ void MeshBuilder::MakeVertex(const TArray<float>& Vertex, const TArray<float>& N
     OutVertex.UV = {UV[0], UV[1]};
 }
 
-void MeshBuilder::CalculateTangent(const FStaticMeshVertex& Vertex0, const FStaticMeshVertex& Vertex1,
-    const FStaticMeshVertex& Vertex2, FVector& OutTangent)
+void FMeshBuilder::CalculateTangent(const FNormalVertex& Vertex0, const FNormalVertex& Vertex1,
+    const FNormalVertex& Vertex2, FVector& OutTangent)
 {
     float s1 = Vertex1.UV.X - Vertex0.UV.X;
     float t1 = Vertex1.UV.Y - Vertex0.UV.Y;
