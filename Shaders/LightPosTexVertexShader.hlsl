@@ -30,39 +30,25 @@ struct PS_INPUT
     float3 normal : NORMAL;
     float2 texcoord : TEXCOORD0;
 };
-
 PS_INPUT mainVS(VS_INPUT input)
 {
-    // output.depthPosition = output.position;
-    
     PS_INPUT output;
     float4 position;
 
     position = mul(float4(input.position, 1.0f), Model);
     output.posWorld = position;
-    matrix View;
-    if (ViewportIndex == 0)
-    {
-        View = Views[0];
-    }
-    else if (ViewportIndex == 1)
-    {
-        View = Views[1];
-    }
-    else if (ViewportIndex == 2)
-    {
-        View = Views[2];
-    }
-    else if (ViewportIndex == 3)
-    {
-        View = Views[3];
-    }
+    
+    matrix View = Views[ViewportIndex]; 
     position = mul(position, View);
     output.position = mul(position, Projection);
-    //output.position = mul(position, Views[0] * Projection);
+
+    // 수정된 부분 (float3 변환)
+    output.normal = normalize(mul(float4(input.normal, 0.0f), InvTranspose).xyz);
     
-    output.normal = mul(float4(input.normal, 1.0f), InvTranspose);
+    // TEXCOORD0 전달
     output.texcoord = input.texcoord;
+
+    // 색상 처리
     output.color = bUseVertexColor == 1 ? input.color : CustomColor;
 
     return output;

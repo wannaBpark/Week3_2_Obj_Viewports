@@ -138,7 +138,7 @@ void UEngine::Run()
         }
 		// Renderer Update
         Renderer->Prepare();          
-        Renderer->PrepareShader();    // 각 rendercomponent에서 호출
+        //Renderer->PrepareShader();    // 각 rendercomponent에서 호출
 
 		// World Update
 		if (World)

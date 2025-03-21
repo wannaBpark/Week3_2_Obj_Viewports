@@ -24,6 +24,8 @@
 #include "Core/Rendering/TextAtlasManager.h";
 #include "Core/Rendering/SubUVManager.h";
 
+#include "Debug/DebugConsole.h"
+
 #define SAFE_RELEASE(p)       { if (p) { (p)->Release();  (p) = nullptr; } }
 
 void URenderer::Create(HWND hWindow, float width, float height)
@@ -389,13 +391,16 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
     DeviceContext->IASetInputLayout(InputLayoutMap[ILType].Get());
     DeviceContext->IASetPrimitiveTopology(Topology);                                    // 실제 토폴로지 세팅
 
-    
     for (uint32 i{ 0 }; i < NumViewports; i++)
     {
+        UE_LOG("Viewport[%d]: X=%.1f, Y=%.1f, W=%.1f, H=%.1f", i, ViewportInfos[i].TopLeftX, ViewportInfos[i].TopLeftY,
+                                                                  ViewportInfos[i].Width, ViewportInfos[i].Height);
+        ComPtr<ID3D11Buffer> pBuffer = ConstantBufferMap[VC];
+        DeviceContext->RSSetViewports(1, &ViewportInfos[i]);
         if (VC == 4 && i > 0)
         {
             // 상수 버퍼가 이미 설정된 상태에서 ViewportIndex만 업데이트
-            ComPtr<ID3D11Buffer> pBuffer = ConstantBufferMap[VC];
+            
             D3D11_MAPPED_SUBRESOURCE ms;
 
             // Map 호출로 ViewportIndex만 업데이트
@@ -414,7 +419,7 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
         }
 
         // 뷰포트 설정 (중복 설정 방지 가능)
-        DeviceContext->RSSetViewports(1, &ViewportInfos[i]);
+        
 
         // 렌더링 호출
         if (bUseIndexBuffer == true)
@@ -728,7 +733,7 @@ void URenderer::PrepareMain()
 
 void URenderer::PrepareMainShader()
 {
-    DeviceContext->PSSetShader(SimplePixelShader, nullptr, 0);
+    //DeviceContext->PSSetShader(SimplePixelShader, nullptr, 0);
 }
 
 FVector URenderer::GetRayDirectionFromClick(FVector MPos)
