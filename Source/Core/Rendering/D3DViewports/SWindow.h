@@ -1,7 +1,9 @@
 #pragma once
+#include "Core/Rendering/D3DViewports/SWidget.h"
 #include "Core/Math/Vector.h"
 #include <iostream>
 #include <algorithm>
+
 struct FRect
 {
 	uint32 H;
@@ -14,7 +16,7 @@ struct FPoint
 	uint32 ID;
 	FVector Position;
 };
-class SWindow
+class SWindow : public SWidget
 {
 protected:
 	FRect Rect;

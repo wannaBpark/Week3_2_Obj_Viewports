@@ -29,7 +29,7 @@ class URenderer
 private:
 public:
     /** Renderer를 초기화 합니다. */
-    void Create(HWND hWindow);
+    void Create(HWND hWindow, float width, float height);
 
     /** Renderer에 사용된 모든 리소스를 해제합니다. */
     void Release();
@@ -114,7 +114,7 @@ public:
 
 protected:
     /** Direct3D Device 및 SwapChain을 생성합니다. */
-    void CreateDeviceAndSwapChain(HWND hWindow);
+    void CreateDeviceAndSwapChain(HWND hWindow, float width, float height);
 
 
     /** Direct3D Device 및 SwapChain을 해제합니다.  */
@@ -124,7 +124,7 @@ protected:
     void CreateFrameBuffer();
 
     /** 뎁스 스텐실 버퍼를 생성합니다. */
-	void CreateDepthStencilBuffer();
+	void CreateDepthStencilBuffer(float width, float height);
 
     /** 뎁스 스텐실 상태를 생성합니다. */
 	void CreateDepthStencilState();

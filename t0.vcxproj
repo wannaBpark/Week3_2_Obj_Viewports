@@ -216,6 +216,7 @@
     <ClCompile Include="Source\Object\PrimitiveComponent\UPrimitiveComponent.cpp" />
     <ClCompile Include="Source\Object\World\World.cpp" />
     <ClCompile Include="Source\Object\Actor\Sphere.cpp" />
+    <ClCompile Include="Source\Core\Rendering\D3DViewports\SWidget.cpp" />
     <ClCompile Include="URaycastSystem.cpp" />
     <ClCompile Include="Source\Core\Rendering\D3DViewports\Viewport.cpp" />
     <ClCompile Include="Source\Core\Rendering\D3DViewports\ViewportClient.cpp" />
@@ -302,6 +303,8 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Core\Delegate\Delegate.h" />
+    <ClInclude Include="Source\Core\Delegate\DelegateCombination.h" />
     <ClInclude Include="Source\Core\FSceneManager.h" />
     <ClInclude Include="Source\Core\Rendering\D3DViewports\SSpliter.h" />
     <ClInclude Include="Source\Core\Rendering\D3DViewports\SWindow.h" />
@@ -386,6 +389,7 @@
     <ClInclude Include="Source\Object\Actor\Sphere.h" />
     <ClInclude Include="Source\ThirdParty\stb-master\stb_image.h" />
     <ClInclude Include="Source\ThirdParty\stb-master\stb_image_write.h" />
+    <ClInclude Include="Source\Core\Rendering\D3DViewports\SWidget.h" />
     <ClInclude Include="UColliders.h" />
     <ClInclude Include="URaycastSystem.h" />
     <ClInclude Include="Source\Core\Rendering\D3DViewports\Viewport.h" />

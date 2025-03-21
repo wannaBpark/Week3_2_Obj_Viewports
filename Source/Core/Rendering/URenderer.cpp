@@ -26,15 +26,15 @@
 
 #define SAFE_RELEASE(p)       { if (p) { (p)->Release();  (p) = nullptr; } }
 
-void URenderer::Create(HWND hWindow)
+void URenderer::Create(HWND hWindow, float width, float height)
 {
-    CreateDeviceAndSwapChain(hWindow);
+    CreateDeviceAndSwapChain(hWindow, width, height);
     CreateViewportInfos(); // 뷰포트 정보 설정
     CreateFrameBuffer();
     CreateRasterizerState();
     CreateBufferCache();
     CreateTexturesSamplers();
-    CreateDepthStencilBuffer();
+    CreateDepthStencilBuffer(width, height);
     CreateDepthStencilState();
 
     CreatePickingTexture(hWindow);
@@ -455,15 +455,15 @@ ID3D11Device* URenderer::GetDevice() const { return Device; }
 
 ID3D11DeviceContext* URenderer::GetDeviceContext() const { return DeviceContext; }
 
-void URenderer::CreateDeviceAndSwapChain(HWND hWindow)
+void URenderer::CreateDeviceAndSwapChain(HWND hWindow, float width, float height)
 {
     // 지원하는 Direct3D 기능 레벨을 정의
     D3D_FEATURE_LEVEL FeatureLevels[] = { D3D_FEATURE_LEVEL_11_0 };
     
     // SwapChain 구조체 초기화
     DXGI_SWAP_CHAIN_DESC SwapChainDesc = {};
-    SwapChainDesc.BufferDesc.Width = 0;                            // 창 크기에 맞게 자동으로 설정
-    SwapChainDesc.BufferDesc.Height = 0;                           // 창 크기에 맞게 자동으로 설정
+    SwapChainDesc.BufferDesc.Width = width;                            // 창 크기에 맞게 자동으로 설정
+    SwapChainDesc.BufferDesc.Height = height;                           // 창 크기에 맞게 자동으로 설정
     SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;  // 색상 포멧
     SwapChainDesc.SampleDesc.Count = 1;                            // 멀티 샘플링 비활성화
     SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;   // 렌더 타겟으로 설정
@@ -497,19 +497,20 @@ void URenderer::CreateDeviceAndSwapChain(HWND hWindow)
     // 뷰포트 정보 설정
     ViewportInfo = {
         0.0f, 0.0f,
-        static_cast<float>(SwapChainDesc.BufferDesc.Width), static_cast<float>(SwapChainDesc.BufferDesc.Height),
+        width, height,
         0.0f, 1.0f
     };
 }
 
 void URenderer::CreateViewportInfos()
 {
-    uint32 Width = UEngine::Get().GetScreenWidth();
-    uint32 Height = UEngine::Get().GetScreenHeight();
+    ViewportInfos.Empty();
+    DXGI_SWAP_CHAIN_DESC SwapChainDesc;
+    SwapChain->GetDesc(&SwapChainDesc);
 
     // 각 뷰포트의 너비와 높이는 화면 크기의 절반
-    float HalfWidth = static_cast<float>(Width) / 2.0f;
-    float HalfHeight = static_cast<float>(Height) / 2.0f;
+    float HalfWidth = static_cast<float>(SwapChainDesc.BufferDesc.Width) / 2.0f;
+    float HalfHeight = static_cast<float>(SwapChainDesc.BufferDesc.Height) / 2.0f;
 
     // 테스트용 : 뷰포트 두개를 수평으로 나누어 생성
     for (int i = 0; i < NumViewports; ++i)
@@ -551,11 +552,11 @@ void URenderer::CreateFrameBuffer()
     Device->CreateRenderTargetView(FrameBuffer, &FrameBufferRTVDesc, &FrameBufferRTV);
 }
 
-void URenderer::CreateDepthStencilBuffer()
+void URenderer::CreateDepthStencilBuffer(float width, float height)
 {
     D3D11_TEXTURE2D_DESC DepthBufferDesc = {};
-    DepthBufferDesc.Width = static_cast<UINT>(ViewportInfo.Width);
-    DepthBufferDesc.Height = static_cast<UINT>(ViewportInfo.Height);
+    DepthBufferDesc.Width = static_cast<UINT>(width);
+    DepthBufferDesc.Height = static_cast<UINT>(height);
     DepthBufferDesc.MipLevels = 1;
     DepthBufferDesc.ArraySize = 1;
 	DepthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;            // 32비트 중 24비트는 깊이, 8비트는 스텐실
@@ -876,6 +877,8 @@ void URenderer::OnUpdateWindowSize(int Width, int Height)
             static_cast<float>(SwapChainDesc.BufferDesc.Width), static_cast<float>(SwapChainDesc.BufferDesc.Height),
             0.0f, 1.0f
         };
+
+        CreateViewportInfos();
     }
 }
 
@@ -885,7 +888,10 @@ void URenderer::OnResizeComplete()
     CreateFrameBuffer();
     CreatePickingTexture(UEngine::Get().GetWindowHandle());
     // 뎁스 스텐실 버퍼를 다시 생성
-    CreateDepthStencilBuffer();
+
+    DXGI_SWAP_CHAIN_DESC SwapChainDesc;
+    SwapChain->GetDesc(&SwapChainDesc);
+    CreateDepthStencilBuffer(static_cast<float>(SwapChainDesc.BufferDesc.Width), static_cast<float>(SwapChainDesc.BufferDesc.Height));
 
     RTVs[0] = FrameBufferRTV;
     RTVs[1] = PickingFrameBufferRTV;

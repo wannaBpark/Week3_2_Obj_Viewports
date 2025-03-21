@@ -222,7 +222,7 @@ void UEngine::InitRenderer()
 {
 	// 렌더러 초기화
 	Renderer = std::make_unique<URenderer>();
-	Renderer->Create(WindowHandle);
+	Renderer->Create(WindowHandle, ScreenWidth, ScreenHeight);
 	Renderer->CreateShader();
 	Renderer->CreateConstantBuffer();
 }
