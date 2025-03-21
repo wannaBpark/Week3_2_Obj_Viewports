@@ -14,6 +14,7 @@
 #include "Object/Gizmo/WorldGizmo.h"
 #include "Core/FSceneManager.h"
 #include "EngineConfig.h"
+#include "Core/Container/ObjectIterator.h"
 
 
 class AArrow;
@@ -150,6 +151,18 @@ void UEngine::Run()
 		// Renderer Update
         Renderer->Prepare();          
         Renderer->PrepareShader();    // 각 rendercomponent에서 호출
+
+        for (TObjectIterator<UPrimitiveComponent> It(UEngine::Get().GObjects.begin(), UEngine::Get().GObjects.end());
+            It;
+            ++It)
+        {
+            UPrimitiveComponent* prim = *It;
+
+            if (prim)
+            {
+                UE_LOG(TEXT("Found PrimitiveCompnent : %s"), *prim->GetName());
+            }
+        }
 
 		// World Update
 		if (World)
