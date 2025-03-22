@@ -14,7 +14,7 @@
 //    FMatrix ProjMatrix;
 //
 //public:
-//    FViewport(ffloat Width, float Height, FMatrix InViewMatrices)
+//    FViewport(float Width, float Height, FMatrix InViewMatrices)
 //        : Context()
 //    {
 //        for (int i = 0; i < 4; i++)
@@ -38,19 +38,6 @@
 //        cbd.CPUAccessFlags = 0;
 //
 //        Device->CreateBuffer(&cbd, nullptr, &ConstantBuffer);
-//    }
-//
-//    void UpdateConstantBuffer()
-//    {
-//        ConstantBufferData cbData;
-//        for (int i = 0; i < 4; i++)
-//        {
-//            cbData.ViewMatrix[i] = DirectX::XMMatrixTranspose(ViewMatrices[i]);
-//            cbData.ProjMatrix[i] = DirectX::XMMatrixTranspose(ProjMatrices[i]);
-//        }
-//
-//        Context->UpdateSubresource(ConstantBuffer, 0, nullptr, &cbData, 0, 0);
-//        Context->VSSetConstantBuffers(0, 1, &ConstantBuffer);
 //    }
 //
 //    void Render(ID3DX11EffectScalarVariable* pActiveViewport)

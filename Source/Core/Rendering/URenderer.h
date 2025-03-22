@@ -184,6 +184,7 @@ public:
     FMatrix ViewZY = FMatrix::LookAtLH(FVector(-70.0f, 0.0f, 3.0f), FVector(3.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 1.0f)); // 높이z 2
     FMatrix ViewZX = FMatrix::LookAtLH(FVector(0.0f, 7.0f, 3.0f), FVector(0.0f, -7.0f, 0.0f), FVector(0.0f, 0.0f, 1.0f)); // 높이 z 1
     FMatrix ViewYX = FMatrix::LookAtLH(FVector(0.0f, 0.0f, 15.0f), FVector(0.0f, 0.0f, -7.0f), FVector(0.0f, 1.0f, 0.0f));
+    //FMatrix ProjZY = FMatrix::OrthoForLH()
     FMatrix ViewportMatrices[4] = {I, ViewZY, ViewZX, ViewYX };
     FMatrix GetViewportMatrixById(uint32 i) { return ViewportMatrices[i]; }
 #pragma endregion

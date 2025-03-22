@@ -4,17 +4,14 @@
 #include <iostream>
 #include <algorithm>
 
-struct FRect
-{
-	uint32 H;
-	uint32 W;
-	uint32 X;
-	uint32 Y;
-};
 struct FPoint
 {
-	uint32 ID;
-	FVector Position;
+	uint32 X, Y;
+	FPoint(uint32 InX = 0, uint32 InY = 0) : X(InX), Y(InY) { }
+};
+struct FRect
+{
+	uint32 X, Y, Width, Height;
 };
 class SWindow : public SWidget
 {
