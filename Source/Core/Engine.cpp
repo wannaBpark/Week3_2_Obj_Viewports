@@ -15,6 +15,9 @@
 #include "Core/FSceneManager.h"
 #include "EngineConfig.h"
 #include "Core/Container/ObjectIterator.h"
+#include "Object/Mesh/ObjManager.h"
+#include "Object/Actor/ATarzan.h"
+
 
 
 class AArrow;
@@ -158,10 +161,10 @@ void UEngine::Run()
         {
             UPrimitiveComponent* prim = *It;
 
-            if (prim)
-            {
-                UE_LOG(TEXT("Found PrimitiveCompnent : %s"), *prim->GetName());
-            }
+            //if (prim)
+            //{
+            //    UE_LOG(TEXT("Found PrimitiveCompnent : %s"), *prim->GetName());
+            //}
         }
 
 		// World Update
@@ -289,7 +292,16 @@ void UEngine::InitWorld()
 	/*World->BeginPlay();*/
 
 	FString DefaultSceneName = "MainScene";
+
+    // preload
+ //   FObjManager::LoadObjStaticMesh(TEXT("Assets/GizmoTranslation.obj"));
+	//FObjManager::LoadObjStaticMesh(TEXT("Assets/GizmoRotation.obj"));
+	//FObjManager::LoadObjStaticMesh(TEXT("Assets/GizmoScale.obj"));
+	FObjManager::LoadObjStaticMesh(TEXT("Assets/2PX7U16XARLGHIM3W48FS86MJ.obj"));
+
 	World->LoadWorld(*DefaultSceneName);
+
+	ATarzan* Tarzan = World->SpawnActor<ATarzan>();
 }
 
 void UEngine::ShutdownWindow()

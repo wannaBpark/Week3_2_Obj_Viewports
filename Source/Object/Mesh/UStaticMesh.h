@@ -9,12 +9,18 @@
 */
 class UStaticMesh : public UObject
 {
+private:
     FStaticMesh* StaticMeshAsset;
+    TMap<FString, class UMaterial*> Materials;
 
+public:
     const FString& GetAssetPathFileName()
     {
         return StaticMeshAsset->PathFileName;
     }
+
+    FStaticMesh* GetStaticMeshAsset() { return StaticMeshAsset; }
+    const FStaticMesh* GetStaticMeshAsset() const { return StaticMeshAsset; }
 
     void SetStaticMeshAsset(FStaticMesh* InStaticMesh)
     {
