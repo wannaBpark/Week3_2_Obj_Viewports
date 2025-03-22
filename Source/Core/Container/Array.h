@@ -60,6 +60,7 @@ public:
         requires std::is_invocable_r_v<bool, Predicate, const T&>
     SizeType RemoveAll(const Predicate& Pred);
     T* GetData();
+    const T* GetData() const;
 
     /**
      * Array에서 Item을 찾습니다.
@@ -218,6 +219,12 @@ typename TArray<T, Allocator>::SizeType TArray<T, Allocator>::RemoveAll(const Pr
 
 template <typename T, typename Allocator>
 T* TArray<T, Allocator>::GetData()
+{
+    return PrivateVector.data();
+}
+
+template<typename T, typename Allocator>
+inline const T* TArray<T, Allocator>::GetData() const
 {
     return PrivateVector.data();
 }

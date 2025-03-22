@@ -112,6 +112,8 @@ public:
 
     void OnResizeComplete();
 
+    void RenderMesh(class UStaticMeshComponent* MeshComp);
+
 protected:
     /** Direct3D Device 및 SwapChain을 생성합니다. */
     void CreateDeviceAndSwapChain(HWND hWindow);
@@ -270,8 +272,8 @@ public:
             DeviceContext->Unmap(LineVertexBuffer, 0);
         }
 	}
-
-    ID3D11Buffer* CreateIndexBuffer( const std::vector<uint32>& indices)
+    
+    ID3D11Buffer* CreateIndexBuffer(const std::vector<uint32>& indices)
     {
         ID3D11Buffer* IndexBuffer;
         D3D11_BUFFER_DESC bufferDesc = {};
@@ -283,6 +285,25 @@ public:
 
         D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
         indexBufferData.pSysMem = indices.data();
+        indexBufferData.SysMemPitch = 0;
+        indexBufferData.SysMemSlicePitch = 0;
+
+        Device->CreateBuffer(&bufferDesc, &indexBufferData, &IndexBuffer);
+        return IndexBuffer;
+    }
+
+    ID3D11Buffer* CreateIndexBuffer(const TArray<uint32>& indices)
+    {
+        ID3D11Buffer* IndexBuffer;
+        D3D11_BUFFER_DESC bufferDesc = {};
+        bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;                       // 초기화 후 변경X
+        bufferDesc.ByteWidth = UINT(sizeof(uint32) * indices.Num());
+        bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+        bufferDesc.CPUAccessFlags = 0;                                  // 0 if no CPU access is necessary.
+        bufferDesc.StructureByteStride = sizeof(uint32);
+
+        D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
+        indexBufferData.pSysMem = indices.GetData();
         indexBufferData.SysMemPitch = 0;
         indexBufferData.SysMemSlicePitch = 0;
 

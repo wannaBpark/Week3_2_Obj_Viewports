@@ -159,10 +159,10 @@ void UEngine::Run()
         {
             UPrimitiveComponent* prim = *It;
 
-            if (prim)
-            {
-                UE_LOG(TEXT("Found PrimitiveCompnent : %s"), *prim->GetName());
-            }
+            //if (prim)
+            //{
+            //    UE_LOG(TEXT("Found PrimitiveCompnent : %s"), *prim->GetName());
+            //}
         }
 
 		// World Update

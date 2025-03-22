@@ -9,6 +9,7 @@
 */
 class UStaticMesh : public UObject
 {
+public:
     FStaticMesh* StaticMeshAsset;
 
 public:
