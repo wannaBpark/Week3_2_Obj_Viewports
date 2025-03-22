@@ -118,6 +118,12 @@ struct FLineConstants
     FVector Padding3;
 };
 
+BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FViewportConstant)
+    SHADER_PARAMETER(uint32, VPIndex)
+    SHADER_PARAMETER(FVector, Padding)
+END_GLOBAL_SHADER_PARAMETER_STRUCT()
+
+
 //struct FLightConstants {
 //    FMatrix Model;              // 오프셋: 0,    크기: 64바이트
 //    FMatrix Views[4];           // 오프셋: 64,   크기: 256바이트

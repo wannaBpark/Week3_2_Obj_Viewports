@@ -210,6 +210,7 @@ void URenderer::CreateConstantBuffer()
     idx = CreateConstantBuffer<FAtlasConstants>();           // Atlas CBuffer : 3
     idx = CreateConstantBuffer<FLightConstants>();           // Lighting 테스트용 CBuffer : 4
     idx = CreateConstantBuffer<FLineConstants>();           // Line에 대한 카메라 4대 테스트용 CBuffer : 5
+    idx = CreateConstantBuffer<FViewportConstant>();        // Viewport viewmatrix index저장용 : 6
     UE_LOG("constantbuffer size : %d", idx);
 }
 
@@ -366,7 +367,16 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
     /* Vertex Shader의 상수 버퍼 */   
     if (ConstantBufferMap.find(VC) != ConstantBufferMap.end())
     {
-        DeviceContext->VSSetConstantBuffers(0, 1, ConstantBufferMap[VC].GetAddressOf());
+        if (VC == 4 || VC == 5) {
+            ID3D11Buffer* ppConstantBuffers[2] = {
+                ConstantBufferMap[VC].Get(),
+                ConstantBufferMap[6].Get(),
+            };
+            DeviceContext->VSSetConstantBuffers(0, 2, ppConstantBuffers);
+        }
+        else {
+            DeviceContext->VSSetConstantBuffers(0, 1, ConstantBufferMap[VC].GetAddressOf());
+        }
     }
     /* Pixel Shader의 상수 버퍼 */
     if (ConstantBufferMap.find(PC) != ConstantBufferMap.end())
@@ -397,9 +407,9 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
     {
         UE_LOG("Viewport[%d]: X=%.1f, Y=%.1f, W=%.1f, H=%.1f", i, ViewportInfos[i].TopLeftX, ViewportInfos[i].TopLeftY,
                                                                   ViewportInfos[i].Width, ViewportInfos[i].Height);
-        ComPtr<ID3D11Buffer> pBuffer = ConstantBufferMap[VC];
+        ComPtr<ID3D11Buffer> pBuffer = ConstantBufferMap[6];
         DeviceContext->RSSetViewports(1, &ViewportInfos[i]);
-        if (i > 0) // 0 = 원본 뷰포트는 viewmatrix 수정필요 없으므로
+        if (i >= 0) // 0 = 원본 뷰포트는 viewmatrix 수정필요 없으므로
         {
             // 상수 버퍼가 이미 설정된 상태에서 ViewportIndex만 업데이트
             
@@ -409,13 +419,9 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
             HRESULT hr = DeviceContext->Map(pBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
             if (SUCCEEDED(hr))
             {
-                if (VC == 4) {
-                    FLightConstants* Cbuffer = static_cast<FLightConstants*>(ms.pData);
-                    Cbuffer->ViewportIndex = i; // ViewportIndex만 변경
-                }
-                else if (VC == 5) {
-                    FLineConstants* Cbuffer = static_cast<FLineConstants*>(ms.pData);
-                    Cbuffer->ViewportIndex = i; // ViewportIndex만 변경
+                if (VC == 4 || VC == 5) {
+                    FViewportConstant* Cbuffer = static_cast<FViewportConstant*>(ms.pData);
+                    Cbuffer->VPIndex = i; // ViewportIndex만 변경
                 }
                 DeviceContext->Unmap(pBuffer.Get(), 0);
             }
@@ -438,6 +444,10 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
         {
             RenderPrimitiveInternal(VertexBufferMap[Type].Get(), numVertices);
         }
+        //DeviceContext->ClearRenderTargetView(FrameBufferRTV, ClearColor);
+        //DeviceContext->ClearRenderTargetView(PickingFrameBufferRTV, ClearColor);
+        //DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
     }   
 
 }
