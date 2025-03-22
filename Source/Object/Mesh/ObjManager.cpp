@@ -40,4 +40,7 @@ UStaticMesh* FObjManager::LoadObjStaticMesh(const FString& PathFileName)
 	FStaticMesh* MeshAsset = LoadObjStaticMeshAsset(PathFileName);
 	UStaticMesh* StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>();
 	StaticMesh->SetStaticMeshAsset(MeshAsset);
+	ObjStaticMeshMap.Add(PathFileName, MeshAsset);
+
+	return StaticMesh;
 }

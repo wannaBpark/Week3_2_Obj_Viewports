@@ -161,6 +161,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Object\Actor\ATarzan.cpp" />
     <ClCompile Include="Source\Core\Container\ObjectIterator.cpp" />
     <ClCompile Include="Source\Object\Mesh\ObjManager.cpp" />
     <ClCompile Include="Source\Core\EngineConfig.cpp" />
@@ -292,6 +293,9 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="Shaders\ShaderMesh.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Shaders\ShaderTest.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -307,6 +311,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Object\Actor\ATarzan.h" />
     <ClInclude Include="Source\Core\Container\ObjectIterator.h" />
     <ClInclude Include="Source\Object\Mesh\ObjManager.h" />
     <ClInclude Include="Source\Core\EngineConfig.h" />

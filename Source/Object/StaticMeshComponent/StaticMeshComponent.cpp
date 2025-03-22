@@ -1,4 +1,6 @@
 #include "StaticMeshComponent.h"
+#include "Object/Mesh/ObjManager.h"
+#include "Object/Mesh/UStaticMesh.h"
 
 void UStaticMeshComponent::BeginPlay()
 {
@@ -12,9 +14,46 @@ void UStaticMeshComponent::Tick(float DeltaTime)
 
 void UStaticMeshComponent::Render()
 {
-	//Super::Render();
+	UEngine::Get().GetRenderer()->RenderMesh(this);
+}
+
+EPrimitiveType UStaticMeshComponent::GetType()
+{
+	return EPrimitiveType::EPT_Mesh;
+}
+
+void UStaticMeshComponent::SetStaicMesh(const FString& staticMeshPath)
+{
+	StaticMesh = FObjManager::LoadObjStaticMesh(staticMeshPath);
+
+	// 버텍스 버퍼 생성
+	CreateVertexBuffer();
+	// 인덱스 버퍼 생성 
+	CreateIndexBuffer();
+
+	bCanBeRendered = true;
+	RenderResource.PrimitiveType = GetType();
+	RenderResource.Stride = sizeof(FNormalVertex);
+	RenderResource.InputLayoutType = InputLayoutType::POSNORMALTANGENTCOLORTEX;
+	RenderResource.VertexShaderIndex = 5;
+	RenderResource.PixelShaderIndex = 6;
+	RenderResource.bUseIndexBuffer = true;
+	RenderResource.VertexConstantIndex = 5;
+	//RenderResource.ShaderResourceViewIndices.emplace().push_back(0);
 
 
-	//UEngine::Get().GetRenderer()->RenderPrimitive(this);
-	//Renderer->RenderPrimitive(this);
+}
+
+void UStaticMeshComponent::CreateVertexBuffer()
+{
+	auto Vertices = StaticMesh->StaticMeshAsset->Vertices;
+	int Size = Vertices.Num();
+	VertexBuffer = UEngine::Get().GetRenderer()->CreateVertexBuffer(Vertices.GetData(), sizeof(FNormalVertex) * Size);
+}
+
+void UStaticMeshComponent::CreateIndexBuffer()
+{
+	auto Indices = StaticMesh->StaticMeshAsset->Indices;
+	RenderResource.numVertices = Indices.Num();
+	IndexBuffer = UEngine::Get().GetRenderer()->CreateIndexBuffer(Indices);
 }

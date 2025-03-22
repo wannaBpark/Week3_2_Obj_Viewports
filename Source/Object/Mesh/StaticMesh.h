@@ -12,7 +12,6 @@ struct FNormalVertex
 	FVector Tangent;
 	FVector4 Color;
 	FVector2D UV;
-	bool bUseColor = false;
 };
 
 /*

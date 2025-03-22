@@ -873,9 +873,9 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
     FMatrix m = MeshComp->GetComponentTransform().GetMatrix();
 
     FStaticMeshVertexConstant vc = {
-        .Model = FMatrix::Transpose(m),
-        .View = FMatrix::Transpose(ViewMatrix),
-        .Projection = FMatrix::Transpose(ProjectionMatrix),
+        .Model = m,
+        .View = ViewMatrix,
+        .Projection = ProjectionMatrix,
     };
 
     UpdateBuffer(vc, VC);

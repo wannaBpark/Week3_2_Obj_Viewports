@@ -21,8 +21,9 @@
 #include "Object/Actor/WorldGrid.h"
 #include "Object/Actor/BillBoard.h"
 #include "Object/Actor/WorldText.h"
-#include "Object/UtilComponent/UStringComponent.h"
 #include "Object/Actor/SubUV.h"
+#include "Object/Actor/ATarzan.h"
+#include "Object/UtilComponent/UStringComponent.h"
 #include "Static/FEditorManager.h"
 #include "Object/World/World.h"
 #include "Object/Gizmo/GizmoHandle.h"
@@ -173,7 +174,7 @@ void UI::RenderMemoryUsage()
 
 void UI::RenderPrimitiveSelection()
 {
-    const char* items[] = { "Sphere", "Cube", "Cylinder", "Cone","Triangle","Circle", "BillBoard", "WorldText", "SubUV", "SubUV2"};
+    const char* items[] = { "Sphere", "Cube", "Cylinder", "Cone","Triangle","Circle", "BillBoard", "WorldText", "SubUV", "SubUV2", "Tarzan"};
 
     ImGui::Combo("Primitive", &currentItem, items, IM_ARRAYSIZE(items));
 
@@ -227,6 +228,10 @@ void UI::RenderPrimitiveSelection()
             {
                 ASubUV* SubUV = World->SpawnActor<ASubUV>();
                 SubUV->SetAtlas("RollingChanhui.png");
+            }
+            else if (strcmp(items[currentItem], "Tarzan") == 0)
+            {
+                World->SpawnActor<ATarzan>();
             }
         }
     }
