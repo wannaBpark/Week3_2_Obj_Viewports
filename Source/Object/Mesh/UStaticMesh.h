@@ -9,7 +9,7 @@
 */
 class UStaticMesh : public UObject
 {
-public:
+private:
     FStaticMesh* StaticMeshAsset;
 
 public:
@@ -17,6 +17,9 @@ public:
     {
         return StaticMeshAsset->PathFileName;
     }
+
+    FStaticMesh* GetStaticMeshAsset() { return StaticMeshAsset; }
+    const FStaticMesh* GetStaticMeshAsset() const { return StaticMeshAsset; }
 
     void SetStaticMeshAsset(FStaticMesh* InStaticMesh)
     {

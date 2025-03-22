@@ -40,20 +40,18 @@ void UStaticMeshComponent::SetStaicMesh(const FString& staticMeshPath)
 	RenderResource.bUseIndexBuffer = true;
 	RenderResource.VertexConstantIndex = 5;
 	//RenderResource.ShaderResourceViewIndices.emplace().push_back(0);
-
-
 }
 
 void UStaticMeshComponent::CreateVertexBuffer()
 {
-	auto Vertices = StaticMesh->StaticMeshAsset->Vertices;
+	auto Vertices = StaticMesh->GetStaticMeshAsset()->Vertices;
 	int Size = Vertices.Num();
 	VertexBuffer = UEngine::Get().GetRenderer()->CreateVertexBuffer(Vertices.GetData(), sizeof(FNormalVertex) * Size);
 }
 
 void UStaticMeshComponent::CreateIndexBuffer()
 {
-	auto Indices = StaticMesh->StaticMeshAsset->Indices;
+	auto Indices = StaticMesh->GetStaticMeshAsset()->Indices;
 	RenderResource.numVertices = Indices.Num();
 	IndexBuffer = UEngine::Get().GetRenderer()->CreateIndexBuffer(Indices);
 }

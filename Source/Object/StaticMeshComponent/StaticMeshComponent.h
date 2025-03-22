@@ -17,7 +17,9 @@ class UStaticMeshComponent :
 	virtual void Render() override;
 	virtual EPrimitiveType GetType() override;
 
+public:
 	void SetStaicMesh(const FString& staticMeshPath);
+private:
 	void CreateVertexBuffer();
 	void CreateIndexBuffer();
 
@@ -25,6 +27,5 @@ public:
 	UStaticMesh* StaticMesh;
 	ID3D11Buffer* VertexBuffer;
 	ID3D11Buffer* IndexBuffer;
-	ID3D11InputLayout* InputLayout;
 };
 
