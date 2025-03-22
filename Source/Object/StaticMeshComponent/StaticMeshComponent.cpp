@@ -12,7 +12,9 @@ void UStaticMeshComponent::Tick(float DeltaTime)
 
 void UStaticMeshComponent::Render()
 {
-	Super::Render();
-	UEngine::Get().GetRenderer()->RenderPrimitive(this);
+	//Super::Render();
+
+
+	//UEngine::Get().GetRenderer()->RenderPrimitive(this);
 	//Renderer->RenderPrimitive(this);
 }

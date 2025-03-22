@@ -12,7 +12,7 @@ void UMeshComponent::Tick(float DeltaTime)
 
 void UMeshComponent::Render()
 {
-	
+	//Super::Render();
 	//UEngine::Get().GetRenderer()->RenderPrimitive(this);
 	//Renderer->RenderPrimitive(this);
 }

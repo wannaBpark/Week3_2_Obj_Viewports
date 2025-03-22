@@ -12,6 +12,10 @@ class UStaticMeshComponent :
 {
 	DECLARE_CLASS(UStaticMeshComponent, UMeshComponent)
 
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+	virtual void Render() override;
+
 
 };
 
