@@ -39,16 +39,3 @@ struct FObjInfo
 * .mtl 파일을 읽어서 저장할 때 사용
 * @TODO : .mtl 파일이 어느 정보를 저장하는지 확인 후 업데이트 필요
 */
-struct FObjMaterialInfo
-{
-	FString MaterialName;
-	FString TextureName;
-	FVector AmbientColor;
-	FVector DiffuseColor;
-	FVector SpecularColor;
-	float SpecularExponent;
-	float Transparency;
-
-    // Diffuse Scalar
-    // Diffuse Texture
-};

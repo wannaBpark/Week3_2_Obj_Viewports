@@ -222,6 +222,7 @@
     <ClCompile Include="Source\Object\PrimitiveComponent\UPrimitiveComponent.cpp" />
     <ClCompile Include="Source\Object\World\World.cpp" />
     <ClCompile Include="Source\Object\Actor\Sphere.cpp" />
+    <ClCompile Include="Source\Object\StaticMeshComponent\StaticMeshComponent.cpp" />
     <ClCompile Include="URaycastSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -398,6 +399,7 @@
     <ClInclude Include="Source\Object\Actor\Sphere.h" />
     <ClInclude Include="Source\ThirdParty\stb-master\stb_image.h" />
     <ClInclude Include="Source\ThirdParty\stb-master\stb_image_write.h" />
+    <ClInclude Include="Source\Object\StaticMeshComponent\StaticMeshComponent.h" />
     <ClInclude Include="UColliders.h" />
     <ClInclude Include="URaycastSystem.h" />
   </ItemGroup>

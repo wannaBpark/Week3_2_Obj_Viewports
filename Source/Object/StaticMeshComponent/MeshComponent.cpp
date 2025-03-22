@@ -17,4 +17,3 @@ void UMeshComponent::Render()
 	//Renderer->RenderPrimitive(this);
 }
 
-

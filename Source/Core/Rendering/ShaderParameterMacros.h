@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Core/Math/Matrix.h"
+#include "Core/Math/Vector.h"
+
 #define BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(StructType) \
     class alignas(16) StructType \
     { \

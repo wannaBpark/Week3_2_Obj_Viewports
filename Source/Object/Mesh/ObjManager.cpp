@@ -1,19 +1,43 @@
 #include "ObjManager.h"
-#include "Object/Mesh/StaticMesh.h"
+#include "UStaticMesh.h"
+#include "Core/Container/ObjectIterator.h"
+#include "Core/Engine.h"
+#include "Object/ObjectFactory.h"
 
-FString FObjManager::GetObjName(const FString& PathFileName)
-{
-    return FString();
-}
+TMap<FString, FStaticMesh*> FObjManager::ObjStaticMeshMap;
 
 FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
 {
-    FStaticMesh* MeshData = *ObjStaticMeshMap.Find(PathFileName);
+    FStaticMesh** MeshDataPtr = ObjStaticMeshMap.Find(PathFileName);
 
-    if (MeshData)
-        return MeshData;
+	if (MeshDataPtr)
+		return *MeshDataPtr;
 
-	FObjImporter Reader(PathFileName);
+    FMeshBuilder MeshBuilder;
+    MeshBuilder.BuildMeshFromObj(PathFileName);
 
-    return nullptr;
+	FStaticMesh* MeshData = new FStaticMesh();
+	MeshData->PathFileName = PathFileName;
+	MeshData->Vertices = MeshBuilder.GetVertices();
+	MeshData->Indices = MeshBuilder.GetIndices();
+	MeshData->GroupNames = MeshBuilder.GetGroupNames();
+	MeshData->Materials = MeshBuilder.GetMaterials();
+
+
+    return MeshData;
+}
+
+UStaticMesh* FObjManager::LoadObjStaticMesh(const FString& PathFileName)
+{
+    for (TObjectIterator<UStaticMesh> It(UEngine::Get().GObjects.begin(), UEngine::Get().GObjects.end()); It; ++It)
+    {
+        UStaticMesh* Mesh = *It;
+
+		if (Mesh && Mesh->GetAssetPathFileName() == PathFileName)
+			return Mesh;
+    }
+
+	FStaticMesh* MeshAsset = LoadObjStaticMeshAsset(PathFileName);
+	UStaticMesh* StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>();
+	StaticMesh->SetStaticMeshAsset(MeshAsset);
 }

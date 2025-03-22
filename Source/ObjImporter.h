@@ -1,8 +1,14 @@
 #pragma once
 #include "Core/Container/Array.h"
 #include "Core/Container/String.h"
+#include "Core/Container/Map.h"
 
 #include <fstream>
+
+struct FVector;
+struct FVector2D;
+struct FFaceInfo;
+struct FObjMaterialInfo;
 
 class FObjImporter
 {
@@ -13,13 +19,20 @@ public:
     
     ~FObjImporter();
 
-    TArray<float> GetVertex(int32 Idx);
+    FVector GetVertex(int32 Idx);
     
-    TArray<float> GetNormal(int32 Idx);
+    FVector GetNormal(int32 Idx);
     
-    TArray<float> GetUV(int32 Idx);
+    FVector2D GetUV(int32 Idx);
     
-    TArray<TArray<TArray<uint32>>> GetFaces() { return Faces; }
+    TArray<FFaceInfo> GetFaces(const FString& GroupName = TEXT("Default"))
+    { 
+		if (FacesPerGroup.Contains(GroupName))
+		{
+			return FacesPerGroup[GroupName];
+		}
+        return {};
+    }
 
     TArray<uint32> GetVertexIndices();
 
@@ -29,7 +42,27 @@ public:
 
     uint32 GetUVNum() const { return UVs.Num(); }
 
-    uint32 GetFaceNum() const { return Faces.Num(); }
+    uint32 GetFaceNum(const FString& GroupName) const 
+    {
+		if (FacesPerGroup.Contains(GroupName))
+		{
+			return FacesPerGroup[GroupName].Num();
+		}
+        return 0;
+    }
+
+    TArray<FString> GetGroupNames() const
+    {
+        TArray<FString> GroupNames;
+        for (auto& Kvp : FacesPerGroup)
+        {
+            GroupNames.Add(Kvp.first);
+        };
+        return GroupNames;
+    }
+
+    TMap<FString, FObjMaterialInfo> GetMaterials() const { return MaterialsPerGroup; }
+	TArray<FVector> GetVertices() const { return Vertices; }
 
 protected:
     FString FilePath;
@@ -44,8 +77,14 @@ protected:
 
     void Clear();
 
-    TArray<TArray<float>> Vertices;
-    TArray<TArray<float>> Normals;
-    TArray<TArray<float>> UVs;
-    TArray<TArray<TArray<uint32>>> Faces;
+    TArray<uint32> ParseFaceInfoPoint(const std::string& line);
+
+    bool LoadMTL(const FString& filename);
+
+    FString MaterialName = "";
+    TArray<FVector> Vertices;
+    TArray<FVector> Normals;
+    TArray<FVector2D> UVs;
+    TMap<FString, TArray<FFaceInfo>> FacesPerGroup;
+	TMap<FString, FObjMaterialInfo> MaterialsPerGroup;
 };

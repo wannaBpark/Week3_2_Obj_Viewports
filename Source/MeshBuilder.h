@@ -3,6 +3,31 @@
 #include "Core/Container/String.h"
 #include "Core/Math/Vector.h"
 #include "Object/Mesh/StaticMesh.h"
+#include <functional>
+
+struct FVertexKey
+{
+    int PositionIdx;
+    int NormalIdx;
+    int UVIdx;
+
+    bool operator==(const FVertexKey& Other) const
+    {
+        return PositionIdx == Other.PositionIdx && NormalIdx == Other.NormalIdx && UVIdx == Other.UVIdx;
+    };
+
+};
+
+template<>
+struct std::hash<FVertexKey>
+{
+	std::size_t operator()(const FVertexKey& Key) const
+	{
+		return ((std::hash<int>()(Key.PositionIdx) ^
+			(std::hash<int>()(Key.NormalIdx) << 1)) >> 1) ^
+			(std::hash<int>()(Key.UVIdx) << 1);
+	}
+};
 
 class FMeshBuilder
 {
@@ -16,16 +41,21 @@ public:
     uint32 GetVertexNum() const { return Vertices.Num(); }
     uint32 GetIndexNum() const { return Indices.Num(); }
 
-    TArray<FNormalVertex> GetVertices() { return Vertices; }
+    TArray<struct FNormalVertex> GetVertices() { return Vertices; }
     TArray<uint32> GetIndices() { return Indices; }
+	TMap<FString, FObjMaterialInfo> GetMaterials() { return Materials; }
+	TArray<FString> GetGroupNames() { return GroupNames; }
+
 
 private:
-    void MakeVertex(const TArray<float>& Vertex, const TArray<float>& Normal, const TArray<float>& UV, FNormalVertex& OutVertex);
+    void MakeVertex(const FVector& Vertex, const FVector& Normal, const FVector2D& UV, FNormalVertex& OutVertex);
 
     void CalculateTangent(const FNormalVertex& Vertex0, const FNormalVertex& Vertex1, const FNormalVertex& Vertex2, FVector& OutTangent);
     
     TArray<FNormalVertex> Vertices;
     TArray<uint32> Indices;
+	TArray<FString> GroupNames;
+    TMap<FString, FObjMaterialInfo> Materials;
 
     uint32 VerticesNum;
     uint32 IndicesNum;

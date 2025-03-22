@@ -1,6 +1,9 @@
 #include "MeshBuilder.h"
+#include "Core/Container/Map.h"
 
-#include "Object/Mesh/StaticMesh.h"
+#include <cassert>
+
+
 
 FMeshBuilder::FMeshBuilder()
     : VerticesNum(0)
@@ -15,68 +18,105 @@ FMeshBuilder::~FMeshBuilder()
 
 bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 {
+    // 여기서 바로 읽는다
     FObjImporter Reader(ObjPath);
-    
-    TArray<TArray<TArray<uint32>>> Faces = Reader.GetFaces();
-    
-    VerticesNum = Reader.GetFaceNum() * 3;
-    IndicesNum = VerticesNum; // 현재는 정보가 중복된 정점을 하나로 합치지 않음.
-    
-    Vertices = TArray<FNormalVertex>(VerticesNum);
-    Indices = TArray<uint32>(IndicesNum);
 
-    uint32 VertexCount = 0;
-    for (const TArray<TArray<uint32>>& Face : Faces)
+
+	// 그룹 이름과 머티리얼 Map을 가져온다
+	GroupNames = Reader.GetGroupNames();
+	Materials = Reader.GetMaterials();
+    
+	// 버텍스 및 인덱스 배열 크기 미리 잡는다
+   	Vertices = TArray<FNormalVertex>();
+
+	Indices = TArray<uint32>();
+
+	TMap<FVertexKey, uint32> VertexMap;
+
+	// 그룹별로 순회하며 Face 정보를 가져와서 FNormalVertex를 구성한다
+    for (const FString& GroupName : GroupNames)
     {
-        // Obj 파일은 오른손 좌표계를 따르므로, 왼손 좌표계로 변환하여 저장
-        TArray<float> Position;
-        TArray<float> UV;
-        TArray<float> Normal;
-        
-        Position = Reader.GetVertex(Face[0][0]);
-        UV = Reader.GetUV(Face[0][1]);
-        Normal = Reader.GetNormal(Face[0][2]);
-        FNormalVertex Vertex0;
-        MakeVertex(Position, Normal, UV, Vertex0);
+		TArray<FFaceInfo> Faces = Reader.GetFaces(GroupName);
+		for (const FFaceInfo& FaceInfo : Faces)
+		{
+			// Obj 파일은 오른손 좌표계를 따르므로, 왼손 좌표계로 변환하여 저장
+			FVector Position;
+			FVector2D UV;
+			FVector Normal;
 
-        Position = Reader.GetVertex(Face[2][0]);
-        UV = Reader.GetUV(Face[2][1]);
-        Normal = Reader.GetNormal(Face[2][2]);
-        FNormalVertex Vertex1;
-        MakeVertex(Position, Normal, UV, Vertex1);
+			int VertexIndex0 = FaceInfo.VertexIndex[0];
 
-        Position = Reader.GetVertex(Face[1][0]);
-        UV = Reader.GetUV(Face[1][1]);
-        Normal = Reader.GetNormal(Face[1][2]);
-        FNormalVertex Vertex2;
-        MakeVertex(Position, Normal, UV, Vertex2);
+			Position = Reader.GetVertex(FaceInfo.VertexIndex[0]);
+			UV = Reader.GetUV(FaceInfo.UVIndex[0]);
+			Normal = Reader.GetNormal(FaceInfo.NormalIndex[0]);
+			FNormalVertex Vertex0;
+			MakeVertex(Position, Normal, UV, Vertex0);
+			
 
-        CalculateTangent(Vertex0, Vertex1, Vertex2, Vertex0.Tangent);
-        CalculateTangent(Vertex1, Vertex2, Vertex0, Vertex1.Tangent);
-        CalculateTangent(Vertex2, Vertex0, Vertex1, Vertex2.Tangent);
+			int VertexIndex1 = FaceInfo.VertexIndex[1];
 
-        Vertices[VertexCount] = Vertex0;
-        Indices[VertexCount] = VertexCount;
-        ++VertexCount;
+			Position = Reader.GetVertex(FaceInfo.VertexIndex[1]);
+			UV = Reader.GetUV(FaceInfo.UVIndex[1]);
+			Normal = Reader.GetNormal(FaceInfo.NormalIndex[1]);
+			FNormalVertex Vertex1;
+			MakeVertex(Position, Normal, UV, Vertex1);
 
-        Vertices[VertexCount] = Vertex1;
-        Indices[VertexCount] = VertexCount;
-        ++VertexCount;
+			int VertexIndex2 = FaceInfo.VertexIndex[2];
+			Position = Reader.GetVertex(FaceInfo.VertexIndex[2]);
+			UV = Reader.GetUV(FaceInfo.UVIndex[2]);
+			Normal = Reader.GetNormal(FaceInfo.NormalIndex[2]);
+			FNormalVertex Vertex2;
+			MakeVertex(Position, Normal, UV, Vertex2);
 
-        Vertices[VertexCount] = Vertex2;
-        Indices[VertexCount] = VertexCount;
-        ++VertexCount;
+			CalculateTangent(Vertex0, Vertex1, Vertex2, Vertex0.Tangent);
+			CalculateTangent(Vertex1, Vertex2, Vertex0, Vertex1.Tangent);
+			CalculateTangent(Vertex2, Vertex0, Vertex1, Vertex2.Tangent);
+
+			if (VertexMap.Contains(FVertexKey{ VertexIndex0, FaceInfo.NormalIndex[0], FaceInfo.UVIndex[0] }))
+			{
+				Indices.Add(VertexMap[FVertexKey{ VertexIndex0, FaceInfo.NormalIndex[0], FaceInfo.UVIndex[0] }]);
+			}
+			else
+			{
+				VertexMap.Add(FVertexKey{ VertexIndex0, FaceInfo.NormalIndex[0], FaceInfo.UVIndex[0] }, Vertices.Num());
+				Indices.Add(Vertices.Num());
+				Vertices.Add(Vertex0);
+			};
+
+			if (VertexMap.Contains(FVertexKey{ VertexIndex1, FaceInfo.NormalIndex[1], FaceInfo.UVIndex[1] }))
+			{
+				Indices.Add(VertexMap[FVertexKey{ VertexIndex1, FaceInfo.NormalIndex[1], FaceInfo.UVIndex[1] }]);
+			}
+			else
+			{
+				VertexMap.Add(FVertexKey{ VertexIndex1, FaceInfo.NormalIndex[1], FaceInfo.UVIndex[1] }, Vertices.Num());
+				Indices.Add(Vertices.Num());
+				Vertices.Add(Vertex1);
+			};
+
+			if (VertexMap.Contains(FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }))
+			{
+				Indices.Add(VertexMap[FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }]);
+			}
+			else
+			{
+				VertexMap.Add(FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }, Vertices.Num());
+				Indices.Add(Vertices.Num());
+				Vertices.Add(Vertex2);
+			};
+		}
     }
+    
     return true;
 }
 
-void FMeshBuilder::MakeVertex(const TArray<float>& Vertex, const TArray<float>& Normal, const TArray<float>& UV, 
+void FMeshBuilder::MakeVertex(const FVector& Vertex, const FVector& Normal, const FVector2D& UV, 
     FNormalVertex& OutVertex)
 {
     OutVertex = {};
-    OutVertex.Position = {Vertex[0], Vertex[1], Vertex[2]};
-    OutVertex.Normal = {Normal[0], Normal[1], Normal[2]};
-    OutVertex.UV = {UV[0], UV[1]};
+    OutVertex.Position = Vertex;
+    OutVertex.Normal = Normal;
+    OutVertex.UV = UV;
 }
 
 void FMeshBuilder::CalculateTangent(const FNormalVertex& Vertex0, const FNormalVertex& Vertex1,
