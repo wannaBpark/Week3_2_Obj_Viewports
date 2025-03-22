@@ -11,6 +11,7 @@ class UStaticMesh : public UObject
 {
     FStaticMesh* StaticMeshAsset;
 
+public:
     const FString& GetAssetPathFileName()
     {
         return StaticMeshAsset->PathFileName;
