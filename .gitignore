@@ -46,6 +46,8 @@ Intermediate/
 # Settings
 *.ini
 
+!Assets/*
+
 t0_BACKUP_1385.vcxproj
 t0_BACKUP_1474.vcxproj
 t0_BASE_1385.vcxproj
