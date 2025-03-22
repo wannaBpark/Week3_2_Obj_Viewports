@@ -1,6 +1,7 @@
 #pragma once
 enum class EProjectionType {
-
+	PERSPECTIVE = 1 << 0,
+	ORTHOGONAL = 1 << 1,
 };
 
 enum class ECollisionDetection {

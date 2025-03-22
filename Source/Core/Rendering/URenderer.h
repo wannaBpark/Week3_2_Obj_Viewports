@@ -181,9 +181,9 @@ protected:
 public:
     
     FMatrix I = FMatrix::Identity();
-    FMatrix ViewZY = FMatrix::LookAtLH(FVector(-70.0f, 0.0f, 0.0f), FVector(3.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 1.0f));
-    FMatrix ViewZX = FMatrix::LookAtLH(FVector(0.0f, 7.0f, 0.0f), FVector(0.0f, -7.0f, 0.0f), FVector(0.0f, 0.0f, 1.0f));
-    FMatrix ViewYX = FMatrix::LookAtLH(FVector(0.0f, 0.0f, 7.0f), FVector(0.0f, 0.0f, -7.0f), FVector(0.0f, 1.0f, 0.0f));
+    FMatrix ViewZY = FMatrix::LookAtLH(FVector(-70.0f, 0.0f, 3.0f), FVector(3.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 1.0f)); // 높이z 2
+    FMatrix ViewZX = FMatrix::LookAtLH(FVector(0.0f, 7.0f, 3.0f), FVector(0.0f, -7.0f, 0.0f), FVector(0.0f, 0.0f, 1.0f)); // 높이 z 1
+    FMatrix ViewYX = FMatrix::LookAtLH(FVector(0.0f, 0.0f, 15.0f), FVector(0.0f, 0.0f, -7.0f), FVector(0.0f, 1.0f, 0.0f));
     FMatrix ViewportMatrices[4] = {I, ViewZY, ViewZX, ViewYX };
     FMatrix GetViewportMatrixById(uint32 i) { return ViewportMatrices[i]; }
 #pragma endregion
@@ -208,16 +208,8 @@ protected:
     std::unordered_map<uint32, ComPtr<ID3D11PixelShader>> ShaderMapPS;
     std::unordered_map<uint32, ComPtr<ID3D11GeometryShader>> ShaderMapGS;
 
-    // Tessellation 테스트
-    ID3D11VertexShader* TessVertexShader = nullptr;
-    ID3D11PixelShader* TessPixelShader = nullptr;
-    ID3D11HullShader* HullShader = nullptr;
-    ID3D11DomainShader* DomainShader = nullptr;
 
-
-	
 	// Buffer Cache
-
 	std::unique_ptr<FBufferCache> BufferCache;
 
 	FMatrix WorldMatrix;

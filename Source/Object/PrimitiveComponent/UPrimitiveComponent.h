@@ -29,6 +29,7 @@ public:
 	virtual void Render();
 	virtual void UpdateConstantData(URenderer*& Renderer);
 	virtual void UpdateLightConstantData(URenderer*& Renderer);
+	virtual void UpdateLineConstantData(URenderer*& Renderer);
 
 	virtual EPrimitiveType GetType() { return EPrimitiveType::EPT_None; }
 
@@ -69,6 +70,7 @@ public:
 	FRenderResource RenderResource;
 	FConstants ConstantData;
 	FLightConstants LightConstantData;
+	FLineConstants LineConstantData;
 public:
 	bool IsUseBillboardUtil() const { return bUseBillboardUtil; }
 	virtual void SetUseBillboardUtil(bool bUse);
@@ -182,13 +184,22 @@ public:
 		bCanBeRendered = true;
 		RenderResource.PrimitiveType = GetType();
 		RenderResource.Stride = sizeof(FPosColor);
-		// shader 관련 index 지정 필요
-		// 
+		RenderResource.InputLayoutType = InputLayoutType::POSCOLOR;
+		RenderResource.VertexShaderIndex = 3; // Line VS PS : 3
+		RenderResource.PixelShaderIndex = 3;
+		RenderResource.VertexConstantIndex = 5;  // Line Constants : 5
+		RenderResource.PixelConstantIndex = 5;
+		RenderResource.bUseIndexBuffer = false;
 	}
 	virtual ~ULineComp() = default;
 	EPrimitiveType GetType() override
 	{
 		return EPrimitiveType::EPT_Line;
+	}
+
+	void UpdateConstantData(URenderer*& Renderer) override
+	{
+		Super::UpdateLineConstantData(Renderer);
 	}
 };
 
@@ -372,8 +383,13 @@ public:
 		RenderResource.PrimitiveType = GetType();
 		RenderResource.Stride = sizeof(FPosColor);
 		RenderResource.InputLayoutType = InputLayoutType::POSCOLOR;
-		RenderResource.VertexShaderIndex = 1;
+		/*RenderResource.VertexShaderIndex = 1;
 		RenderResource.PixelShaderIndex = 1;
+		RenderResource.bUseIndexBuffer = true;*/
+		RenderResource.VertexShaderIndex = 3; // Line VS PS : 3
+		RenderResource.PixelShaderIndex = 3;
+		RenderResource.VertexConstantIndex = 5;  // Line Constants : 5
+		RenderResource.PixelConstantIndex = 5;
 		RenderResource.bUseIndexBuffer = true;
 	}
 
@@ -383,8 +399,10 @@ public:
 		return EPrimitiveType::EPT_BoundingBox;
 	}
 
-	//void UpdateConstantData(URenderer*& Renderer) override;
-	//void Render() override;
+	void UpdateConstantData(URenderer*& Renderer) override
+	{
+		Super::UpdateLineConstantData(Renderer);
+	}
 };
 
 class UWorldGridComp : public UPrimitiveComponent
@@ -398,11 +416,18 @@ public:
 		RenderResource.PrimitiveType = GetType();
 		RenderResource.Stride = sizeof(FVertexSimple);
 		RenderResource.InputLayoutType = InputLayoutType::POSCOLOR;
-		RenderResource.VertexShaderIndex = 0;
+		// 기존 : PosColNorTex쓰면서 PosColr inputlayout 사용
+		/*RenderResource.VertexShaderIndex = 0;
 		RenderResource.PixelShaderIndex = 0;
 		RenderResource.VertexConstantIndex = 0;
 		RenderResource.PixelConstantIndex = -1;
+		RenderResource.bUseIndexBuffer = false;*/
+		RenderResource.VertexShaderIndex = 3; // Line VS PS : 3
+		RenderResource.PixelShaderIndex = 3;
+		RenderResource.VertexConstantIndex = 5;  // Line Constants : 5
+		RenderResource.PixelConstantIndex = 5;
 		RenderResource.bUseIndexBuffer = false;
+		bUseVertexColor = false;
 		//RenderResource.ShaderResourceViewIndices.emplace().push_back(0);	// TextAtlas 추가 필요
 	}
 
@@ -412,7 +437,10 @@ public:
 		return EPrimitiveType::EPT_WORLDGRID;
 	}
 
-	void UpdateConstantData(URenderer*& Renderer) override;
+	void UpdateConstantData(URenderer*& Renderer) override
+	{
+		Super::UpdateLineConstantData(Renderer);
+	}
 };
 
 class USubUVComponent : public UPrimitiveComponent

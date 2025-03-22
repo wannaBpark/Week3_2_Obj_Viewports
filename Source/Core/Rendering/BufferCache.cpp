@@ -808,9 +808,9 @@ std::tuple<TArray<FVertexSimple>, std::vector<uint32>> FBufferCache::CreateWorld
 	TArray<FVertexSimple> Vertices;
 	std::vector<uint32> Indices;
 
-	float distance = fabs(cameraPos.Z) / 10.0f;
-	float half = max(gridSize * distance / 2.0f, 100.0f);
-	cellSize *= (distance >= 1.0f ) ? distance : 1.0f;
+	//float distance = fabs(cameraPos.Z) / 10.0f;  [Deprecated] : xy평면과 거리에 반비례한 격자 크기
+	float half = gridSize * 2.0f;
+	//cellSize *= (distance >= 1.0f ) ? distance : 1.0f;
 	half = floor(half);
 	// 카메라와 그리드의 중앙 간의 거리 계산
 

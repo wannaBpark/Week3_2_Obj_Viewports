@@ -89,10 +89,11 @@ void URenderer::CreateShader()
     ID3DBlob* AtlasVertexShaderCSO;
     ID3DBlob* AtlasPixelShaderCSO;
 
-	ID3DBlob* TessVertexShaderCSO;
-	ID3DBlob* TessHullShaderCSO;
-	ID3DBlob* TessDomainShaderCSO;
-	ID3DBlob* TessPixelShaderCSO;
+    /* Line 렌더링용 VS, PS */ 
+    ID3D11VertexShader* GridVertexShader = nullptr;
+    ID3D11PixelShader* GridPixelShader = nullptr;
+	ID3DBlob* GridVertexShaderCSO;
+	ID3DBlob* GridPixelShaderCSO;
 
     //ID3DBlob* PickingShaderCSO;
     
@@ -153,11 +154,11 @@ void URenderer::CreateShader()
     }
 
     SAFE_RELEASE(VertexShaderCSO);  SAFE_RELEASE(PixelShaderCSO);
-    D3DCompileFromFile(L"Shaders/GridVertexShader.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", 0, 0, &TessVertexShaderCSO, &ErrorMsg);
-    Device->CreateVertexShader(TessVertexShaderCSO->GetBufferPointer(), TessVertexShaderCSO->GetBufferSize(), nullptr, &TessVertexShader);
+    D3DCompileFromFile(L"Shaders/GridVertexShader.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", 0, 0, &GridVertexShaderCSO, &ErrorMsg);
+    Device->CreateVertexShader(GridVertexShaderCSO->GetBufferPointer(), GridVertexShaderCSO->GetBufferSize(), nullptr, &GridVertexShader);
 
-    D3DCompileFromFile(L"Shaders/GridPixelShader.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", 0, 0, &TessPixelShaderCSO, &ErrorMsg);
-    Device->CreatePixelShader(TessPixelShaderCSO->GetBufferPointer(), TessPixelShaderCSO->GetBufferSize(), nullptr, &TessPixelShader);
+    D3DCompileFromFile(L"Shaders/GridPixelShader.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", 0, 0, &GridPixelShaderCSO, &ErrorMsg);
+    Device->CreatePixelShader(GridPixelShaderCSO->GetBufferPointer(), GridPixelShaderCSO->GetBufferSize(), nullptr, &GridPixelShader);
 
     SAFE_RELEASE(VertexShaderCSO);  SAFE_RELEASE(PixelShaderCSO);
     D3DCompileFromFile(L"Shaders/LightPosTexVertexShader.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", 0, 0, &VertexShaderCSO, &ErrorMsg);
@@ -169,13 +170,13 @@ void URenderer::CreateShader()
     ShaderMapVS.insert({ 0, SimpleVertexShader});                               // 여기서 Vertex Shader, Pixel Shader, InputLayout 추가
     ShaderMapVS.insert({ 1, PosTexVertexShader});
     ShaderMapVS.insert({ 2, AtlasVertexShader });
-    ShaderMapVS.insert({ 3, TessVertexShader });
+    ShaderMapVS.insert({ 3, GridVertexShader });            // Line : 3
     ShaderMapVS.insert({ 4, LightPosTexVertexShader });
 
     ShaderMapPS.insert({ 0, SimplePixelShader });
     ShaderMapPS.insert({ 1, PosTexPixelShader });
     ShaderMapPS.insert({ 2, AtlasPixelShader });
-    ShaderMapPS.insert({ 3, TessPixelShader });
+    ShaderMapPS.insert({ 3, GridPixelShader });             // Line : 3
     ShaderMapPS.insert({ 4, LightPosTexPixelShader });
     ShaderMapPS.insert({ 5, AtlasNoClipPixelShader });
 
@@ -208,6 +209,7 @@ void URenderer::CreateConstantBuffer()
     idx = CreateConstantBuffer<FDepthConstants>();      // DepthConstants : 2
     idx = CreateConstantBuffer<FAtlasConstants>();           // Atlas CBuffer : 3
     idx = CreateConstantBuffer<FLightConstants>();           // Lighting 테스트용 CBuffer : 4
+    idx = CreateConstantBuffer<FLineConstants>();           // Line에 대한 카메라 4대 테스트용 CBuffer : 5
     UE_LOG("constantbuffer size : %d", idx);
 }
 
@@ -397,7 +399,7 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
                                                                   ViewportInfos[i].Width, ViewportInfos[i].Height);
         ComPtr<ID3D11Buffer> pBuffer = ConstantBufferMap[VC];
         DeviceContext->RSSetViewports(1, &ViewportInfos[i]);
-        if (VC == 4 && i > 0)
+        if (i > 0) // 0 = 원본 뷰포트는 viewmatrix 수정필요 없으므로
         {
             // 상수 버퍼가 이미 설정된 상태에서 ViewportIndex만 업데이트
             
@@ -407,8 +409,14 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
             HRESULT hr = DeviceContext->Map(pBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
             if (SUCCEEDED(hr))
             {
-                FLightConstants* Cbuffer = static_cast<FLightConstants*>(ms.pData);
-                Cbuffer->ViewportIndex = i; // ViewportIndex만 변경
+                if (VC == 4) {
+                    FLightConstants* Cbuffer = static_cast<FLightConstants*>(ms.pData);
+                    Cbuffer->ViewportIndex = i; // ViewportIndex만 변경
+                }
+                else if (VC == 5) {
+                    FLineConstants* Cbuffer = static_cast<FLineConstants*>(ms.pData);
+                    Cbuffer->ViewportIndex = i; // ViewportIndex만 변경
+                }
                 DeviceContext->Unmap(pBuffer.Get(), 0);
             }
             else

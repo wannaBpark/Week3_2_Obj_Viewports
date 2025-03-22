@@ -88,7 +88,8 @@ BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FAtlasConstants)
     SHADER_PARAMETER(FVector4, AtlasSzOffset)
 END_GLOBAL_SHADER_PARAMETER_STRUCT()
 
-struct FLightConstants {
+struct FLightConstants 
+{
     FMatrix Model;              
     FMatrix Views[4];           
     FMatrix Projection;         
@@ -102,6 +103,21 @@ struct FLightConstants {
     uint32 ViewportIndex;       
     FVector Padding2;           
 };
+
+struct FLineConstants
+{
+    FMatrix Model;
+    FMatrix Views[4];
+    FMatrix Projection;
+    uint32 bIsPicked;
+    FVector Padding1;
+    FVector4 CustomColor;
+    uint32 bUseVertexColor;
+    FVector Padding2;
+    uint32 ViewportIndex;
+    FVector Padding3;
+};
+
 //struct FLightConstants {
 //    FMatrix Model;              // 오프셋: 0,    크기: 64바이트
 //    FMatrix Views[4];           // 오프셋: 64,   크기: 256바이트
