@@ -7,5 +7,10 @@ ATarzan::ATarzan()
 	RootComponent = MeshComponent;
 
 	MeshComponent->SetStaicMesh(TEXT("Assets/2PX7U16XARLGHIM3W48FS86MJ.obj"));
-	//MeshComponent->SetStaicMesh(TEXT("Assets/model_tarzan/Tarzan_textured_MaterialGroups.obj"));
+
+
+	FTransform Tr = GetActorTransform();
+	Tr.Rotate(FVector(-90, 0, 0));
+
+	MeshComponent->SetRelativeTransform(Tr);
 }
