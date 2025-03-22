@@ -4,8 +4,10 @@
 #include "Core/Engine.h"
 #include "Object/ObjectFactory.h"
 #include "Object/Material/Material.h"
+#include "MeshBuilder.h"
 
 TMap<FString, FStaticMesh*> FObjManager::ObjStaticMeshMap;
+TMap<FString, FObjMaterialInfo*> FObjManager::MaterialMap;
 
 FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
 {
@@ -22,6 +24,7 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
 	MeshData->Vertices = MeshBuilder.GetVertices();
 	MeshData->Indices = MeshBuilder.GetIndices();
 	MeshData->GroupNames = MeshBuilder.GetGroupNames();
+	MeshData->SubMeshes = MeshBuilder.GetSubMeshes();
 
 	auto Mats = MeshBuilder.GetMaterials();
 
@@ -61,6 +64,6 @@ UMaterial* FObjManager::LoadMaterial(const FString& MaterialName)
 			return Material;
 	}
 
-	// 머티리얼 없음 -> null반환
+	// 머티리얼 없음 -> 이럴 경우가 없어야 하는데
 	return nullptr;
 }

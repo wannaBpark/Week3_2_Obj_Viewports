@@ -15,7 +15,6 @@ struct FVertexKey
     {
         return PositionIdx == Other.PositionIdx && NormalIdx == Other.NormalIdx && UVIdx == Other.UVIdx;
     };
-
 };
 
 template<>
@@ -45,12 +44,15 @@ public:
     TArray<uint32> GetIndices() { return Indices; }
 	TMap<FString, FObjMaterialInfo> GetMaterials() { return Materials; }
 	TArray<FString> GetGroupNames() { return GroupNames; }
+	TMap<FString, FSubMesh> GetSubMeshes() { return SubMeshes; }
 
 
 private:
     void MakeVertex(const FVector& Vertex, const FVector& Normal, const FVector2D& UV, FNormalVertex& OutVertex);
 
     void CalculateTangent(const FNormalVertex& Vertex0, const FNormalVertex& Vertex1, const FNormalVertex& Vertex2, FVector& OutTangent);
+
+    void CreateTextureSRV();
     
     TArray<FNormalVertex> Vertices;
     TArray<uint32> Indices;

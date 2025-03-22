@@ -2,10 +2,12 @@
 #include "Object/UObject.h"
 #include "Core/Math/Vector.h"
 #include "Object/Mesh/StaticMesh.h"
+#include "Object/ObjectMacro.h"
 
 class UMaterial :
     public UObject
 {
+	DECLARE_CLASS(UMaterial, UObject);
 public:
 	UMaterial(const FString& Name, const FObjMaterialInfo& ObjInfo);
 	virtual ~UMaterial() = default;

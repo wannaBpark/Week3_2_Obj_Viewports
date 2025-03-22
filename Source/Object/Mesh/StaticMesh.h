@@ -3,7 +3,6 @@
 #include "Core/Math/Vector.h"
 #include "Core/Rendering/ShaderParameterMacros.h"
 #include "ObjImporter.h"
-#include "MeshBuilder.h"
 #include "Core/Container/String.h"
 
 
@@ -21,6 +20,8 @@ struct FSubMesh
 	FString GroupName = "Default";
 	uint32 StartIndex = 0;
 	uint32 NumIndices = 0;
+
+	uint32 TextureIndex = 0;
 };
 /*
 * 가공된 메시 [실제] 데이터 구조체
@@ -64,4 +65,5 @@ struct FObjMaterialInfo
 	float OpticalDensity;
 	uint32 Illum;
 	std::string TextureName;
+	uint32 TextureMapIndex;
 };

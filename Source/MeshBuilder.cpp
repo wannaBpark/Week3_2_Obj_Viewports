@@ -1,5 +1,6 @@
 #include "MeshBuilder.h"
 #include "Core/Container/Map.h"
+#include "Core/Engine.h"
 
 #include <cassert>
 
@@ -25,6 +26,8 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 	// 그룹 이름과 머티리얼 Map을 가져온다
 	GroupNames = Reader.GetGroupNames();
 	Materials = Reader.GetMaterials();
+
+	CreateTextureSRV();
     
 	// 버텍스 및 인덱스 배열 크기 미리 잡는다
    	Vertices = TArray<FNormalVertex>();
@@ -45,6 +48,8 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 		for (const FFaceInfo& FaceInfo : Faces)
 		{
 			// Obj 파일은 오른손 좌표계를 따르므로, 왼손 좌표계로 변환하여 저장
+
+
 			FVector Position;
 			FVector2D UV;
 			FVector Normal;
@@ -110,13 +115,18 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 				Indices.Add(Vertices.Num());
 				Vertices.Add(Vertex2);
 			};
-			IndexCount+=3;
+
+			IndexCount += 3;
 		}
 
+
 		SubMesh.NumIndices = IndexCount;
+		SubMesh.TextureIndex = Materials[GroupName].TextureMapIndex;
 		SubMeshes.Add(GroupName, SubMesh);
     }
+
     
+	// 여기서 텍스쳐 로드해서 ShaderResourceView를 생성
     return true;
 }
 
@@ -149,4 +159,23 @@ void FMeshBuilder::CalculateTangent(const FNormalVertex& Vertex0, const FNormalV
 
     OutTangent = FVector(Tx, Ty, Tz);
     OutTangent.Normalize();
+}
+
+#include <codecvt>
+void FMeshBuilder::CreateTextureSRV()
+{
+	for (auto& Material : Materials)
+	{
+		// 텍스쳐 로드
+		std::string texturename = Material.second.TextureName;
+
+		int size_needed = MultiByteToWideChar(CP_UTF8, 0, &texturename[0], (int)texturename.size(), NULL, 0);
+		std::wstring str(size_needed, 0);
+		MultiByteToWideChar(CP_UTF8, 0, &texturename[0], (int)texturename.size(), &str[0], size_needed);
+
+		std::wstring filePath = L"Textures/" + str;
+		uint32 index = UEngine::Get().GetRenderer()->CreateTextureSRVW(filePath.c_str());
+
+		Material.second.TextureMapIndex = index;
+	}
 }

@@ -879,8 +879,19 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
     };
 
     UpdateBuffer(vc, VC);
+	DeviceContext->PSSetSamplers(0, 1, SamplerMap[0].GetAddressOf());
 
-    DeviceContext->DrawIndexed(MeshComp->RenderResource.numVertices, 0, 0);
+    TMap<FString, FSubMesh>& SubMeshes = MeshComp->StaticMesh->GetStaticMeshAsset()->SubMeshes;
+
+    for (const auto& kvp : SubMeshes)
+    {
+		FSubMesh SubMesh = kvp.second;
+
+		DeviceContext->PSSetShaderResources(0, 1, &ShaderResourceViewMap[SubMesh.TextureIndex]);
+		DeviceContext->DrawIndexed(SubMesh.NumIndices, SubMesh.StartIndex, 0);
+    }
+
+    //DeviceContext->DrawIndexed(MeshComp->RenderResource.numVertices, 0, 0);
 }
 
 void URenderer::RenderPickingTexture()
@@ -958,7 +969,7 @@ void URenderer::CreateTextureSRV(const wchar_t* filename)
 }
 
 
-void URenderer::CreateTextureSRVW(const WIDECHAR* filename)
+uint32 URenderer::CreateTextureSRVW(const WIDECHAR* filename)
 {
     using namespace DirectX;
 
@@ -971,8 +982,8 @@ void URenderer::CreateTextureSRVW(const WIDECHAR* filename)
 
     if (FAILED(hr))
     {
-        UE_LOG("Failed to load texture");
-        return;
+        UE_LOG("Failed to load texture. %s", filename);
+        return -1;
     }
     assert(SRV.Get() != nullptr);
     // ShaderResourceViewMap에 추가
@@ -980,4 +991,6 @@ void URenderer::CreateTextureSRVW(const WIDECHAR* filename)
     ShaderResourceViewMap.insert({ idx, SRV });
 
     UE_LOG("Successfully loaded texture");
+
+    return idx;
 }

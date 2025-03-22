@@ -1,4 +1,8 @@
 // ShaderMesh.hlsl
+Texture2D texture0 : register(t0);
+
+SamplerState sampler0 : register(s0);
+
 cbuffer constants : register(b0)
 {
     matrix Model;
@@ -17,8 +21,11 @@ struct VS_INPUT
 
 struct PS_INPUT
 {
-    float4 position : SV_POSITION; // Transformed position to pass to the pixel shader
-    float4 color : COLOR; // Color to pass to the pixel shader
+    float4 position : SV_POSITION; // Input position from vertex buffer
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float4 color : COLOR;
+    float2 texcoord : TEXCOORD0;
 };
 
 struct PS_OUTPUT
@@ -36,18 +43,24 @@ PS_INPUT mainVS(VS_INPUT input)
     position = mul(position, Model);
     position = mul(position, View);
     output.position = mul(position, Projection);
+    
     output.color = input.color;
+    output.texcoord = input.texcoord;
+    output.normal = input.normal;
+    output.tangent = input.tangent;
+    
     return output;
 }
-
 
 PS_OUTPUT mainPS(PS_INPUT input)
 {
     PS_OUTPUT output;
 
     // 색상 설정 (예: 흰색)
-    // output.color = input.color;
-    output.color = float4(1, 1, 1, 1);
+    float3 color = texture0.Sample(sampler0, float2(input.texcoord.x, input.texcoord.y)).rgb;
+
+    output.color = float4(color.xyz, 1.0f);
+    output.UUID = float4(0.0f, 0.0f, 0.0f, 0.0f); // UUID 초기화
     
     return output;
 }

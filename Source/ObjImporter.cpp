@@ -126,10 +126,11 @@ namespace fs = std::filesystem;
 
 bool FObjImporter::LoadMTL(const FString& filename)
 {
-	std::ifstream file(*filename);
+    FString FileName = TEXT("Assets/") + filename;
+	std::ifstream file(*FileName);
 	if (!file.is_open()) return false;
 
-	fs::path mtlPath = fs::path(*filename).parent_path();
+	fs::path mtlPath = fs::path(*FileName).parent_path();
 	std::string currentMaterial;
 	std::string line;
 	while (std::getline(file, line))
@@ -187,7 +188,7 @@ bool FObjImporter::LoadMTL(const FString& filename)
 			{
 				fullPath = mtlPath / fullPath;
 			}
-			MaterialsPerGroup[currentMaterial].TextureName = fullPath.string();
+			MaterialsPerGroup[currentMaterial].TextureName = texturePath;
 		}
 	}
 
@@ -208,6 +209,8 @@ void FObjImporter::ReadFile()
         File.open(*FilePath);
     }
 
+	FString GroupName = "Default";
+
     std::string Line; // std::string을 참조해야하므로, FString 대신 std::string 사용
     while (std::getline(File, Line))
     {
@@ -222,12 +225,11 @@ void FObjImporter::ReadFile()
         }
         const std::string& Key = Tokens[0];
 
-        FString GroupName = "Default";
 
         // 사용할 머티리얼 파일 로드
         if (Key == "mtllib")
         {
-			FString MtlFileName = TEXT("Assets/") + FString(Tokens[1].c_str());
+			FString MtlFileName = FString(Tokens[1].c_str());
 			LoadMTL(MtlFileName);
         }
 
@@ -262,7 +264,7 @@ void FObjImporter::ReadFile()
         }
         else if (Key == "g")
         {
-			GroupName = Tokens[1].c_str();
+			GroupName = Tokens[1];
 			FacesPerGroup.Add(GroupName, TArray<FFaceInfo>());
         }
         else if (Key == "f")
