@@ -16,6 +16,8 @@
 #include "EngineConfig.h"
 #include "Core/Container/ObjectIterator.h"
 #include "Object/Mesh/ObjManager.h"
+#include "Object/Actor/ATarzan.h"
+
 
 
 class AArrow;
@@ -299,7 +301,7 @@ void UEngine::InitWorld()
 
 	World->LoadWorld(*DefaultSceneName);
 
-
+	ATarzan* Tarzan = World->SpawnActor<ATarzan>();
 }
 
 void UEngine::ShutdownWindow()

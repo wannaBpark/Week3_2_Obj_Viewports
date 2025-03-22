@@ -13,19 +13,19 @@ cbuffer constants : register(b0)
 struct VS_INPUT
 {
     float3 position : POSITION; // Input position from vertex buffer
-    float3 normal : NORMAL;
-    float3 tangent : TANGENT;
-    float4 color : COLOR; // Input color from vertex buffer
-    float2 texcoord : TEXCOORD0;
+    float3 normal : NORMAL; // NORMAL0 -> NORMAL
+    float3 tangent : TANGENT; // TANGENT0 -> TANGENT
+    float4 color : COLOR; // COLOR0 -> COLOR
+    float2 texcoord : TEXCOORD; // TEXCOORD0 -> TEXCOORD
 };
 
 struct PS_INPUT
 {
     float4 position : SV_POSITION; // Input position from vertex buffer
-    float3 normal : NORMAL;
-    float3 tangent : TANGENT;
-    float4 color : COLOR;
-    float2 texcoord : TEXCOORD0;
+    float3 normal : NORMAL; // NORMAL0 -> NORMAL
+    float3 tangent : TANGENT; // TANGENT0 -> TANGENT
+    float4 color : COLOR; // COLOR0 -> COLOR
+    float2 texcoord : TEXCOORD; // TEXCOORD0 -> TEXCOORD
 };
 
 struct PS_OUTPUT
@@ -56,7 +56,6 @@ PS_OUTPUT mainPS(PS_INPUT input)
 {
     PS_OUTPUT output;
 
-    // 색상 설정 (예: 흰색)
     float3 color = texture0.Sample(sampler0, float2(input.texcoord.x, input.texcoord.y)).rgb;
 
     output.color = float4(color.xyz, 1.0f);

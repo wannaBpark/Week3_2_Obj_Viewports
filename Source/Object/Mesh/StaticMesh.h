@@ -8,11 +8,11 @@
 
 struct FNormalVertex
 {
-    FVector Position;
-	FVector Normal;
-	FVector Tangent;
-	FVector4 Color;
-	FVector2D UV;
+	FVector Position = FVector();
+	FVector Normal = FVector();
+	FVector Tangent = FVector();
+	FVector4 Color = FVector4();
+	FVector2D UV = FVector2D();
 };
 
 struct FSubMesh

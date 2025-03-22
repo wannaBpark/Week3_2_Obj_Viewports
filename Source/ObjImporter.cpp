@@ -142,7 +142,7 @@ bool FObjImporter::LoadMTL(const FString& filename)
 		if (token == "newmtl")
 		{
 			iss >> currentMaterial;
-			MaterialsPerGroup[currentMaterial] = FObjMaterialInfo();            // newmtl 토큰 파싱 시에만 새로운 Material추가 (이름 = newmtl 다음 토큰)
+			//MaterialsPerGroup[currentMaterial] = FObjMaterialInfo();            // newmtl 토큰 파싱 시에만 새로운 Material추가 (이름 = newmtl 다음 토큰)
 		}
 		else if (token == "Ka")
 		{
@@ -262,7 +262,7 @@ void FObjImporter::ReadFile()
             };
             UVs.Add(UV);
         }
-        else if (Key == "g")
+        else if (Key == "usemtl")
         {
 			GroupName = Tokens[1];
 			FacesPerGroup.Add(GroupName, TArray<FFaceInfo>());

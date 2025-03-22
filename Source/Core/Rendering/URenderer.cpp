@@ -82,6 +82,8 @@ void URenderer::CreateShader()
     ID3D11PixelShader* AtlasNoClipPixelShader;
     ID3D11VertexShader* MeshVertexShader;
     ID3D11PixelShader* MeshPixelShader;
+	ID3D11InputLayout* MeshInputLayout;
+
     ID3DBlob* VertexShaderCSO;
     ID3DBlob* PosTexVertexShaderCSO;
     ID3DBlob* PixelShaderCSO;
@@ -173,6 +175,9 @@ void URenderer::CreateShader()
     HRESULT result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", shaderFlags, 0, &VertexShaderCSO, &ErrorMsg);
     Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &MeshVertexShader);
 
+	it = InputLayouts.find(InputLayoutType::POSNORMALTANGENTCOLORTEX);
+	Device->CreateInputLayout(it->second.data(), it->second.size(), VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), &MeshInputLayout);
+
     result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", shaderFlags, 0, &PixelShaderCSO, &ErrorMsg);
     Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &MeshPixelShader);
 
@@ -193,6 +198,7 @@ void URenderer::CreateShader()
 
     InputLayoutMap.insert({ InputLayoutType::POSCOLOR, SimpleInputLayout });
     InputLayoutMap.insert({ InputLayoutType::POSCOLORNORMALTEX, PosTexInputLayout });
+	InputLayoutMap.insert({ InputLayoutType::POSNORMALTANGENTCOLORTEX, MeshInputLayout });
 
     
 
@@ -855,6 +861,7 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
 
     uint32 stride = sizeof(FNormalVertex);
     uint32 offset = 0;
+    DeviceContext->IASetInputLayout(InputLayoutMap[InputLayoutType::POSNORMALTANGENTCOLORTEX].Get());
     DeviceContext->IASetVertexBuffers(0, 1, &MeshComp->VertexBuffer, &stride, &offset);
     DeviceContext->IASetIndexBuffer(MeshComp->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
@@ -887,11 +894,10 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
     {
 		FSubMesh SubMesh = kvp.second;
 
-		DeviceContext->PSSetShaderResources(0, 1, &ShaderResourceViewMap[SubMesh.TextureIndex]);
+        auto srv = ShaderResourceViewMap[SubMesh.TextureIndex];
+		DeviceContext->PSSetShaderResources(0, 1, &srv);
 		DeviceContext->DrawIndexed(SubMesh.NumIndices, SubMesh.StartIndex, 0);
     }
-
-    //DeviceContext->DrawIndexed(MeshComp->RenderResource.numVertices, 0, 0);
 }
 
 void URenderer::RenderPickingTexture()
