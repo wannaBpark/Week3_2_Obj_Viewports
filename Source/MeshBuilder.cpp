@@ -36,6 +36,11 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 	// 그룹별로 순회하며 Face 정보를 가져와서 FNormalVertex를 구성한다
     for (const FString& GroupName : GroupNames)
     {
+		FSubMesh SubMesh;
+		SubMesh.GroupName = GroupName;
+		SubMesh.StartIndex = Indices.Num();
+
+		int IndexCount = 0;
 		TArray<FFaceInfo> Faces = Reader.GetFaces(GroupName);
 		for (const FFaceInfo& FaceInfo : Faces)
 		{
@@ -75,6 +80,7 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 			if (VertexMap.Contains(FVertexKey{ VertexIndex0, FaceInfo.NormalIndex[0], FaceInfo.UVIndex[0] }))
 			{
 				Indices.Add(VertexMap[FVertexKey{ VertexIndex0, FaceInfo.NormalIndex[0], FaceInfo.UVIndex[0] }]);
+				
 			}
 			else
 			{
@@ -104,7 +110,11 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 				Indices.Add(Vertices.Num());
 				Vertices.Add(Vertex2);
 			};
+			IndexCount+=3;
 		}
+
+		SubMesh.NumIndices = IndexCount;
+		SubMeshes.Add(GroupName, SubMesh);
     }
     
     return true;

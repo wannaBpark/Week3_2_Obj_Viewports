@@ -4,6 +4,8 @@
 #include "Core/Rendering/ShaderParameterMacros.h"
 #include "ObjImporter.h"
 #include "MeshBuilder.h"
+#include "Core/Container/String.h"
+
 
 struct FNormalVertex
 {
@@ -14,6 +16,12 @@ struct FNormalVertex
 	FVector2D UV;
 };
 
+struct FSubMesh
+{
+	FString GroupName = "Default";
+	uint32 StartIndex = 0;
+	uint32 NumIndices = 0;
+};
 /*
 * 가공된 메시 [실제] 데이터 구조체
 * [Preload]타임에 사용될 실제, 그러나 사용되기 좋도록 가공된 데이터
@@ -29,12 +37,11 @@ struct FStaticMesh
     TArray<FNormalVertex> Vertices;
 	// 버텍스 인덱스 정보
     TArray<uint32> Indices;
-	// 머티리얼 정보. 텍스쳐 이름 포함
-	TMap<FString, FObjMaterialInfo> Materials;
 	// 그룹정보
 	TArray<FString> GroupNames;
-	// 그룹 당 Face 정보
-	TMap<FString, TArray<FFaceInfo>> FacesPerGroup;
+
+	// Submesh정보
+	TMap<FString, FSubMesh> SubMeshes;
 };
 
 // Obj파일의 Face정보를 저장하는 구조체. UV, Normal의 데이터가 없을 경우에 대비해 -1로 초기화
@@ -57,11 +64,4 @@ struct FObjMaterialInfo
 	float OpticalDensity;
 	uint32 Illum;
 	std::string TextureName;
-};
-
-struct FSubMesh
-{
-	FString GroupName;
-	uint32 StartIndex;
-	uint32 NumIndices;
 };

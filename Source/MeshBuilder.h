@@ -56,6 +56,7 @@ private:
     TArray<uint32> Indices;
 	TArray<FString> GroupNames;
     TMap<FString, FObjMaterialInfo> Materials;
+	TMap<FString, FSubMesh> SubMeshes;
 
     uint32 VerticesNum;
     uint32 IndicesNum;
