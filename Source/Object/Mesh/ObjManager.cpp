@@ -7,7 +7,7 @@
 #include "MeshBuilder.h"
 
 TMap<FName, FStaticMesh*> FObjManager::ObjStaticMeshMap;
-TMap<FName, FObjMaterialInfo*> FObjManager::MaterialMap;
+TMap<FName, FObjMaterialInfo> FObjManager::MaterialMap;
 
 FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
 {
@@ -30,7 +30,8 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
 
 	for (auto& Kvp : Mats)
 	{
-		MaterialMap.Add(Kvp.first, new FObjMaterialInfo(Kvp.second));
+		// 실제 생성된 MeshData의 머티리얼 정보를 가리키도록
+		MaterialMap.Add(Kvp.first, Kvp.second);
 	}
 
     return MeshData;
@@ -54,7 +55,7 @@ UStaticMesh* FObjManager::LoadObjStaticMesh(const FString& PathFileName)
 	return StaticMesh;
 }
 
-UMaterial* FObjManager::LoadMaterial(const FString& MaterialName)
+class UMaterial* FObjManager::LoadMaterial(const FName& MaterialName)
 {
 	for (TObjectIterator<UMaterial> It(UEngine::Get().GObjects.begin(), UEngine::Get().GObjects.end()); It; ++It)
 	{
@@ -64,6 +65,14 @@ UMaterial* FObjManager::LoadMaterial(const FString& MaterialName)
 			return Material;
 	}
 
-	// 머티리얼 없음 -> 이럴 경우가 없어야 하는데
+	FString MatNameDebug = MaterialName.ToString();
+	FObjMaterialInfo* MaterialInfoPtr = MaterialMap.Find(MaterialName);
+	if (MaterialInfoPtr)
+	{
+		UMaterial* Material = FObjectFactory::ConstructObject<UMaterial>();
+		Material->SetMaterialInfo(MaterialName, *MaterialInfoPtr);
+		return Material;
+	};
+
 	return nullptr;
 }

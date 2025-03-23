@@ -24,6 +24,8 @@
 
 #include "Core/Rendering/TextAtlasManager.h";
 #include "Core/Rendering/SubUVManager.h";
+#include "Object/Mesh/ObjManager.h"
+#include "Object/Material/Material.h"
 
 #define SAFE_RELEASE(p)       { if (p) { (p)->Release();  (p) = nullptr; } }
 
@@ -893,11 +895,15 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
     {
 		FSubMesh SubMesh = kvp.second;
 
-        auto srv = ShaderResourceViewMap[SubMesh.TextureIndex].Get();
-		DeviceContext->PSSetSamplers(0, 1, SamplerMap[0].GetAddressOf());
+        UMaterial* Mat = FObjManager::LoadMaterial(SubMesh.MaterialName);
+        if (Mat != nullptr)
+        {
+			auto srv = ShaderResourceViewMap[Mat->TextureMapIndex].Get();
+			DeviceContext->PSSetSamplers(0, 1, SamplerMap[0].GetAddressOf());
 
-		DeviceContext->PSSetShaderResources(0, 1, &srv);
-		DeviceContext->DrawIndexed(SubMesh.NumIndices, SubMesh.StartIndex, 0);
+			DeviceContext->PSSetShaderResources(0, 1, &srv);
+			DeviceContext->DrawIndexed(SubMesh.NumIndices, SubMesh.StartIndex, 0);
+        }
     }
 }
 

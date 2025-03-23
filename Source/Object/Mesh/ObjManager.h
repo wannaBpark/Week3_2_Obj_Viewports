@@ -11,9 +11,9 @@ public:
 	static FStaticMesh* LoadObjStaticMeshAsset(const FString& PathFileName);
 	static class UStaticMesh* LoadObjStaticMesh(const FString& PathFileName);
 
-	static class UMaterial* LoadMaterial(const FString& MaterialName);
+	static class UMaterial* LoadMaterial(const FName& MaterialName);
 private:
 	static TMap<FName, FStaticMesh*> ObjStaticMeshMap;
-	static TMap<FName, FObjMaterialInfo*> MaterialMap;
+	static TMap<FName, FObjMaterialInfo> MaterialMap;
 };
 

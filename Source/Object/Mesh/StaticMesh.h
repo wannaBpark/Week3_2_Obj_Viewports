@@ -16,21 +16,27 @@ struct FNormalVertex
 	FVector2D UV = FVector2D();
 };
 
+/*
+* 서브메시 정보 구조체
+* @GroupName : 서브메시 이름
+* @StartIndex : 서브메시 시작 인덱스
+* @NumIndices : 서브메시 인덱스 개수
+* @MaterialName : 서브메시에 사용될 머티리얼 이름
+*/
 struct FSubMesh
 {
 	FName GroupName = "Default";
 	uint32 StartIndex = 0;
 	uint32 NumIndices = 0;
 
-	uint32 TextureIndex = 0;
-	// !TODO : 머티리얼 이름으로 변경해야 함
+	//uint32 TextureIndex = 0;
+	FName MaterialName = "Default";
 };
 /*
 * 가공된 메시 [실제] 데이터 구조체
 * [Preload]타임에 사용될 실제, 그러나 사용되기 좋도록 가공된 데이터
 * @Vertices : <정점의 위치, 노말, 색상, 텍스쳐 좌표>
 * @Indices : 정점의 인덱스 정보
-* @TODO: StaticMesh가 어느 정보를 얼마나 담을지 고민 필요
 */
 struct FStaticMesh
 {
@@ -66,6 +72,6 @@ struct FObjMaterialInfo
 	float Opacity;
 	float OpticalDensity;
 	uint32 Illum;
-	std::string TextureName;
+	FName TextureName;
 	uint32 TextureMapIndex;
 };
