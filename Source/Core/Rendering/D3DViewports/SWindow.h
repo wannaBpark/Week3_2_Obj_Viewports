@@ -3,19 +3,8 @@
 #include "Core/Math/Vector.h"
 #include <iostream>
 #include <algorithm>
+#include "Core/Container/Array.h"
 
-struct FRect
-{
-	uint32 H;
-	uint32 W;
-	uint32 X;
-	uint32 Y;
-};
-struct FPoint
-{
-	uint32 ID;
-	FVector Position;
-};
 class SWindow : public SWidget
 {
 protected:
@@ -28,5 +17,10 @@ protected:
 	}
 	
 	virtual void Render() = 0; // 스플리터 창을 렌더합니다
+
+protected:
+	std::weak_ptr<SWindow> ParentWindowPtr;
+
+	TArray<std::shared_ptr<SWindow>> ChildWindowPtrs;
 };
 

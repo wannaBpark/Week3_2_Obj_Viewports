@@ -10,7 +10,7 @@
 #include "Static/FEditorManager.h"
 #include "Core/Rendering/BufferCache.h" // 그리드 동적 렌더링
 
-// 아래는 Texture에 쓸 이미지 로딩용
+// 아래는 Texture에 쓸 이미지 로딩
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image.h";

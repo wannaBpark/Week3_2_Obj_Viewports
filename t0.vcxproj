@@ -161,7 +161,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Core\Rendering\D3DViewports\Geometry.cpp" />
+    <ClCompile Include="Source\Core\Rendering\D3DViewports\FRenderTarget.cpp" />
     <ClCompile Include="Source\Core\FSceneManager.cpp" />
+    <ClCompile Include="Source\Core\Rendering\D3DViewports\Margin.cpp" />
     <ClCompile Include="Source\Core\Rendering\SubUVManager.cpp" />
     <ClCompile Include="Source\Core\Rendering\TextAtlasManager.cpp" />
     <ClCompile Include="Source\Object\Actor\Circle.cpp" />
@@ -303,9 +306,12 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Core\Rendering\D3DViewports\Geometry.h" />
+    <ClInclude Include="Source\Core\Rendering\D3DViewports\FRenderTarget.h" />
     <ClInclude Include="Source\Core\Delegate\Delegate.h" />
     <ClInclude Include="Source\Core\Delegate\DelegateCombination.h" />
     <ClInclude Include="Source\Core\FSceneManager.h" />
+    <ClInclude Include="Source\Core\Rendering\D3DViewports\Margin.h" />
     <ClInclude Include="Source\Core\Rendering\D3DViewports\SSpliter.h" />
     <ClInclude Include="Source\Core\Rendering\D3DViewports\SWindow.h" />
     <ClInclude Include="Source\Core\Rendering\SubUVManager.h" />
