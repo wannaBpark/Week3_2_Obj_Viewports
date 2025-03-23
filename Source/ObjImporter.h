@@ -2,6 +2,7 @@
 #include "Core/Container/Array.h"
 #include "Core/Container/String.h"
 #include "Core/Container/Map.h"
+#include "Object/NameTypes.h"
 
 #include <fstream>
 
@@ -25,7 +26,7 @@ public:
     
     FVector2D GetUV(int32 Idx);
     
-    TArray<FFaceInfo> GetFaces(const FString& GroupName = TEXT("Default"))
+    TArray<FFaceInfo> GetFaces(const FName& GroupName = TEXT("Default"))
     { 
 		if (FacesPerGroup.Contains(GroupName))
 		{
@@ -51,9 +52,9 @@ public:
         return 0;
     }
 
-    TArray<FString> GetGroupNames() const
+    TArray<FName> GetGroupNames() const
     {
-        TArray<FString> GroupNames;
+        TArray<FName> GroupNames;
         for (auto& Kvp : FacesPerGroup)
         {
             GroupNames.Add(Kvp.first);
@@ -61,7 +62,7 @@ public:
         return GroupNames;
     }
 
-    TMap<FString, FObjMaterialInfo> GetMaterials() const { return MaterialsPerGroup; }
+    TMap<FName, FObjMaterialInfo> GetMaterials() const { return MaterialsPerGroup; }
 	TArray<FVector> GetVertices() const { return Vertices; }
 
 protected:
@@ -85,6 +86,6 @@ protected:
     TArray<FVector> Vertices;
     TArray<FVector> Normals;
     TArray<FVector2D> UVs;
-    TMap<FString, TArray<FFaceInfo>> FacesPerGroup;
-	TMap<FString, FObjMaterialInfo> MaterialsPerGroup;
+    TMap<FName, TArray<FFaceInfo>> FacesPerGroup;
+	TMap<FName, FObjMaterialInfo> MaterialsPerGroup;
 };

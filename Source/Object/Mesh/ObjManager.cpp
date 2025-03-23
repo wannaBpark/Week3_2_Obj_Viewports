@@ -6,8 +6,8 @@
 #include "Object/Material/Material.h"
 #include "MeshBuilder.h"
 
-TMap<FString, FStaticMesh*> FObjManager::ObjStaticMeshMap;
-TMap<FString, FObjMaterialInfo*> FObjManager::MaterialMap;
+TMap<FName, FStaticMesh*> FObjManager::ObjStaticMeshMap;
+TMap<FName, FObjMaterialInfo*> FObjManager::MaterialMap;
 
 FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
 {

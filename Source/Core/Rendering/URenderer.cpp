@@ -887,7 +887,7 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
 
     UpdateBuffer(vc, VC);
 
-    TMap<FString, FSubMesh>& SubMeshes = MeshComp->StaticMesh->GetStaticMeshAsset()->SubMeshes;
+    TMap<FName, FSubMesh>& SubMeshes = MeshComp->StaticMesh->GetStaticMeshAsset()->SubMeshes;
 
     for (const auto& kvp : SubMeshes)
     {

@@ -37,7 +37,7 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 	TMap<FVertexKey, uint32> VertexMap;
 
 	// 그룹별로 순회하며 Face 정보를 가져와서 FNormalVertex를 구성한다
-    for (const FString& GroupName : GroupNames)
+    for (const FName& GroupName : GroupNames)
     {
 		FSubMesh SubMesh;
 		SubMesh.GroupName = GroupName;
