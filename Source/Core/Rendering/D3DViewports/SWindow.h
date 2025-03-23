@@ -1,29 +1,49 @@
 #pragma once
 #include "Core/Rendering/D3DViewports/SWidget.h"
 #include "Core/Math/Vector.h"
+#include "Debug/DebugConsole.h"
+#include <d3d11.h>
 #include <iostream>
 #include <algorithm>
 
 struct FPoint
 {
 	uint32 X, Y;
-	FPoint(uint32 InX = 0, uint32 InY = 0) : X(InX), Y(InY) { }
+	explicit FPoint(uint32 InX = 0, uint32 InY = 0) : X(InX), Y(InY) { }
 };
+
 struct FRect
 {
-	uint32 X, Y, Width, Height;
+	uint32 X;
+	uint32 Y;
+	uint32 W;
+	uint32 H;
 };
+
 class SWindow : public SWidget
 {
 protected:
 	FRect Rect;
+	bool bIsDragging = false;
+	bool bRenderable = true;
+public:
+	virtual ~SWindow() = default;
+	virtual void Render() 
+	{
+		if (bRenderable) {
+			UE_LOG("Base Window Render");
+			bRenderable = false;
+		}
+	}
 
-	// TODO : 해당 WIndow에 마우스를 올려놓고 있는지 판단 가능해야 함
 	bool IsHover(FPoint coord) const
 	{
-		return true;
+		bool ret = (coord.X >= Rect.X && coord.X <= Rect.X + Rect.W
+			&& coord.Y >= Rect.Y && coord.Y <= Rect.Y + Rect.H);
+		return ret;
 	}
-	
-	virtual void Render() = 0; // 스플리터 창을 렌더합니다
+	void SetNeedsRender() { bRenderable = true; }
+	void SetRect(const FRect& InRect) { Rect = InRect; SetNeedsRender(); }
+	FRect GetRect() const { return Rect; }
 };
 

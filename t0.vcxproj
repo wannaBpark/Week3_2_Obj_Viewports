@@ -307,6 +307,7 @@
     <ClInclude Include="Source\Core\Delegate\DelegateCombination.h" />
     <ClInclude Include="Source\Core\FSceneManager.h" />
     <ClInclude Include="Source\Core\Rendering\D3DViewports\SSpliter.h" />
+    <ClInclude Include="Source\Core\Rendering\D3DViewports\SViewportWindow.h" />
     <ClInclude Include="Source\Core\Rendering\D3DViewports\SWindow.h" />
     <ClInclude Include="Source\Core\Rendering\SubUVManager.h" />
     <ClInclude Include="Source\Core\Rendering\TextAtlasManager.h" />

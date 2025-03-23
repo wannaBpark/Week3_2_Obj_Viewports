@@ -187,6 +187,8 @@ public:
     //FMatrix ProjZY = FMatrix::OrthoForLH()
     FMatrix ViewportMatrices[4] = {I, ViewZY, ViewZX, ViewYX };
     FMatrix GetViewportMatrixById(uint32 i) { return ViewportMatrices[i]; }
+
+    void SetViewport(D3D11_VIEWPORT*& CurViewport) { DeviceContext->RSSetViewports(1, CurViewport); }
 #pragma endregion
 
 public:
