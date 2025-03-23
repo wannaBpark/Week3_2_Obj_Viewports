@@ -24,6 +24,8 @@
 
 #include "Core/Rendering/TextAtlasManager.h";
 #include "Core/Rendering/SubUVManager.h";
+#include "Object/Mesh/ObjManager.h"
+#include "Object/Material/Material.h"
 
 #define SAFE_RELEASE(p)       { if (p) { (p)->Release();  (p) = nullptr; } }
 
@@ -82,6 +84,8 @@ void URenderer::CreateShader()
     ID3D11PixelShader* AtlasNoClipPixelShader;
     ID3D11VertexShader* MeshVertexShader;
     ID3D11PixelShader* MeshPixelShader;
+	ID3D11InputLayout* MeshInputLayout;
+
     ID3DBlob* VertexShaderCSO;
     ID3DBlob* PosTexVertexShaderCSO;
     ID3DBlob* PixelShaderCSO;
@@ -173,6 +177,9 @@ void URenderer::CreateShader()
     HRESULT result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", shaderFlags, 0, &VertexShaderCSO, &ErrorMsg);
     Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &MeshVertexShader);
 
+	it = InputLayouts.find(InputLayoutType::POSNORMALTANGENTCOLORTEX);
+	Device->CreateInputLayout(it->second.data(), it->second.size(), VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), &MeshInputLayout);
+
     result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", shaderFlags, 0, &PixelShaderCSO, &ErrorMsg);
     Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &MeshPixelShader);
 
@@ -193,6 +200,7 @@ void URenderer::CreateShader()
 
     InputLayoutMap.insert({ InputLayoutType::POSCOLOR, SimpleInputLayout });
     InputLayoutMap.insert({ InputLayoutType::POSCOLORNORMALTEX, PosTexInputLayout });
+	InputLayoutMap.insert({ InputLayoutType::POSNORMALTANGENTCOLORTEX, MeshInputLayout });
 
     
 
@@ -855,6 +863,7 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
 
     uint32 stride = sizeof(FNormalVertex);
     uint32 offset = 0;
+    DeviceContext->IASetInputLayout(InputLayoutMap[InputLayoutType::POSNORMALTANGENTCOLORTEX].Get());
     DeviceContext->IASetVertexBuffers(0, 1, &MeshComp->VertexBuffer, &stride, &offset);
     DeviceContext->IASetIndexBuffer(MeshComp->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
@@ -880,7 +889,22 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
 
     UpdateBuffer(vc, VC);
 
-    DeviceContext->DrawIndexed(MeshComp->RenderResource.numVertices, 0, 0);
+    TMap<FName, FSubMesh>& SubMeshes = MeshComp->StaticMesh->GetStaticMeshAsset()->SubMeshes;
+
+    for (const auto& kvp : SubMeshes)
+    {
+		FSubMesh SubMesh = kvp.second;
+
+        UMaterial* Mat = FObjManager::LoadMaterial(SubMesh.MaterialName);
+        if (Mat != nullptr)
+        {
+			auto srv = ShaderResourceViewMap[Mat->TextureMapIndex].Get();
+			DeviceContext->PSSetSamplers(0, 1, SamplerMap[0].GetAddressOf());
+
+			DeviceContext->PSSetShaderResources(0, 1, &srv);
+			DeviceContext->DrawIndexed(SubMesh.NumIndices, SubMesh.StartIndex, 0);
+        }
+    }
 }
 
 void URenderer::RenderPickingTexture()
@@ -958,7 +982,7 @@ void URenderer::CreateTextureSRV(const wchar_t* filename)
 }
 
 
-void URenderer::CreateTextureSRVW(const WIDECHAR* filename)
+uint32 URenderer::CreateTextureSRVW(const WIDECHAR* filename)
 {
     using namespace DirectX;
 
@@ -971,8 +995,8 @@ void URenderer::CreateTextureSRVW(const WIDECHAR* filename)
 
     if (FAILED(hr))
     {
-        UE_LOG("Failed to load texture");
-        return;
+        UE_LOG("Failed to load texture. %s", filename);
+        return -1;
     }
     assert(SRV.Get() != nullptr);
     // ShaderResourceViewMap에 추가
@@ -980,4 +1004,6 @@ void URenderer::CreateTextureSRVW(const WIDECHAR* filename)
     ShaderResourceViewMap.insert({ idx, SRV });
 
     UE_LOG("Successfully loaded texture");
+
+    return idx;
 }

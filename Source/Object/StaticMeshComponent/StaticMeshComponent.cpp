@@ -39,7 +39,14 @@ void UStaticMeshComponent::SetStaicMesh(const FString& staticMeshPath)
 	RenderResource.PixelShaderIndex = 6;
 	RenderResource.bUseIndexBuffer = true;
 	RenderResource.VertexConstantIndex = 5;
-	//RenderResource.ShaderResourceViewIndices.emplace().push_back(0);
+
+	// 머티리얼 로드
+	Materials.Empty();
+	for (auto& Kvp : StaticMesh->GetStaticMeshAsset()->SubMeshes)
+	{
+		auto Material = FObjManager::LoadMaterial(Kvp.second.MaterialName);
+		Materials.Add(Material);
+	};
 }
 
 void UStaticMeshComponent::CreateVertexBuffer()

@@ -354,7 +354,7 @@ public:
 
     void CreateTextureSRV(const std::string& filename);
     void CreateTextureSRV(const WIDECHAR* filename);
-    void CreateTextureSRVW(const WIDECHAR* filename);
+    uint32 CreateTextureSRVW(const WIDECHAR* filename);
 #pragma endregion
 
 #pragma region picking

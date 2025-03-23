@@ -161,6 +161,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Object\Material\Material.cpp" />
     <ClCompile Include="Source\Object\Actor\ATarzan.cpp" />
     <ClCompile Include="Source\Core\Container\ObjectIterator.cpp" />
     <ClCompile Include="Source\Object\Mesh\ObjManager.cpp" />
@@ -311,6 +312,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Object\Material\Material.h" />
     <ClInclude Include="Source\Object\Actor\ATarzan.h" />
     <ClInclude Include="Source\Core\Container\ObjectIterator.h" />
     <ClInclude Include="Source\Object\Mesh\ObjManager.h" />

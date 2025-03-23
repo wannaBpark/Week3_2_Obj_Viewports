@@ -1,5 +1,6 @@
 #include "MeshBuilder.h"
 #include "Core/Container/Map.h"
+#include "Core/Engine.h"
 
 #include <cassert>
 
@@ -25,6 +26,8 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 	// 그룹 이름과 머티리얼 Map을 가져온다
 	GroupNames = Reader.GetGroupNames();
 	Materials = Reader.GetMaterials();
+
+	CreateTextureSRV();
     
 	// 버텍스 및 인덱스 배열 크기 미리 잡는다
    	Vertices = TArray<FNormalVertex>();
@@ -34,12 +37,19 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 	TMap<FVertexKey, uint32> VertexMap;
 
 	// 그룹별로 순회하며 Face 정보를 가져와서 FNormalVertex를 구성한다
-    for (const FString& GroupName : GroupNames)
+    for (const FName& GroupName : GroupNames)
     {
+		FSubMesh SubMesh;
+		SubMesh.GroupName = GroupName;
+		SubMesh.StartIndex = Indices.Num();
+
+		int IndexCount = 0;
 		TArray<FFaceInfo> Faces = Reader.GetFaces(GroupName);
 		for (const FFaceInfo& FaceInfo : Faces)
 		{
 			// Obj 파일은 오른손 좌표계를 따르므로, 왼손 좌표계로 변환하여 저장
+
+
 			FVector Position;
 			FVector2D UV;
 			FVector Normal;
@@ -83,6 +93,17 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 				Vertices.Add(Vertex0);
 			};
 
+			if (VertexMap.Contains(FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }))
+			{
+				Indices.Add(VertexMap[FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }]);
+			}
+			else
+			{
+				VertexMap.Add(FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }, Vertices.Num());
+				Indices.Add(Vertices.Num());
+				Vertices.Add(Vertex2);
+			};
+
 			if (VertexMap.Contains(FVertexKey{ VertexIndex1, FaceInfo.NormalIndex[1], FaceInfo.UVIndex[1] }))
 			{
 				Indices.Add(VertexMap[FVertexKey{ VertexIndex1, FaceInfo.NormalIndex[1], FaceInfo.UVIndex[1] }]);
@@ -94,19 +115,20 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 				Vertices.Add(Vertex1);
 			};
 
-			if (VertexMap.Contains(FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }))
-			{
-				Indices.Add(VertexMap[FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }]);
-			}
-			else
-			{
-				VertexMap.Add(FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }, Vertices.Num());
-				Indices.Add(Vertices.Num());
-				Vertices.Add(Vertex2);
-			};
+			
+
+			IndexCount += 3;
 		}
+
+
+		SubMesh.NumIndices = IndexCount;
+		SubMesh.GroupName = GroupName;
+		SubMesh.MaterialName = GroupName;
+		SubMeshes.Add(GroupName, SubMesh);
     }
+
     
+	// 여기서 텍스쳐 로드해서 ShaderResourceView를 생성
     return true;
 }
 
@@ -139,4 +161,17 @@ void FMeshBuilder::CalculateTangent(const FNormalVertex& Vertex0, const FNormalV
 
     OutTangent = FVector(Tx, Ty, Tz);
     OutTangent.Normalize();
+}
+
+#include <codecvt>
+void FMeshBuilder::CreateTextureSRV()
+{
+	for (auto& Material : Materials)
+	{
+		std::wstring fileName = Material.second.TextureName.ToString().c_wchar();
+		std::wstring filePath = L"Textures/" + fileName;
+		uint32 index = UEngine::Get().GetRenderer()->CreateTextureSRVW(filePath.c_str());
+
+		Material.second.TextureMapIndex = index;
+	}
 }

@@ -11,6 +11,7 @@ class UStaticMesh : public UObject
 {
 private:
     FStaticMesh* StaticMeshAsset;
+    TMap<FString, class UMaterial*> Materials;
 
 public:
     const FString& GetAssetPathFileName()
