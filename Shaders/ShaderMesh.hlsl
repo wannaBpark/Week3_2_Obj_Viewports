@@ -1,5 +1,5 @@
 // ShaderMesh.hlsl
-Texture2D texture0 : register(t0);
+Texture2D g_texture0 : register(t0);
 
 SamplerState sampler0 : register(s0);
 
@@ -56,7 +56,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
 {
     PS_OUTPUT output;
 
-    float3 color = texture0.Sample(sampler0, float2(input.texcoord.x, input.texcoord.y)).rgb;
+    float3 color = g_texture0.Sample(sampler0, float2(input.texcoord.x, input.texcoord.y)).rgb;
 
     output.color = float4(color.xyz, 1.0f);
     output.UUID = float4(0.0f, 0.0f, 0.0f, 0.0f); // UUID 초기화

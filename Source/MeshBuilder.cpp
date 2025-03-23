@@ -37,7 +37,7 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 	TMap<FVertexKey, uint32> VertexMap;
 
 	// 그룹별로 순회하며 Face 정보를 가져와서 FNormalVertex를 구성한다
-    for (const FString& GroupName : GroupNames)
+    for (const FName& GroupName : GroupNames)
     {
 		FSubMesh SubMesh;
 		SubMesh.GroupName = GroupName;
@@ -85,13 +85,23 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 			if (VertexMap.Contains(FVertexKey{ VertexIndex0, FaceInfo.NormalIndex[0], FaceInfo.UVIndex[0] }))
 			{
 				Indices.Add(VertexMap[FVertexKey{ VertexIndex0, FaceInfo.NormalIndex[0], FaceInfo.UVIndex[0] }]);
-				
 			}
 			else
 			{
 				VertexMap.Add(FVertexKey{ VertexIndex0, FaceInfo.NormalIndex[0], FaceInfo.UVIndex[0] }, Vertices.Num());
 				Indices.Add(Vertices.Num());
 				Vertices.Add(Vertex0);
+			};
+
+			if (VertexMap.Contains(FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }))
+			{
+				Indices.Add(VertexMap[FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }]);
+			}
+			else
+			{
+				VertexMap.Add(FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }, Vertices.Num());
+				Indices.Add(Vertices.Num());
+				Vertices.Add(Vertex2);
 			};
 
 			if (VertexMap.Contains(FVertexKey{ VertexIndex1, FaceInfo.NormalIndex[1], FaceInfo.UVIndex[1] }))
@@ -105,16 +115,7 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 				Vertices.Add(Vertex1);
 			};
 
-			if (VertexMap.Contains(FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }))
-			{
-				Indices.Add(VertexMap[FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }]);
-			}
-			else
-			{
-				VertexMap.Add(FVertexKey{ VertexIndex2, FaceInfo.NormalIndex[2], FaceInfo.UVIndex[2] }, Vertices.Num());
-				Indices.Add(Vertices.Num());
-				Vertices.Add(Vertex2);
-			};
+			
 
 			IndexCount += 3;
 		}

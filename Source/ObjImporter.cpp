@@ -133,11 +133,14 @@ bool FObjImporter::LoadMTL(const FString& filename)
 	fs::path mtlPath = fs::path(*FileName).parent_path();
 	std::string currentMaterial;
 	std::string line;
+
 	while (std::getline(file, line))
 	{
 		std::istringstream iss(line);
 		std::string token;
 		iss >> token;
+
+		FName CurrentMaterialName = FName(currentMaterial);
 
 		if (token == "newmtl")
 		{
@@ -146,38 +149,38 @@ bool FObjImporter::LoadMTL(const FString& filename)
 		}
 		else if (token == "Ka")
 		{
-			iss >> MaterialsPerGroup[currentMaterial].Ambient.X >> MaterialsPerGroup[currentMaterial].Ambient.Y >> MaterialsPerGroup[currentMaterial].Ambient.Z;
-			MaterialsPerGroup[currentMaterial].Ambient.W = 1.0f;
+			iss >> MaterialsPerGroup[CurrentMaterialName].Ambient.X >> MaterialsPerGroup[CurrentMaterialName].Ambient.Y >> MaterialsPerGroup[CurrentMaterialName].Ambient.Z;
+			MaterialsPerGroup[CurrentMaterialName].Ambient.W = 1.0f;
 		}
 		else if (token == "Kd")
 		{
-			iss >> MaterialsPerGroup[currentMaterial].Diffuse.X >> MaterialsPerGroup[currentMaterial].Diffuse.Y >> MaterialsPerGroup[currentMaterial].Diffuse.Z;
-			MaterialsPerGroup[currentMaterial].Diffuse.W = 1.0f;
+			iss >> MaterialsPerGroup[CurrentMaterialName].Diffuse.X >> MaterialsPerGroup[CurrentMaterialName].Diffuse.Y >> MaterialsPerGroup[CurrentMaterialName].Diffuse.Z;
+			MaterialsPerGroup[CurrentMaterialName].Diffuse.W = 1.0f;
 		}
 		else if (token == "Ks")
 		{
-			iss >> MaterialsPerGroup[currentMaterial].Specular.X >> MaterialsPerGroup[currentMaterial].Specular.Y >> MaterialsPerGroup[currentMaterial].Specular.Z;
-			MaterialsPerGroup[currentMaterial].Specular.W = 1.0f;
+			iss >> MaterialsPerGroup[CurrentMaterialName].Specular.X >> MaterialsPerGroup[CurrentMaterialName].Specular.Y >> MaterialsPerGroup[CurrentMaterialName].Specular.Z;
+			MaterialsPerGroup[CurrentMaterialName].Specular.W = 1.0f;
 		}
 		else if (token == "Ke")
 		{
-			iss >> MaterialsPerGroup[currentMaterial].Emissive.X >> MaterialsPerGroup[currentMaterial].Emissive.Y >> MaterialsPerGroup[currentMaterial].Emissive.Z;
+			iss >> MaterialsPerGroup[CurrentMaterialName].Emissive.X >> MaterialsPerGroup[CurrentMaterialName].Emissive.Y >> MaterialsPerGroup[CurrentMaterialName].Emissive.Z;
 		}
 		else if (token == "Ns")
 		{
-			iss >> MaterialsPerGroup[currentMaterial].Shininess;
+			iss >> MaterialsPerGroup[CurrentMaterialName].Shininess;
 		}
 		else if (token == "Ni")
 		{
-			iss >> MaterialsPerGroup[currentMaterial].OpticalDensity;
+			iss >> MaterialsPerGroup[CurrentMaterialName].OpticalDensity;
 		}
 		else if (token == "d")
 		{
-			iss >> MaterialsPerGroup[currentMaterial].Opacity;
+			iss >> MaterialsPerGroup[CurrentMaterialName].Opacity;
 		}
 		else if (token == "illum")
 		{
-			iss >> MaterialsPerGroup[currentMaterial].Illum;
+			iss >> MaterialsPerGroup[CurrentMaterialName].Illum;
 		}
 		else if (token == "map_Kd")
 		{
@@ -188,7 +191,7 @@ bool FObjImporter::LoadMTL(const FString& filename)
 			{
 				fullPath = mtlPath / fullPath;
 			}
-			MaterialsPerGroup[currentMaterial].TextureName = texturePath;
+			MaterialsPerGroup[CurrentMaterialName].TextureName = texturePath;
 		}
 	}
 
@@ -265,7 +268,7 @@ void FObjImporter::ReadFile()
         else if (Key == "usemtl")
         {
 			GroupName = Tokens[1];
-			FacesPerGroup.Add(GroupName, TArray<FFaceInfo>());
+			FacesPerGroup.Add(FName(GroupName), TArray<FFaceInfo>());
         }
         else if (Key == "f")
         {

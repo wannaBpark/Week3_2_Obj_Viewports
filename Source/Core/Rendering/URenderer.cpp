@@ -886,15 +886,16 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
     };
 
     UpdateBuffer(vc, VC);
-	DeviceContext->PSSetSamplers(0, 1, SamplerMap[0].GetAddressOf());
 
-    TMap<FString, FSubMesh>& SubMeshes = MeshComp->StaticMesh->GetStaticMeshAsset()->SubMeshes;
+    TMap<FName, FSubMesh>& SubMeshes = MeshComp->StaticMesh->GetStaticMeshAsset()->SubMeshes;
 
     for (const auto& kvp : SubMeshes)
     {
 		FSubMesh SubMesh = kvp.second;
 
-        auto srv = ShaderResourceViewMap[SubMesh.TextureIndex];
+        auto srv = ShaderResourceViewMap[SubMesh.TextureIndex].Get();
+		DeviceContext->PSSetSamplers(0, 1, SamplerMap[0].GetAddressOf());
+
 		DeviceContext->PSSetShaderResources(0, 1, &srv);
 		DeviceContext->DrawIndexed(SubMesh.NumIndices, SubMesh.StartIndex, 0);
     }

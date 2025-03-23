@@ -1,8 +1,9 @@
 #pragma once
 #include "Core/Container/Map.h"
-
 #include "Object/Mesh/StaticMesh.h"
 #include "Core/Container/String.h"
+#include "Object/NameTypes.h"
+
 
 class FObjManager
 {
@@ -12,7 +13,7 @@ public:
 
 	static class UMaterial* LoadMaterial(const FString& MaterialName);
 private:
-	static TMap<FString, FStaticMesh*> ObjStaticMeshMap;
-	static TMap<FString, FObjMaterialInfo*> MaterialMap;
+	static TMap<FName, FStaticMesh*> ObjStaticMeshMap;
+	static TMap<FName, FObjMaterialInfo*> MaterialMap;
 };
 

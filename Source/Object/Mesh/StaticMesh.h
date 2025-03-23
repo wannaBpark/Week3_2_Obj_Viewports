@@ -4,6 +4,7 @@
 #include "Core/Rendering/ShaderParameterMacros.h"
 #include "ObjImporter.h"
 #include "Core/Container/String.h"
+#include "Object/NameTypes.h"
 
 
 struct FNormalVertex
@@ -17,11 +18,12 @@ struct FNormalVertex
 
 struct FSubMesh
 {
-	FString GroupName = "Default";
+	FName GroupName = "Default";
 	uint32 StartIndex = 0;
 	uint32 NumIndices = 0;
 
 	uint32 TextureIndex = 0;
+	// !TODO : 머티리얼 이름으로 변경해야 함
 };
 /*
 * 가공된 메시 [실제] 데이터 구조체
@@ -39,10 +41,10 @@ struct FStaticMesh
 	// 버텍스 인덱스 정보
     TArray<uint32> Indices;
 	// 그룹정보
-	TArray<FString> GroupNames;
+	TArray<FName> GroupNames;
 
 	// Submesh정보
-	TMap<FString, FSubMesh> SubMeshes;
+	TMap<FName, FSubMesh> SubMeshes;
 };
 
 // Obj파일의 Face정보를 저장하는 구조체. UV, Normal의 데이터가 없을 경우에 대비해 -1로 초기화

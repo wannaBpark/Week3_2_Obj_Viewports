@@ -42,9 +42,9 @@ public:
 
     TArray<struct FNormalVertex> GetVertices() { return Vertices; }
     TArray<uint32> GetIndices() { return Indices; }
-	TMap<FString, FObjMaterialInfo> GetMaterials() { return Materials; }
-	TArray<FString> GetGroupNames() { return GroupNames; }
-	TMap<FString, FSubMesh> GetSubMeshes() { return SubMeshes; }
+	TMap<FName, FObjMaterialInfo> GetMaterials() { return Materials; }
+	TArray<FName> GetGroupNames() { return GroupNames; }
+	TMap<FName, FSubMesh> GetSubMeshes() { return SubMeshes; }
 
 
 private:
@@ -56,9 +56,9 @@ private:
     
     TArray<FNormalVertex> Vertices;
     TArray<uint32> Indices;
-	TArray<FString> GroupNames;
-    TMap<FString, FObjMaterialInfo> Materials;
-	TMap<FString, FSubMesh> SubMeshes;
+	TArray<FName> GroupNames;
+    TMap<FName, FObjMaterialInfo> Materials;
+	TMap<FName, FSubMesh> SubMeshes;
 
     uint32 VerticesNum;
     uint32 IndicesNum;
