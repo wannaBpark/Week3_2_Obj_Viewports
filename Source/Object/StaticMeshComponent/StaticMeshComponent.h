@@ -1,6 +1,7 @@
 #pragma once
 #include "MeshComponent.h"
 #include "Object/ObjectMacro.h"
+#include "Core/Container/Array.h"
 
 /*
 * 특정 Actor에 부착되어 메시 렌더링을 담당하는 컴포넌트
@@ -27,5 +28,8 @@ public:
 	UStaticMesh* StaticMesh;
 	ID3D11Buffer* VertexBuffer;
 	ID3D11Buffer* IndexBuffer;
+
+private:
+	TArray<class UMaterial*> Materials;
 };
 

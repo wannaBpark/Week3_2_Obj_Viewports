@@ -1,9 +1,9 @@
 #include "Material.h"
 
-UMaterial::UMaterial(const FString& Name, const FObjMaterialInfo& ObjInfo)
+
+void UMaterial::SetMaterialInfo(const FName& Name, const FObjMaterialInfo& ObjInfo)
 {
 	MaterialName = Name;
-	TextureName = ObjInfo.TextureName;
 	Ambient = ObjInfo.Ambient;
 	Diffuse = ObjInfo.Diffuse;
 	Specular = ObjInfo.Specular;
@@ -11,5 +11,7 @@ UMaterial::UMaterial(const FString& Name, const FObjMaterialInfo& ObjInfo)
 	Shininess = ObjInfo.Shininess;
 	Opacity = ObjInfo.Opacity;
 	OpticalDensity = ObjInfo.OpticalDensity;
+	TextureName = ObjInfo.TextureName;
+	TextureMapIndex = ObjInfo.TextureMapIndex;
 	Illum = ObjInfo.Illum;
 }

@@ -122,7 +122,8 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 
 
 		SubMesh.NumIndices = IndexCount;
-		SubMesh.TextureIndex = Materials[GroupName].TextureMapIndex;
+		SubMesh.GroupName = GroupName;
+		SubMesh.MaterialName = GroupName;
 		SubMeshes.Add(GroupName, SubMesh);
     }
 
@@ -168,7 +169,7 @@ void FMeshBuilder::CreateTextureSRV()
 	for (auto& Material : Materials)
 	{
 		// 텍스쳐 로드
-		std::string texturename = Material.second.TextureName;
+		std::string texturename = *Material.second.TextureName.ToString();
 
 		int size_needed = MultiByteToWideChar(CP_UTF8, 0, &texturename[0], (int)texturename.size(), NULL, 0);
 		std::wstring str(size_needed, 0);
