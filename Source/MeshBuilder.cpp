@@ -168,14 +168,8 @@ void FMeshBuilder::CreateTextureSRV()
 {
 	for (auto& Material : Materials)
 	{
-		// 텍스쳐 로드
-		std::string texturename = *Material.second.TextureName.ToString();
-
-		int size_needed = MultiByteToWideChar(CP_UTF8, 0, &texturename[0], (int)texturename.size(), NULL, 0);
-		std::wstring str(size_needed, 0);
-		MultiByteToWideChar(CP_UTF8, 0, &texturename[0], (int)texturename.size(), &str[0], size_needed);
-
-		std::wstring filePath = L"Textures/" + str;
+		std::wstring fileName = Material.second.TextureName.ToString().c_wchar();
+		std::wstring filePath = L"Textures/" + fileName;
 		uint32 index = UEngine::Get().GetRenderer()->CreateTextureSRVW(filePath.c_str());
 
 		Material.second.TextureMapIndex = index;

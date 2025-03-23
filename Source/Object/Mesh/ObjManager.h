@@ -5,6 +5,8 @@
 #include "Object/NameTypes.h"
 
 
+// 메시 및 머터리얼 관리 Static 클래스
+// !TODO : FStaticMesh 해제 로직
 class FObjManager
 {
 public:

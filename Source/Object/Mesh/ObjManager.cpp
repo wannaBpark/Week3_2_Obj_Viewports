@@ -65,7 +65,7 @@ class UMaterial* FObjManager::LoadMaterial(const FName& MaterialName)
 			return Material;
 	}
 
-	FString MatNameDebug = MaterialName.ToString();
+	//FString MatNameDebug = MaterialName.ToString();
 	FObjMaterialInfo* MaterialInfoPtr = MaterialMap.Find(MaterialName);
 	if (MaterialInfoPtr)
 	{

@@ -41,6 +41,7 @@ void UStaticMeshComponent::SetStaicMesh(const FString& staticMeshPath)
 	RenderResource.VertexConstantIndex = 5;
 
 	// 머티리얼 로드
+	Materials.Empty();
 	for (auto& Kvp : StaticMesh->GetStaticMeshAsset()->SubMeshes)
 	{
 		auto Material = FObjManager::LoadMaterial(Kvp.second.MaterialName);
