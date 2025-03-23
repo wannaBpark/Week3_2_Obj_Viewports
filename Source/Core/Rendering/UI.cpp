@@ -602,9 +602,12 @@ void UI::RenderSceneManager()
             actors = FSceneManager::Get().GetScene(0)->GetActors();
 
         for (auto actor : actors) {
-            UClass* uClass = actor->GetClass();
+            /*UClass* uClass = actor->GetClass();
             if (uClass == AAxis::StaticClass() || uClass == AWorldGrid::StaticClass() || uClass == AWorldGizmo::StaticClass() ||
                 uClass == ACamera::StaticClass() || uClass == APicker::StaticClass() || uClass == AGizmoHandle::StaticClass())
+                continue;*/
+
+            if (actor->IsGizmoActor())
                 continue;
 
             char buffer[64];

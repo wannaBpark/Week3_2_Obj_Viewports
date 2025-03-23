@@ -33,6 +33,6 @@ struct UClassDeleter
 	{
 		ClassPtr->~UClass();
 		FPlatformMemory::Free<EAT_Object>(ClassPtr, sizeof(UClass));
-		StackAllocator::GetInstance().deleteNode(ClassPtr);
+		//StackAllocator::GetInstance().deleteNode(ClassPtr);
 	}
 };
