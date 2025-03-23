@@ -17,6 +17,8 @@
 #include "Core/Rendering/ShaderParameterMacros.h" // InputlayoutType
 #include "../EEnum.h"
 
+#include "Debug/DebugConsole.h" // multi viewport 디버깅용
+
 using namespace Microsoft::WRL;
 struct FVertexSimple;
 struct FVector4;
@@ -51,6 +53,7 @@ public:
 
     /** 렌더링 파이프라인을 준비 합니다. */
     void Prepare() const;
+    void PrepareMain() const;
 
     /** 셰이더를 준비 합니다. */
     void PrepareShader() const;
@@ -188,7 +191,12 @@ public:
     FMatrix ViewportMatrices[4] = {I, ViewZY, ViewZX, ViewYX };
     FMatrix GetViewportMatrixById(uint32 i) { return ViewportMatrices[i]; }
 
-    void SetViewport(D3D11_VIEWPORT*& CurViewport) { DeviceContext->RSSetViewports(1, CurViewport); }
+    void SetViewport(D3D11_VIEWPORT& CurViewport) { 
+        UE_LOG("RSSET Viewport (%f, %f) - (%f, %f)",
+            CurViewport.TopLeftX, CurViewport.TopLeftY,
+            CurViewport.TopLeftX + CurViewport.Width,
+            CurViewport.TopLeftY + CurViewport.Height);
+        DeviceContext->RSSetViewports(1, &CurViewport); }
 #pragma endregion
 
 public:
@@ -365,7 +373,6 @@ public:
 	void UpdateConstantPicking(FVector4 UUIDColor) const;
     void UpdateConstantDepth(int Depth) const;
     void PrepareMain();
-	void PrepareMainShader();
 
     FVector GetRayDirectionFromClick(FVector MPos);
 	FVector4 GetPixel(FVector MPos);

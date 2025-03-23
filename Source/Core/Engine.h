@@ -8,10 +8,11 @@
 #include "AbstractClass/Singleton.h"
 #include "Container/Map.h"
 #include "Core/Container/Array.h"
+#include "Core/Rendering/D3DViewports/SSpliter.h"
 
 class UObject;
 class UWorld;
-
+class SViewportWindow;
 enum class EScreenMode : uint8
 {
     Windowed,    // 창 모드
@@ -103,6 +104,8 @@ private:
 
 private:
     class UWorld* World;
+    std::unique_ptr<SSplitterH> RootWindow;
+    TArray<std::shared_ptr<SViewportWindow>> SViewportWindows;
 
 public:
     // TArray<std::shared_ptr<UObject>> GObjects;

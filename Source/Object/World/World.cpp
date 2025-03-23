@@ -116,9 +116,7 @@ void UWorld::Render()
 
 void UWorld::RenderMainTexture(URenderer& Renderer)
 {
-	Renderer.PrepareMain();
-	Renderer.PrepareMainShader();
-
+	//Renderer.Prepare(); // [Deprecated] 모든 뷰포트가 다 렌더된 후 clearRTV 해야하므로 지움
 	uint32 showFlagMask = FSceneManager::Get().GetShowFlagMask();
 
 	for (auto& RenderComponent : RenderComponents)

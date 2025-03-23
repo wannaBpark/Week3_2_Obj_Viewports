@@ -14,6 +14,7 @@
 #include "Object/Gizmo/WorldGizmo.h"
 #include "Core/FSceneManager.h"
 
+#include "Core/Rendering/D3DViewports/SViewportWindow.h"
 
 class AArrow;
 class APicker;
@@ -80,7 +81,7 @@ void UEngine::Initialize(
     ScreenWidth = InScreenWidth;
     ScreenHeight = InScreenHeight;
 
-    InitWindow(InScreenWidth, InScreenWidth);
+    InitWindow(InScreenWidth, InScreenHeight);
     InitRenderer();
 
     InitWorld();
@@ -144,7 +145,11 @@ void UEngine::Run()
 		if (World)
 		{
 			World->Tick(DeltaTime);
-			World->Render();
+            // 변경 : 각 뷰포트가 모두 렌더 한 후
+            RootWindow->Render();
+            RootWindow->UpdateLayout();
+            
+
 		    World->LateTick(DeltaTime);
 		}
 
@@ -189,7 +194,29 @@ void UEngine::InitWindow(int InScreenWidth, int InScreenHeight)
     wnd_class.lpszClassName = WindowClassName;
     RegisterClassW(&wnd_class);
 
+    // 원하는 클라이언트 영역 크기를 위한 윈도우 크기 계산 (딱 맞도록)
+    RECT windowRect = { 0, 0, InScreenWidth, InScreenHeight };
+    AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
+
+    int windowWidth = windowRect.right - windowRect.left;
+    int windowHeight = windowRect.bottom - windowRect.top;
+
+    // 화면 중앙에 위치하도록 좌표 계산
+    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+    int windowX = (screenWidth - windowWidth) / 2;
+    int windowY = (screenHeight - windowHeight) / 2;
+
     // Window Handle 생성
+    WindowHandle = CreateWindowExW(
+        0, WindowClassName, WindowTitle,
+        WS_OVERLAPPEDWINDOW,
+        windowX, windowY,
+        windowWidth, windowHeight,
+        nullptr, nullptr, WindowInstance, nullptr
+    );
+
+    //// Window Handle 생성
     WindowHandle = CreateWindowExW(
         0, WindowClassName, WindowTitle,
         WS_POPUP | WS_VISIBLE | WS_OVERLAPPEDWINDOW,
@@ -209,6 +236,26 @@ void UEngine::InitWindow(int InScreenWidth, int InScreenHeight)
     SetForegroundWindow(WindowHandle);
     SetFocus(WindowHandle);
 
+#pragma region Multi Viewports               // 
+    auto topLeft = std::make_shared<SViewportWindow>();
+    auto topRight = std::make_shared<SViewportWindow>();
+    auto bottomLeft = std::make_shared<SViewportWindow>();
+    auto bottomRight = std::make_shared<SViewportWindow>();
+    auto TopVerticalSplitter = std::make_shared<SSplitterV>(topLeft, topRight);
+    auto BottomVerticalSplitter = std::make_shared<SSplitterV>(bottomLeft, bottomRight);
+
+    SViewportWindows.Add(topLeft); SViewportWindows.Add(topRight);
+    SViewportWindows.Add(bottomLeft); SViewportWindows.Add(bottomRight);
+
+    RootWindow = std::make_unique<SSplitterH>(TopVerticalSplitter, BottomVerticalSplitter);
+    RootWindow->SetRect({
+        0, 0,                               // TopLeft, TopRight 
+        static_cast<uint32>(InScreenWidth), // Width
+        static_cast<uint32>(InScreenHeight) // Height
+    });
+    RootWindow->UpdateLayout();
+    UE_LOG("InScreen Resolution : %d %d", static_cast<uint32>(InScreenWidth), static_cast<uint32>(InScreenHeight));
+#pragma endregion
     //AllocConsole(); // 콘솔 창 생성
 
     //// 표준 출력 및 입력을 콘솔과 연결
@@ -279,6 +326,17 @@ void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
 	{
 		Renderer->OnResizeComplete();
 	}
+
+    // [Added] 다중 뷰포트를 관리하는 Root window의 Rect Update
+    if (RootWindow) 
+    {
+        RootWindow->SetRect({
+            0, 0,                               // TopLeft, TopRight 
+            static_cast<uint32>(InScreenWidth), // Width
+            static_cast<uint32>(InScreenHeight) // Height
+        });
+        RootWindow->UpdateLayout();
+    }
 }
 
 UObject* UEngine::GetObjectByUUID(uint32 InUUID) const

@@ -397,58 +397,67 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
         DeviceContext->PSSetShaderResources(0, static_cast<UINT>(SRVArray.size()), SRVArray.data());
         DeviceContext->PSSetSamplers(0, 1, SamplerMap[0].GetAddressOf());                                           // TODO : 샘플러 기본 1개로 설정되있는 것 각자 여러개 접근토록 바꿔야 함
     }
-	
-
     this->Stride = stride;
     DeviceContext->IASetInputLayout(InputLayoutMap[ILType].Get());
     DeviceContext->IASetPrimitiveTopology(Topology);                                    // 실제 토폴로지 세팅
 
-    for (uint32 i{ 0 }; i < NumViewports; i++)
+    D3D11_VIEWPORT DXViewport;
+    UINT NumViewports = 1; // 뷰포트 개수 초기화
+
+    DeviceContext->RSGetViewports(&NumViewports, &DXViewport); // RSGetViewports 호출
+
+    UE_LOG("Rendering CALL VIEWPORT  (%f, %f) - (%f, %f)",
+        DXViewport.TopLeftX, DXViewport.TopLeftY,
+        DXViewport.TopLeftX + DXViewport.Width,
+        DXViewport.TopLeftY + DXViewport.Height);
+    //this->SetViewport(ViewportInfos[0]);
+    //for (uint32 i{ 0 }; i < NumViewports; i++)
+    //{
+    //    UE_LOG("Viewport[%d]: X=%.1f, Y=%.1f, W=%.1f, H=%.1f", i, ViewportInfos[i].TopLeftX, ViewportInfos[i].TopLeftY,
+    //                                                              ViewportInfos[i].Width, ViewportInfos[i].Height);
+    //    ComPtr<ID3D11Buffer> pBuffer = ConstantBufferMap[6];
+    //    DeviceContext->RSSetViewports(1, &ViewportInfos[i]);
+    //    if (i >= 0) // 0 = 원본 뷰포트는 viewmatrix 수정필요 없으므로
+    //    {
+    //        // 상수 버퍼가 이미 설정된 상태에서 ViewportIndex만 업데이트
+    //        
+    //        D3D11_MAPPED_SUBRESOURCE ms;
+
+    //        // Map 호출로 ViewportIndex만 업데이트
+    //        HRESULT hr = DeviceContext->Map(pBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
+    //        if (SUCCEEDED(hr))
+    //        {
+    //            if (VC == 4 || VC == 5) {
+    //                FViewportConstant* Cbuffer = static_cast<FViewportConstant*>(ms.pData);
+    //                Cbuffer->VPIndex = i; // ViewportIndex만 변경
+    //            }
+    //            DeviceContext->Unmap(pBuffer.Get(), 0);
+    //        }
+    //        else
+    //        {
+    //            // Map 실패 시 로그 출력 또는 오류 처리
+    //            continue;
+    //        }
+    //    }
+    //    if (bUseIndexBuffer == true)
+    //    {
+    //        RenderPrimitiveIndexed(VertexBufferMap[Type].Get(), IndexBufferMap[Type].Get(), numVertices);
+    //    }
+    //    else
+    //    {
+    //        RenderPrimitiveInternal(VertexBufferMap[Type].Get(), numVertices);
+    //    }
+    //    // 뷰포트 설정 (중복 설정 방지 가능)
+    //}   
+    // 렌더링 호출
+    if (bUseIndexBuffer == true)
     {
-        UE_LOG("Viewport[%d]: X=%.1f, Y=%.1f, W=%.1f, H=%.1f", i, ViewportInfos[i].TopLeftX, ViewportInfos[i].TopLeftY,
-                                                                  ViewportInfos[i].Width, ViewportInfos[i].Height);
-        ComPtr<ID3D11Buffer> pBuffer = ConstantBufferMap[6];
-        DeviceContext->RSSetViewports(1, &ViewportInfos[i]);
-        if (i >= 0) // 0 = 원본 뷰포트는 viewmatrix 수정필요 없으므로
-        {
-            // 상수 버퍼가 이미 설정된 상태에서 ViewportIndex만 업데이트
-            
-            D3D11_MAPPED_SUBRESOURCE ms;
-
-            // Map 호출로 ViewportIndex만 업데이트
-            HRESULT hr = DeviceContext->Map(pBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
-            if (SUCCEEDED(hr))
-            {
-                if (VC == 4 || VC == 5) {
-                    FViewportConstant* Cbuffer = static_cast<FViewportConstant*>(ms.pData);
-                    Cbuffer->VPIndex = i; // ViewportIndex만 변경
-                }
-                DeviceContext->Unmap(pBuffer.Get(), 0);
-            }
-            else
-            {
-                // Map 실패 시 로그 출력 또는 오류 처리
-                continue;
-            }
-        }
-
-        // 뷰포트 설정 (중복 설정 방지 가능)
-        
-
-        // 렌더링 호출
-        if (bUseIndexBuffer == true)
-        {
-            RenderPrimitiveIndexed(VertexBufferMap[Type].Get(), IndexBufferMap[Type].Get(), numVertices);
-        }
-        else
-        {
-            RenderPrimitiveInternal(VertexBufferMap[Type].Get(), numVertices);
-        }
-        //DeviceContext->ClearRenderTargetView(FrameBufferRTV, ClearColor);
-        //DeviceContext->ClearRenderTargetView(PickingFrameBufferRTV, ClearColor);
-        //DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-    }   
+        RenderPrimitiveIndexed(VertexBufferMap[Type].Get(), IndexBufferMap[Type].Get(), numVertices);
+    }
+    else
+    {
+        RenderPrimitiveInternal(VertexBufferMap[Type].Get(), numVertices);
+    }
 
 }
 
@@ -742,16 +751,11 @@ void URenderer::UpdateConstantDepth(int Depth) const
     DeviceContext->Unmap(ConstantsDepthBuffer, 0);
 }
 
-void URenderer::PrepareMain()
+void URenderer::PrepareMain() const
 {
 	DeviceContext->OMSetDepthStencilState(DepthStencilState, 0);                // DepthStencil 상태 설정. StencilRef: 스텐실 테스트 결과의 레퍼런스
     DeviceContext->OMSetRenderTargets(2, RTVs, DepthStencilView);
     DeviceContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
-}
-
-void URenderer::PrepareMainShader()
-{
-    //DeviceContext->PSSetShader(SimplePixelShader, nullptr, 0);
 }
 
 FVector URenderer::GetRayDirectionFromClick(FVector MPos)

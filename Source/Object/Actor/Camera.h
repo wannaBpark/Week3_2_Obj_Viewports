@@ -24,7 +24,7 @@ class ACamera : public AActor
 
 public:
     ACamera();
-
+    //ACamera(ECameraProjectionMode prjMode, ); // Constructor : Set Orthographic Camera
 
 private:    
     float Near;

@@ -34,6 +34,37 @@ public:
     std::shared_ptr<SWindow> GetSideLT() { return SideLT; }
 };
 
+
+class SSplitterV final : public SSplitter
+{
+    using Super = SSplitter;
+public:
+    explicit SSplitterV(std::shared_ptr<SWindow> Left, std::shared_ptr<SWindow> Right) : SSplitter(Left, Right) {}
+
+    void OnDrag(float Delta) override
+    {
+        SplitRatio += Delta;
+        SplitRatio = std::clamp(SplitRatio, 0.2f, 0.8f);
+        UpdateLayout();
+    }
+
+    void UpdateLayout() override
+    {
+        Super::UpdateLayout();
+
+        // 왼쪽의 width를 반영
+        FRect leftRect = Rect;
+        leftRect.W = static_cast<uint32_t>(Rect.W * SplitRatio);
+        SideLT->SetRect(leftRect);
+
+        // 오른쪽의 width와 시작점 X를 반영
+        FRect rightRect = Rect;
+        rightRect.X = Rect.X + leftRect.W;
+        rightRect.W = Rect.W - leftRect.W;
+        SideRB->SetRect(rightRect);
+    }
+};
+
 class SSplitterH final : public SSplitter {
 private:
     std::shared_ptr<SSplitterV> TopSplitterV;
@@ -57,42 +88,12 @@ public:
         topRect.H = static_cast<uint32_t>(Rect.H * SplitRatio);
         TopSplitterV->SetRect(topRect);
 
-        FRect rightRect = Rect;
-        rightRect.Y = Rect.Y + topRect.H;
-        rightRect.H = Rect.H - topRect.H;
-        BottomSplitterV->SetRect(rightRect);
+        FRect bottomRect = Rect;
+        bottomRect.Y = Rect.Y + topRect.H;
+        bottomRect.H = Rect.H - topRect.H;
+        BottomSplitterV->SetRect(bottomRect);
 
         TopSplitterV->UpdateLayout();
         BottomSplitterV->UpdateLayout();
-    }
-};
-
-class SSplitterV final : public SSplitter
-{
-    using Super = SSplitter;
-public:
-    explicit SSplitterV(std::shared_ptr<SWindow> Left, std::shared_ptr<SWindow> Right) : SSplitter(Left, Right) { }
-
-    void OnDrag(float Delta) override
-    {
-        SplitRatio += Delta;
-        SplitRatio = std::clamp(SplitRatio, 0.2f, 0.8f);
-        UpdateLayout();
-    }
-
-    void UpdateLayout() override
-    {
-        Super::UpdateLayout();
-
-        // 왼쪽의 width를 반영
-        FRect leftRect = Rect;
-        leftRect.W = static_cast<uint32_t>(Rect.W * SplitRatio);
-        SideLT->SetRect(leftRect);
-
-        // 오른쪽의 width와 시작점 X를 반영
-        FRect rightRect = Rect;
-        rightRect.X = Rect.X + leftRect.W;
-        rightRect.W = Rect.W - leftRect.W;
-        SideRB->SetRect(rightRect);
     }
 };

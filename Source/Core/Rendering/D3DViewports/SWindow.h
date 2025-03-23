@@ -20,13 +20,14 @@ struct FRect
 	uint32 H;
 };
 
-class SWindow : public SWidget
+class SWindow /*: public SWidget*/
 {
 protected:
 	FRect Rect;
 	bool bIsDragging = false;
 	bool bRenderable = true;
 public:
+	SWindow() = default;
 	virtual ~SWindow() = default;
 	virtual void Render() 
 	{
