@@ -61,7 +61,9 @@ public:
 	// 기본 마우스 이벤트
 	virtual void OnMouseMove(const FPoint& MousePos)
 	{
-		if (IsHover(MousePos)) { UE_LOG("SWindow: Mouse Hover"); }
+		if (IsHover(MousePos)) { 
+			//UE_LOG("SWindow: Mouse Hover"); 
+		}
 	}
 	virtual void OnMouseDown(const FPoint& MousePos) {
 		if (IsHover(MousePos)) { bIsDragging = true; }

@@ -449,7 +449,7 @@ void UEngine::SetViewportCameras()
         static_cast<uint32>(ScreenHeight) // Height
         });
     RootWindow->UpdateLayout();
-    UE_LOG("InScreen Resolution : %d %d", static_cast<uint32>(ScreenWidth), static_cast<uint32>(ScreenHeight));
+    //UE_LOG("InScreen Resolution : %d %d", static_cast<uint32>(ScreenWidth), static_cast<uint32>(ScreenHeight));
 #pragma endregion
 
 #pragma region Multi Camera Initialization

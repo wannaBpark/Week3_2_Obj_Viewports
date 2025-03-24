@@ -17,7 +17,7 @@ public:
         SplitRatio += Delta;
         SplitRatio = std::clamp(SplitRatio, 0.1f, 0.9f);
         UpdateLayout();
-        UE_LOG("SSplitterH: Dragging, SplitRatio = %.2f", SplitRatio);
+        //UE_LOG("SSplitterH: Dragging, SplitRatio = %.2f", SplitRatio);
     }
 
     virtual void Render() override // 자신과 자신의 자식(Swindow or Splitter)을 렌더
@@ -43,7 +43,7 @@ public:
         ::SetCursor(LoadCursor(nullptr, IDC_ARROW));
         if (SideLT) SideLT->OnMouseUp(MousePos);
         if (SideRB) SideRB->OnMouseUp(MousePos);
-        UE_LOG("SSplitterH: Mouse Up, stop dragging");
+        //UE_LOG("SSplitterH: Mouse Up, stop dragging");
     }
 
     float GetSplitRatio() const { return SplitRatio; }
@@ -82,7 +82,7 @@ public:
         {
             bIsDragging = true;
             LastMousePos = MousePos;
-            UE_LOG("SSplitterV: Border Mouse Down, start dragging");
+            //UE_LOG("SSplitterV: Border Mouse Down, start dragging");
         }
     }
 
@@ -197,13 +197,13 @@ public:
         {
             bIsVerticalDrag = bIsDragging = true;
             ::SetCursor(LoadCursor(nullptr, IDC_SIZEWE));  // 좌우 아이콘
-            UE_LOG("SSplitterH: Vertical Border Mouse Down, ONLY Start Dragging Vertical");
+            //UE_LOG("SSplitterH: Vertical Border Mouse Down, ONLY Start Dragging Vertical");
         }
         else if (IsOverBorder(MousePos))
         {
             bIsDragging = true;
             ::SetCursor(LoadCursor(nullptr, IDC_SIZENS));
-            UE_LOG("SSplitterH: Border Mouse Down, General Mouse Drag");
+            //UE_LOG("SSplitterH: Border Mouse Down, General Mouse Drag");
         }
         LastMousePos = MousePos;
 
