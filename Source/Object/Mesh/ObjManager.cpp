@@ -70,9 +70,18 @@ class UMaterial* FObjManager::LoadMaterial(const FName& MaterialName)
 	if (MaterialInfoPtr)
 	{
 		UMaterial* Material = FObjectFactory::ConstructObject<UMaterial>();
+		MaterialInfoPtr->MaterialName = MaterialName;
 		Material->SetMaterialInfo(MaterialName, *MaterialInfoPtr);
 		return Material;
 	};
 
 	return nullptr;
+}
+
+void FObjManager::ReleaseResources()
+{
+	for (auto& Kvp : ObjStaticMeshMap)
+	{
+		delete Kvp.second;
+	};
 }

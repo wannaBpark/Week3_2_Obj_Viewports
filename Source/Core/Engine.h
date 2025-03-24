@@ -67,6 +67,7 @@ private:
     void InitWorld();
     void ShutdownWindow();
     void UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight);
+    void PreloadResources();
 
 public:
 	UWorld* GetWorld() const { return World; }

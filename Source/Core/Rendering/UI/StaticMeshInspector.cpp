@@ -3,6 +3,7 @@
 #include "Object/StaticMeshComponent/StaticMeshComponent.h"
 #include "Core/Container/ObjectIterator.h"
 #include "Object/Material/Material.h"
+#include <Object/Mesh/ObjManager.h>
 
 void FStaticMeshInspector::Init(UStaticMeshComponent* Comp)
 {
@@ -15,31 +16,28 @@ void FStaticMeshInspector::Init(UStaticMeshComponent* Comp)
 	StaticMeshIndex = 0;
 
 	int Count = 0;
-	// 이 스태틱메시 몇 번째인지
-	for (TObjectIterator<UStaticMesh> It(UEngine::Get().GObjects.begin(), UEngine::Get().GObjects.end()); It; ++It)
-	{
-		if (*It == nullptr)
-			continue;
 
-		UStaticMesh* Mesh = *It;
-		StaticMeshes.Add(Mesh);
-		if (Mesh == Comp->StaticMesh)
+	TMap<FName, FStaticMesh*> StaticMeshMap = FObjManager::GetObjStaticMeshMap();
+	for (auto& kvp : StaticMeshMap)
+	{
+		FStaticMesh* StaticMesh = kvp.second;
+		StaticMeshes.Add(StaticMesh);
+		if (StaticMesh->PathFileName == Comp->StaticMesh->GetAssetPathFileName())
 		{
 			StaticMeshIndex = Count;
-		};
+		}
 		Count++;
 	}
 
-	Materials.Empty();
+	ComponentMaterials.Empty();
 	AllMaterials.Empty();
 
-	Materials = Comp->GetMaterials();
-	AllMaterials;
+	ComponentMaterials = Comp->GetMaterials();
 	// 모든 머티리얼들 가져오기
-	for (TObjectIterator<UMaterial> It(UEngine::Get().GObjects.begin(), UEngine::Get().GObjects.end()); It; ++It)
+	TMap<FName, FObjMaterialInfo> GlobalMaterialMap = FObjManager::GetMaterialMap();
+	for (auto& kvp : GlobalMaterialMap)
 	{
-		UMaterial* Material = *It;
-		AllMaterials.Add(Material);
+		AllMaterials.Add(kvp.second);
 	}
 }
 
@@ -58,15 +56,15 @@ void FStaticMeshInspector::UpdateStaticMeshCombo()
 {
 	if (StaticMeshes.Num() == 0)
 		return;
-	if (ImGui::BeginCombo("Static Mesh", StaticMeshes[StaticMeshIndex]->GetStaticMeshAsset()->PathFileName.c_char()))
+	if (ImGui::BeginCombo("Static Mesh", StaticMeshes[StaticMeshIndex]->PathFileName.c_char()))
 	{
 		for (int i = 0; i < StaticMeshes.Num(); i++)
 		{
 			bool IsSelected = StaticMeshIndex == i;
-			if (ImGui::Selectable(StaticMeshes[i]->GetStaticMeshAsset()->PathFileName.c_char(), IsSelected))
+			if (ImGui::Selectable(StaticMeshes[i]->PathFileName.c_char(), IsSelected))
 			{
 				StaticMeshIndex = i;
-				Component->SetStaicMesh(StaticMeshes[i]->GetStaticMeshAsset()->PathFileName);
+				Component->SetStaicMesh(StaticMeshes[i]->PathFileName);
 			}
 			if (IsSelected)
 			{
@@ -79,22 +77,23 @@ void FStaticMeshInspector::UpdateStaticMeshCombo()
 
 void FStaticMeshInspector::UpdateMaterialCombo()
 {
-	for (int i = 0; i < Materials.Num(); i++)
+	for (int i = 0; i < ComponentMaterials.Num(); i++)
 	{
-		MaterialNameStr = Materials[i]->GetMaterialName().ToString();
+		MaterialNameStr = ComponentMaterials[i]->GetMaterialName().ToString();
 		const char* MaterialName = MaterialNameStr.c_char();
 		if (ImGui::BeginCombo(("Material" + std::to_string(i)).c_str(), MaterialName))
 		{
-			for (int j = 0; j < AllMaterials.Num(); j++)
+			for(const auto& GlobalMat : AllMaterials)
 			{
-				bool IsSelected = Materials[i] == AllMaterials[j];
-				MaterialNameStr = AllMaterials[j]->GetMaterialName().ToString();
+				bool IsSelected = ComponentMaterials[i]->MaterialName == GlobalMat.MaterialName;
+				MaterialNameStr = GlobalMat.MaterialName.ToString();
 				if (ImGui::Selectable(MaterialNameStr.c_char(), IsSelected))
 				{
 					// 여기서 머티리얼을 교체함
-					Component->SetMaterial(i, AllMaterials[j]);
+					UMaterial* MatInstance = FObjManager::LoadMaterial(GlobalMat.MaterialName);
+					Component->SetMaterial(i, MatInstance);
 					// 머티리얼 배열 Refresh
-					Materials = Component->GetMaterials();
+					ComponentMaterials = Component->GetMaterials();
 				}
 				if (IsSelected)
 				{
