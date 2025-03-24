@@ -374,11 +374,11 @@ FVector4 FMatrix::TransformVector(const FVector4& Vector) const
 		Vector.X * M[0][3] + Vector.Y * M[1][3] + Vector.Z * M[2][3] + Vector.W * M[3][3],
 	};
 }
-FMatrix FMatrix::OrthoForLH(float ViewWidth, float VeiwHeight, float NearPlane, float FarPlane)
+FMatrix FMatrix::OrthoForLH(float ViewWidth, float ViewHeight, float NearPlane, float FarPlane)
 {
 	FMatrix Result;
 	Result.M[0][0] = 2 / ViewWidth;
-	Result.M[1][1] = 2 / VeiwHeight;
+	Result.M[1][1] = 2 / ViewHeight;
 	Result.M[2][2] = 1 / (FarPlane - NearPlane);
 	Result.M[3][2] = NearPlane / (NearPlane - FarPlane);
 	Result.M[3][3] = 1.0f;

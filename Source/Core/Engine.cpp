@@ -454,8 +454,9 @@ void UEngine::SetViewportCameras()
 
 #pragma region Multi Camera Initialization
     FTransform ZY = FTransform(FVector(-5, 0, 1), FVector(0, 0, 0), FVector(1, 1, 1));
-    FTransform ZX = FTransform(FVector(0, 5, 1), FVector(0, 0, -90), FVector(1, 1, 1));
-    FTransform XY = FTransform(FVector(0, 0, 5), FVector(0, 90, 0), FVector(1, 1, 1));
+    FTransform ZX = FTransform(FVector(0, 10, 1), FVector(0, 0, -90), FVector(1, 1, 1));
+    FTransform XY = FTransform(FVector(0, 0, 5), FVector(0,89.9,-89.9), FVector(1, 1, 1));
+    
     ACamera* CamZY = World->SpawnActor<ACamera>(); CamZY->SetActorTransform(ZY); CamZY->SetProjectionMode(ECameraProjectionMode::Orthographic);
     ACamera* CamZX = World->SpawnActor<ACamera>(); CamZX->SetActorTransform(ZX); CamZX->SetProjectionMode(ECameraProjectionMode::Orthographic);
     ACamera* CamXY = World->SpawnActor<ACamera>(); CamXY->SetActorTransform(XY); CamXY->SetProjectionMode(ECameraProjectionMode::Orthographic);
