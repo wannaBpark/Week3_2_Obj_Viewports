@@ -124,11 +124,36 @@ struct FLineConstants
 };
 
 
-
 BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FStaticMeshVertexConstant)
+    SHADER_PARAMETER(FMatrix, InverseTranspose)
     SHADER_PARAMETER(FMatrix, Model)
     SHADER_PARAMETER(FMatrix, View)
     SHADER_PARAMETER(FMatrix, Projection)
+END_GLOBAL_SHADER_PARAMETER_STRUCT()
+
+BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FGlobalLightConstant)
+    SHADER_PARAMETER(FVector4, Ambient)
+    SHADER_PARAMETER(FVector4, Diffuse)
+    SHADER_PARAMETER(FVector4, Specular)
+    SHADER_PARAMETER(FVector, Emissive)
+    SHADER_PARAMETER(float, Padding1)
+    SHADER_PARAMETER(FVector, Direction)
+    SHADER_PARAMETER(float, Padding)
+END_GLOBAL_SHADER_PARAMETER_STRUCT()
+
+BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FMaterialConstant)
+    SHADER_PARAMETER(FVector4, Ambient)
+    SHADER_PARAMETER(FVector4, Diffuse)
+    SHADER_PARAMETER(FVector4, Specular)
+    SHADER_PARAMETER(FVector, Emissive)
+    SHADER_PARAMETER(float, Roughness)
+    //SHADER_PARAMETER(float, Metalic)
+    //SHADER_PARAMETER(FVector2D, Padding)
+END_GLOBAL_SHADER_PARAMETER_STRUCT()
+
+BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FCameraPositionConstant)
+    SHADER_PARAMETER(FVector, CameraPosition)
+    SHADER_PARAMETER(float, Padding)
 END_GLOBAL_SHADER_PARAMETER_STRUCT()
 
 

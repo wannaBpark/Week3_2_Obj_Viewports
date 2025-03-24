@@ -234,6 +234,10 @@ void URenderer::CreateConstantBuffer()
     idx = CreateConstantBuffer<FLightConstants>();           // Lighting 테스트용 CBuffer : 4
     idx = CreateConstantBuffer<FStaticMeshVertexConstant>(); // STaticMesh용 Cbuffer : 5
     idx = CreateConstantBuffer<FLineConstants>();           // Line에 대한 카메라 4대 테스트용 CBuffer : 6
+    idx = CreateConstantBuffer<FGlobalLightConstant>();           // Lighting 적용 Global light : 7
+    idx = CreateConstantBuffer<FMaterialConstant>();           // Lighting 적용 material : 8
+    idx = CreateConstantBuffer<FCameraPositionConstant>();           // Lighting 적용 camera position : 9
+    
     UE_LOG("constantbuffer size : %d", idx);
 }
 
@@ -931,14 +935,36 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
     //DeviceContext->PSSetConstantBuffers(0, 1, ConstantBufferMap[PC].GetAddressOf());
 
     FMatrix m = MeshComp->GetComponentTransform().GetMatrix();
+    FQuat quat = MeshComp->GetComponentTransform().GetRotation();
 
     FStaticMeshVertexConstant vc = {
+        .InverseTranspose = FMatrix::Transpose(m.GetRotateMatrix(quat)),
         .Model = FMatrix::Transpose(m),
         .View = FMatrix::Transpose(ViewMatrix),
         .Projection = FMatrix::Transpose(ProjectionMatrix),
     };
 
     UpdateBuffer(vc, VC);
+
+    FGlobalLightConstant globalLightConstant = {
+        .Ambient = FVector4(0.1f, 0.1f, 0.1f, 1.f),
+        .Diffuse = FVector4(1.f, 1.f, 1.f, 1.f),
+        .Specular = FVector4(1.f, 1.f, 1.f, 1.f),
+        .Emissive = FVector4(0.f, 0.f, 0.f, 1.0f),
+        .Padding1 = 0,
+        .Direction = FVector(0.1f, -1.f, -1.f),
+        .Padding = 0,
+    };
+
+    UpdateBuffer(globalLightConstant, 7);
+
+    FVector camPos = ViewMatrix.GetTranslation();
+
+    FCameraPositionConstant camPosConstant = {
+        .CameraPosition = camPos
+    };
+
+    UpdateBuffer(camPosConstant, 9);
 
     TMap<FName, FSubMesh>& SubMeshes = MeshComp->StaticMesh->GetStaticMeshAsset()->SubMeshes;
 
@@ -949,6 +975,16 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
         const UMaterial* Mat = MeshComp->GetMaterial(SubMesh.Index);
         if (Mat != nullptr)
         {
+            FMaterialConstant matConstant = {
+                .Ambient = Mat->Ambient,
+                .Diffuse = Mat->Diffuse,
+                .Specular = Mat->Specular,
+                .Emissive = Mat->Emissive,
+                .Roughness = 1 - Mat->Shininess,
+            };
+
+            UpdateBuffer(matConstant, 8);
+
 			auto srv = ShaderResourceViewMap[Mat->TextureMapIndex].Get();
 			DeviceContext->PSSetSamplers(0, 1, SamplerMap[0].GetAddressOf());
 
