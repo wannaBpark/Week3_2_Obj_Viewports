@@ -9,7 +9,7 @@
 struct FPoint
 {
 	uint32 X, Y;
-	explicit FPoint(uint32 InX = 0, uint32 InY = 0) : X(InX), Y(InY) { }
+	FPoint(uint32 InX = 0, uint32 InY = 0) : X(InX), Y(InY) { }
 };
 
 struct FRect

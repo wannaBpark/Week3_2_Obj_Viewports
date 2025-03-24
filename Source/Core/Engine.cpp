@@ -59,16 +59,29 @@ LRESULT UEngine::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             EngineInstance.RootWindow->OnMouseMove(mousePos);
         break;
     }
-        break;
     case WM_KEYUP:
         APlayerInput::Get().KeyUp(static_cast<EKeyCode>( wParam ));
         break;
     case WM_LBUTTONDOWN:
+    {
         APlayerInput::Get().HandleMouseInput(hWnd, lParam, true, false);
+        int x = GET_X_LPARAM(lParam);
+        int y = GET_Y_LPARAM(lParam);
+        FPoint mousePos(static_cast<uint32>(x), static_cast<uint32>(y));
+        if (EngineInstance.RootWindow)
+            EngineInstance.RootWindow->OnMouseDown(mousePos);
         break;
+    }
     case WM_LBUTTONUP:
+    {
         APlayerInput::Get().HandleMouseInput(hWnd, lParam, false, false);
+        int x = GET_X_LPARAM(lParam);
+        int y = GET_Y_LPARAM(lParam);
+        FPoint mousePos(static_cast<uint32>(x), static_cast<uint32>(y));
+        if (EngineInstance.RootWindow)
+            EngineInstance.RootWindow->OnMouseUp(mousePos);
         break;
+    }
     case WM_RBUTTONDOWN:
         APlayerInput::Get().HandleMouseInput(hWnd, lParam, true, true);
         break;
