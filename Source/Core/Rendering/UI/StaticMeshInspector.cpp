@@ -64,7 +64,9 @@ void FStaticMeshInspector::UpdateStaticMeshCombo()
 			if (ImGui::Selectable(StaticMeshes[i]->PathFileName.c_char(), IsSelected))
 			{
 				StaticMeshIndex = i;
-				Component->SetStaticMesh(StaticMeshes[i]->PathFileName);
+				Component->SetStaicMesh(StaticMeshes[i]->PathFileName);
+				// 메시바뀌면 머티리얼 갱신해줘야 함
+				ComponentMaterials = Component->GetMaterials();
 			}
 			if (IsSelected)
 			{

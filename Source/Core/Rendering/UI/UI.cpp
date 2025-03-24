@@ -37,12 +37,6 @@
 
 #define INI_PATH "./editor.ini" // grid scale 저장할 ini 파일 경로
 
-//
-//UI::~UI()
-//{
-//	Shutdown();
-//}
-
 void UI::Initialize(HWND hWnd, const URenderer& Renderer, UINT ScreenWidth, UINT ScreenHeight)
 {
     // ImGui 초기화

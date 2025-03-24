@@ -34,6 +34,8 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
 		MaterialMap.Add(Kvp.first, Kvp.second);
 	}
 
+	ObjStaticMeshMap.Add(PathFileName, MeshData);
+
     return MeshData;
 }
 
@@ -50,7 +52,6 @@ UStaticMesh* FObjManager::LoadObjStaticMesh(const FString& PathFileName)
 	FStaticMesh* MeshAsset = LoadObjStaticMeshAsset(PathFileName);
 	UStaticMesh* StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>();
 	StaticMesh->SetStaticMeshAsset(MeshAsset);
-	ObjStaticMeshMap.Add(PathFileName, MeshAsset);
 
 	return StaticMesh;
 }

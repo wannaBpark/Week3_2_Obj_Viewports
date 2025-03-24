@@ -24,3 +24,8 @@ ATarzan::ATarzan()
 	UEngine::Get().GetWorld()->AddColliderComponent(hitCollider);
 	hitCollider->SetupAttachment(RootComponent);
 }
+
+const char* ATarzan::GetTypeName()
+{
+	return "Tarzan";
+}
