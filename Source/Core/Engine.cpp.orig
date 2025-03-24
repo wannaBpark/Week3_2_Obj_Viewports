@@ -97,7 +97,10 @@ void UEngine::Initialize(
 	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenWidth, ScreenWidth);
 	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenHeight, ScreenHeight);
 
-    // InitWindow(InScreenWidth, InScreenHeight);
+<<<<<<< HEAD
+    InitWindow(InScreenWidth, InScreenHeight);
+=======
+>>>>>>> main
     InitRenderer();
 
     InitWorld();
@@ -288,11 +291,13 @@ void UEngine::InitWorld()
     World->SceneName = "MainScene";
     FSceneManager::Get().AddScene(World);
 
+<<<<<<< HEAD
     //FEditorManager::Get().SetCamera(World->SpawnActor<ACamera>());
 #pragma region Viewport and Camera Settings
     SetViewportCameras();
 #pragma endregion
-	ACamera* Camera = Cameras[2].get();
+=======
+	ACamera* Camera = World->SpawnActor<ACamera>();
     FEditorManager::Get().SetCamera(Camera);
 	FTransform CameraTransform = Camera->GetActorTransform();
     // Camera ini 세팅
@@ -308,7 +313,7 @@ void UEngine::InitWorld()
     CameraTransform.SetRotation(FQuat(CamRotX, CamRotY, CamRotZ, CamRotW));
 
 	Camera->SetActorTransform(CameraTransform);
-
+>>>>>>> main
 
     World->SpawnActor<AAxis>();
     APicker* Picker = World->SpawnActor<APicker>();
@@ -366,6 +371,7 @@ void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
 		Renderer->OnResizeComplete();
 	}
 
+<<<<<<< HEAD
     // [Added] 다중 뷰포트를 관리하는 Root window의 Rect Update
     if (RootWindow) 
     {
@@ -376,6 +382,7 @@ void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
         });
         RootWindow->UpdateLayout();
     }
+=======
 	// 전체 윈도우 영역 가져와서 ini에 저장
 	RECT WindowRect;
 
@@ -392,6 +399,7 @@ void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
 void UEngine::PreloadResources()
 {
 	FObjManager::LoadObjStaticMeshAsset(TEXT("Assets/2PX7U16XARLGHIM3W48FS86MJ.obj"));
+>>>>>>> main
 }
 
 UObject* UEngine::GetObjectByUUID(uint32 InUUID) const

@@ -515,6 +515,7 @@
     <ClInclude Include="Source\Object\UtilComponent\UStringComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="Source\Core\Rendering\D3DViewports\Viewport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -525,6 +526,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Core\Rendering\D3DViewports\SWindow.h">
+=======
     <ClInclude Include="Source\MeshBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -541,6 +543,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Object\StaticMeshComponent\MeshComponent.h">
+>>>>>>> main
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

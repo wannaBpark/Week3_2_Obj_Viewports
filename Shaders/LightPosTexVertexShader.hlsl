@@ -2,7 +2,7 @@
 cbuffer constants : register(b0)
 {
     matrix Model;
-    matrix View;
+    matrix Views[4];
     matrix Projection;
     matrix InvTranspose;
     float4 CustomColor;
@@ -11,7 +11,10 @@ cbuffer constants : register(b0)
     float4 indexColor;
     uint bIsPicked;
     float3 Padding;
+    uint ViewportIndex;
+    float3 Padding2;
 }
+
 
 struct VS_INPUT
 {
@@ -28,22 +31,26 @@ struct PS_INPUT
     float3 normal : NORMAL;
     float2 texcoord : TEXCOORD0;
 };
-
 PS_INPUT mainVS(VS_INPUT input)
 {
-    // output.depthPosition = output.position;
-    
     PS_INPUT output;
     float4 position;
 
     position = mul(float4(input.position, 1.0f), Model);
     output.posWorld = position;
-    position = mul(position, View);
-    position = mul(position, Projection);
-    output.position = position;
     
-    output.normal = mul(float4(input.normal, 1.0f), InvTranspose);
+    //matrix View = Views[ViewportIndex]; 
+    matrix View = Views[0];
+    position = mul(position, View);
+    output.position = mul(position, Projection);
+
+    // 수정된 부분 (float3 변환)
+    output.normal = normalize(mul(float4(input.normal, 0.0f), InvTranspose).xyz);
+    
+    // TEXCOORD0 전달
     output.texcoord = input.texcoord;
+
+    // 색상 처리
     output.color = bUseVertexColor == 1 ? input.color : CustomColor;
 
     return output;

@@ -37,11 +37,11 @@
 
 #define INI_PATH "./editor.ini" // grid scale 저장할 ini 파일 경로
 
-
-UI::~UI()
-{
-	Shutdown();
-}
+//
+//UI::~UI()
+//{
+//	Shutdown();
+//}
 
 void UI::Initialize(HWND hWnd, const URenderer& Renderer, UINT ScreenWidth, UINT ScreenHeight)
 {
@@ -51,6 +51,7 @@ void UI::Initialize(HWND hWnd, const URenderer& Renderer, UINT ScreenWidth, UINT
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     // 기본 폰트 크기 설정
     io.FontGlobalScale = 1.0f;
@@ -97,6 +98,7 @@ void UI::Update()
         //UE_LOG("Current Ratio: %f, %f", CurRatio.x, CurRatio.y);
     }
     
+    RenderGameView();
     RenderControlPanel();
     RenderPropertyWindow();
     RenderSceneManager();
@@ -131,6 +133,13 @@ void UI::OnUpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
 	io.DisplaySize = ImVec2(static_cast<float>(InScreenWidth), static_cast<float>(InScreenHeight));
 
     bWasWindowSizeUpdated = true;
+}
+
+void UI::RenderGameView()
+{
+    //ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
+
 }
 
 void UI::RenderControlPanel()
