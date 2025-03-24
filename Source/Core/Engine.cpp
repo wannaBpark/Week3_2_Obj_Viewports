@@ -278,10 +278,6 @@ void UEngine::InitWorld()
 
 	Camera->SetActorTransform(CameraTransform);
 
-    //// Test
-    //AArrow* Arrow = World->SpawnActor<AArrow>();
-    //World->SpawnActor<ASphere>();
-    
     World->SpawnActor<AAxis>();
     APicker* Picker = World->SpawnActor<APicker>();
     FEditorManager::Get().SetBoundingBox(Picker->GetBoundingBoxComp());
@@ -294,10 +290,7 @@ void UEngine::InitWorld()
 	FString DefaultSceneName = "MainScene";
 
     // preload
- //   FObjManager::LoadObjStaticMesh(TEXT("Assets/GizmoTranslation.obj"));
-	//FObjManager::LoadObjStaticMesh(TEXT("Assets/GizmoRotation.obj"));
-	//FObjManager::LoadObjStaticMesh(TEXT("Assets/GizmoScale.obj"));
-	FObjManager::LoadObjStaticMesh(TEXT("Assets/2PX7U16XARLGHIM3W48FS86MJ.obj"));
+    PreloadResources();
 
 	World->LoadWorld(*DefaultSceneName);
 
@@ -316,6 +309,9 @@ void UEngine::ShutdownWindow()
 
     EngineConfig->SaveAllConfig();
 	delete EngineConfig;
+
+    // 프리로드 리소스 해제
+	FObjManager::ReleaseResources();
 }
 
 void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
@@ -349,6 +345,11 @@ void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
 	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenWidth, TotalWidth);
 	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenHeight, TotalHeignt);
 
+}
+
+void UEngine::PreloadResources()
+{
+	FObjManager::LoadObjStaticMeshAsset(TEXT("Assets/2PX7U16XARLGHIM3W48FS86MJ.obj"));
 }
 
 UObject* UEngine::GetObjectByUUID(uint32 InUUID) const

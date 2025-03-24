@@ -23,6 +23,7 @@ public:
     virtual const char* GetTypeName() override;
     
     static bool SetSelectActor(const UActorComponent* actorComponent);
+	static bool SetSelectedComponent(USceneComponent* actorComponent);
 private:
     static POINT GetMousePoint();
     UActorComponent* GetAcotrByPixelPicking(const POINT& pt);

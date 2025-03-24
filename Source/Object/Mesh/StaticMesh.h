@@ -26,6 +26,7 @@ struct FNormalVertex
 struct FSubMesh
 {
 	FName GroupName = "Default";
+	uint32 Index = 0;
 	uint32 StartIndex = 0;
 	uint32 NumIndices = 0;
 
@@ -64,6 +65,8 @@ struct FFaceInfo
 // 머티리얼 정보
 struct FObjMaterialInfo
 {
+	FName MaterialName;
+
 	FVector4 Ambient;
 	FVector4 Diffuse;
 	FVector4 Specular;
@@ -75,3 +78,4 @@ struct FObjMaterialInfo
 	FName TextureName;
 	uint32 TextureMapIndex;
 };
+
