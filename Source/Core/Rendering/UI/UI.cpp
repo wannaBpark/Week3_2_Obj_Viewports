@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "Object/Actor/Camera.h"
-#include "URenderer.h"
+#include "Core/Rendering/URenderer.h"
 #include "Core/HAL/PlatformMemory.h"
 #include "ImGui/imgui_impl_dx11.h"
 #include "ImGui/imgui_impl_win32.h"
@@ -21,19 +21,27 @@
 #include "Object/Actor/WorldGrid.h"
 #include "Object/Actor/BillBoard.h"
 #include "Object/Actor/WorldText.h"
-#include "Object/UtilComponent/UStringComponent.h"
 #include "Object/Actor/SubUV.h"
+#include "Object/Actor/ATarzan.h"
+#include "Object/UtilComponent/UStringComponent.h"
 #include "Static/FEditorManager.h"
 #include "Object/World/World.h"
 #include "Object/Gizmo/GizmoHandle.h"
 #include "Object/Gizmo/WorldGizmo.h"
 #include "Core/FSceneManager.h"
 #include "Object/Gizmo/Axis.h"
-
+#include "Object/Material/Material.h"
 #include "JsonSaveHelper.h"
+#include <Object/StaticMeshComponent/StaticMeshComponent.h>
+#include "StaticMeshInspector.h"
 
 #define INI_PATH "./editor.ini" // grid scale 저장할 ini 파일 경로
 
+//
+//UI::~UI()
+//{
+//	Shutdown();
+//}
 
 void UI::Initialize(HWND hWnd, const URenderer& Renderer, UINT ScreenWidth, UINT ScreenHeight)
 {
@@ -43,6 +51,7 @@ void UI::Initialize(HWND hWnd, const URenderer& Renderer, UINT ScreenWidth, UINT
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     // 기본 폰트 크기 설정
     io.FontGlobalScale = 1.0f;
@@ -89,6 +98,7 @@ void UI::Update()
         //UE_LOG("Current Ratio: %f, %f", CurRatio.x, CurRatio.y);
     }
     
+    RenderGameView();
     RenderControlPanel();
     RenderPropertyWindow();
     RenderSceneManager();
@@ -107,6 +117,9 @@ void UI::Shutdown()
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+
+    if (StaticMeshInspector)
+        delete StaticMeshInspector;
 }
 
 void UI::OnUpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
@@ -120,6 +133,13 @@ void UI::OnUpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
 	io.DisplaySize = ImVec2(static_cast<float>(InScreenWidth), static_cast<float>(InScreenHeight));
 
     bWasWindowSizeUpdated = true;
+}
+
+void UI::RenderGameView()
+{
+    //ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
+
 }
 
 void UI::RenderControlPanel()
@@ -173,7 +193,7 @@ void UI::RenderMemoryUsage()
 
 void UI::RenderPrimitiveSelection()
 {
-    const char* items[] = { "Sphere", "Cube", "Cylinder", "Cone","Triangle","Circle", "BillBoard", "WorldText", "SubUV", "SubUV2"};
+    const char* items[] = { "Sphere", "Cube", "Cylinder", "Cone","Triangle","Circle", "BillBoard", "WorldText", "SubUV", "SubUV2", "Tarzan"};
 
     ImGui::Combo("Primitive", &currentItem, items, IM_ARRAYSIZE(items));
 
@@ -227,6 +247,10 @@ void UI::RenderPrimitiveSelection()
             {
                 ASubUV* SubUV = World->SpawnActor<ASubUV>();
                 SubUV->SetAtlas("RollingChanhui.png");
+            }
+            else if (strcmp(items[currentItem], "Tarzan") == 0)
+            {
+                World->SpawnActor<ATarzan>();
             }
         }
     }
@@ -464,7 +488,28 @@ void UI::RenderPropertyWindow()
     }
     
     AActor* selectedActor = FEditorManager::Get().GetSelectedActor();
-    if (selectedActor != nullptr)
+    USceneComponent* selectedComp = FEditorManager::Get().GetSelectedComponent();
+    if (selectedComp != nullptr)
+    {
+        if (selectedComp->IsA<UStaticMeshComponent>())
+        {
+			UStaticMeshComponent* StaticMeshComp = static_cast<UStaticMeshComponent*>(selectedComp);
+            if (StaticMeshInspector == nullptr)
+            {
+                StaticMeshInspector = new FStaticMeshInspector();
+                StaticMeshInspector->Init(StaticMeshComp);
+            }
+            else
+            {
+                if (StaticMeshInspector->GetCurrentStaticMeshComponent() != StaticMeshComp)
+                {
+                    StaticMeshInspector->Init(StaticMeshComp);
+                }
+            }
+            StaticMeshInspector->Update();
+        }
+    }
+    else if (selectedActor != nullptr)
     {
         FTransform selectedTransform = selectedActor->GetActorTransform();
         float position[] = { selectedTransform.GetPosition().X, selectedTransform.GetPosition().Y, selectedTransform.GetPosition().Z };
@@ -597,9 +642,12 @@ void UI::RenderSceneManager()
             actors = FSceneManager::Get().GetScene(0)->GetActors();
 
         for (auto actor : actors) {
-            UClass* uClass = actor->GetClass();
+            /*UClass* uClass = actor->GetClass();
             if (uClass == AAxis::StaticClass() || uClass == AWorldGrid::StaticClass() || uClass == AWorldGizmo::StaticClass() ||
                 uClass == ACamera::StaticClass() || uClass == APicker::StaticClass() || uClass == AGizmoHandle::StaticClass())
+                continue;*/
+
+            if (actor->IsGizmoActor())
                 continue;
 
             char buffer[64];
@@ -615,6 +663,12 @@ void UI::RenderSceneManager()
                 ImGui::Indent();
                 for (auto component : actor->GetComponents()) {
                     ImGui::Text(*component->GetFName().ToString());
+					if (ImGui::IsItemClicked()) {
+                        if (component->IsA<USceneComponent>())
+                        {
+    						APicker::SetSelectedComponent(actor->GetRootComponent());
+                        }
+					}
                 }
                 ImGui::Unindent();
                 ImGui::TreePop();

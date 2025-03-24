@@ -54,6 +54,8 @@ enum class InputLayoutType
     POSCOLORNORMAL,
     POSNORMALTEX,
     POSCOLORNORMALTEX,
+
+    POSNORMALTANGENTCOLORTEX,
 };
 
 // Constant Buffer 구조체 정의
@@ -91,15 +93,73 @@ BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FAtlasConstants)
     SHADER_PARAMETER(FVector4, AtlasSzOffset)
 END_GLOBAL_SHADER_PARAMETER_STRUCT()
 
-BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FLightConstants)
+struct FLightConstants 
+{
+    FMatrix Model;              
+    FMatrix Views[4];           
+    FMatrix Projection;         
+    FMatrix InvTranspose;       
+    FVector4 Color;             
+    uint32  bUseVertexColor;    
+    FVector eyeWorldPos;        
+    FVector4 indexColor;        
+    uint32  bIsPicked;          
+    FVector Padding;            
+    uint32 ViewportIndex;       
+    FVector Padding2;           
+};
+
+struct FLineConstants
+{
+    FMatrix Model;
+    FMatrix Views[4];
+    FMatrix Projection;
+    uint32 bIsPicked;
+    FVector Padding1;
+    FVector4 CustomColor;
+    uint32 bUseVertexColor;
+    FVector Padding2;
+    uint32 ViewportIndex;
+    FVector Padding3;
+};
+
+
+
+BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FStaticMeshVertexConstant)
     SHADER_PARAMETER(FMatrix, Model)
     SHADER_PARAMETER(FMatrix, View)
     SHADER_PARAMETER(FMatrix, Projection)
-    SHADER_PARAMETER(FMatrix, InvTranspose)
-    SHADER_PARAMETER(FVector4, Color)
-    SHADER_PARAMETER(uint32, bUseVertexColor)
-    SHADER_PARAMETER(FVector, eyeWorldPos)
-    SHADER_PARAMETER(FVector4, indexColor)
-    SHADER_PARAMETER(uint32, bIsPicked)
-    SHADER_PARAMETER(FVector, Padding)
 END_GLOBAL_SHADER_PARAMETER_STRUCT()
+
+
+//struct FLightConstants {
+//    FMatrix Model;              // 오프셋: 0,    크기: 64바이트
+//    FMatrix Views[4];           // 오프셋: 64,   크기: 256바이트
+//    FMatrix Projection;         // 오프셋: 320,  크기: 64바이트
+//    FMatrix InvTranspose;       // 오프셋: 384,  크기: 64바이트
+//    FVector4 Color;             // 오프셋: 448,  크기: 16바이트
+//    uint32 bUseVertexColor;     // 오프셋: 464,  크기: 4바이트
+//    FVector Padding1;          // 패딩,         크기: 12바이트
+//    FVector eyeWorldPos;       // 오프셋: 480,  크기: 12바이트
+//    float Padding2;             // 패딩,         크기: 4바이트
+//    FVector4 indexColor;        // 오프셋: 496,  크기: 16바이트
+//    uint32 bIsPicked;           // 오프셋: 512,  크기: 4바이트
+//    FVector Padding3;          // 패딩,         크기: 12바이트
+//    uint32 ViewportIndex;       // 오프셋: 528,  크기: 4바이트
+//    FVector Padding4;          // 패딩,         크기: 12바이트
+//};
+
+//BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FLightConstants)
+//    SHADER_PARAMETER(FMatrix, Model)
+//    SHADER_PARAMETER(FMatrix, Views[4])
+//    SHADER_PARAMETER(FMatrix, Projection)
+//    SHADER_PARAMETER(FMatrix, InvTranspose)
+//    SHADER_PARAMETER(FVector4, Color)
+//    SHADER_PARAMETER(uint32, bUseVertexColor)
+//    SHADER_PARAMETER(FVector, eyeWorldPos)
+//    SHADER_PARAMETER(FVector4, indexColor)
+//    SHADER_PARAMETER(uint32, bIsPicked)
+//    SHADER_PARAMETER(FVector, Padding)
+//    SHADER_PARAMETER(uint32, ViewportIndex)
+//    SHADER_PARAMETER(FVector, Padding2)
+//END_GLOBAL_SHADER_PARAMETER_STRUCT()

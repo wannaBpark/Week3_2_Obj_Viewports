@@ -16,7 +16,10 @@
 #include "EngineConfig.h"
 #include "Core/Container/ObjectIterator.h"
 #include "Object/Mesh/ObjManager.h"
+#include "Object/Actor/ATarzan.h"
 
+
+#include "Core/Rendering/D3DViewports/SViewportWindow.h"
 
 class AArrow;
 class APicker;
@@ -94,6 +97,7 @@ void UEngine::Initialize(
 	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenWidth, ScreenWidth);
 	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenHeight, ScreenHeight);
 
+    // InitWindow(InScreenWidth, InScreenHeight);
     InitRenderer();
 
     InitWorld();
@@ -151,7 +155,7 @@ void UEngine::Run()
         }
 		// Renderer Update
         Renderer->Prepare();          
-        Renderer->PrepareShader();    // 각 rendercomponent에서 호출
+        //Renderer->PrepareShader();    // 각 rendercomponent에서 호출
 
         for (TObjectIterator<UPrimitiveComponent> It(UEngine::Get().GObjects.begin(), UEngine::Get().GObjects.end());
             It;
@@ -159,17 +163,21 @@ void UEngine::Run()
         {
             UPrimitiveComponent* prim = *It;
 
-            if (prim)
-            {
-                UE_LOG(TEXT("Found PrimitiveCompnent : %s"), *prim->GetName());
-            }
+            //if (prim)
+            //{
+            //    UE_LOG(TEXT("Found PrimitiveCompnent : %s"), *prim->GetName());
+            //}
         }
 
 		// World Update
 		if (World)
 		{
 			World->Tick(DeltaTime);
-			World->Render();
+            // 변경 : 각 뷰포트가 모두 렌더 한 후
+            RootWindow->Render();
+            RootWindow->UpdateLayout();
+            
+
 		    World->LateTick(DeltaTime);
 		}
 
@@ -215,7 +223,29 @@ void UEngine::InitWindow(int InScreenWidth, int InScreenHeight)
     wnd_class.lpszClassName = WindowClassName;
     RegisterClassW(&wnd_class);
 
+    // 원하는 클라이언트 영역 크기를 위한 윈도우 크기 계산 (딱 맞도록)
+    RECT windowRect = { 0, 0, InScreenWidth, InScreenHeight };
+    AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
+
+    int windowWidth = windowRect.right - windowRect.left;
+    int windowHeight = windowRect.bottom - windowRect.top;
+
+    // 화면 중앙에 위치하도록 좌표 계산
+    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+    int windowX = (screenWidth - windowWidth) / 2;
+    int windowY = (screenHeight - windowHeight) / 2;
+
     // Window Handle 생성
+    WindowHandle = CreateWindowExW(
+        0, WindowClassName, WindowTitle,
+        WS_OVERLAPPEDWINDOW,
+        windowX, windowY,
+        windowWidth, windowHeight,
+        nullptr, nullptr, WindowInstance, nullptr
+    );
+
+    //// Window Handle 생성
     WindowHandle = CreateWindowExW(
         0, WindowClassName, WindowTitle,
         WS_POPUP | WS_VISIBLE | WS_OVERLAPPEDWINDOW,
@@ -234,7 +264,6 @@ void UEngine::InitWindow(int InScreenWidth, int InScreenHeight)
     ShowWindow(WindowHandle, SW_SHOW);
     SetForegroundWindow(WindowHandle);
     SetFocus(WindowHandle);
-
     //AllocConsole(); // 콘솔 창 생성
 
     //// 표준 출력 및 입력을 콘솔과 연결
@@ -248,7 +277,7 @@ void UEngine::InitRenderer()
 {
 	// 렌더러 초기화
 	Renderer = std::make_unique<URenderer>();
-	Renderer->Create(WindowHandle);
+	Renderer->Create(WindowHandle, ScreenWidth, ScreenHeight);
 	Renderer->CreateShader();
 	Renderer->CreateConstantBuffer();
 }
@@ -259,7 +288,11 @@ void UEngine::InitWorld()
     World->SceneName = "MainScene";
     FSceneManager::Get().AddScene(World);
 
-	ACamera* Camera = World->SpawnActor<ACamera>();
+    //FEditorManager::Get().SetCamera(World->SpawnActor<ACamera>());
+#pragma region Viewport and Camera Settings
+    SetViewportCameras();
+#pragma endregion
+	ACamera* Camera = Cameras[2].get();
     FEditorManager::Get().SetCamera(Camera);
 	FTransform CameraTransform = Camera->GetActorTransform();
     // Camera ini 세팅
@@ -276,10 +309,7 @@ void UEngine::InitWorld()
 
 	Camera->SetActorTransform(CameraTransform);
 
-    //// Test
-    //AArrow* Arrow = World->SpawnActor<AArrow>();
-    //World->SpawnActor<ASphere>();
-    
+
     World->SpawnActor<AAxis>();
     APicker* Picker = World->SpawnActor<APicker>();
     FEditorManager::Get().SetBoundingBox(Picker->GetBoundingBoxComp());
@@ -292,14 +322,11 @@ void UEngine::InitWorld()
 	FString DefaultSceneName = "MainScene";
 
     // preload
- //   FObjManager::LoadObjStaticMesh(TEXT("Assets/GizmoTranslation.obj"));
-	//FObjManager::LoadObjStaticMesh(TEXT("Assets/GizmoRotation.obj"));
-	//FObjManager::LoadObjStaticMesh(TEXT("Assets/GizmoScale.obj"));
-	FObjManager::LoadObjStaticMesh(TEXT("Assets/2PX7U16XARLGHIM3W48FS86MJ.obj"));
+    PreloadResources();
 
 	World->LoadWorld(*DefaultSceneName);
 
-
+	ATarzan* Tarzan = World->SpawnActor<ATarzan>();
 }
 
 void UEngine::ShutdownWindow()
@@ -314,6 +341,9 @@ void UEngine::ShutdownWindow()
 
     EngineConfig->SaveAllConfig();
 	delete EngineConfig;
+
+    // 프리로드 리소스 해제
+	FObjManager::ReleaseResources();
 }
 
 void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
@@ -336,6 +366,16 @@ void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
 		Renderer->OnResizeComplete();
 	}
 
+    // [Added] 다중 뷰포트를 관리하는 Root window의 Rect Update
+    if (RootWindow) 
+    {
+        RootWindow->SetRect({
+            0, 0,                               // TopLeft, TopRight 
+            static_cast<uint32>(InScreenWidth), // Width
+            static_cast<uint32>(InScreenHeight) // Height
+        });
+        RootWindow->UpdateLayout();
+    }
 	// 전체 윈도우 영역 가져와서 ini에 저장
 	RECT WindowRect;
 
@@ -349,6 +389,11 @@ void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
 
 }
 
+void UEngine::PreloadResources()
+{
+	FObjManager::LoadObjStaticMeshAsset(TEXT("Assets/2PX7U16XARLGHIM3W48FS86MJ.obj"));
+}
+
 UObject* UEngine::GetObjectByUUID(uint32 InUUID) const
 {
     if (const auto Obj = GObjects.Find(InUUID))
@@ -356,4 +401,55 @@ UObject* UEngine::GetObjectByUUID(uint32 InUUID) const
         return Obj->get();
     }
     return nullptr;
+}
+
+
+void UEngine::SetViewportCameras()
+{
+#pragma region Multi Viewports               // 
+    auto topLeft = std::make_shared<SViewportWindow>();
+    auto topRight = std::make_shared<SViewportWindow>();
+    auto bottomLeft = std::make_shared<SViewportWindow>();
+    auto bottomRight = std::make_shared<SViewportWindow>();
+    auto TopVerticalSplitter = std::make_shared<SSplitterV>(topLeft, topRight);
+    auto BottomVerticalSplitter = std::make_shared<SSplitterV>(bottomLeft, bottomRight);
+
+    SViewportWindows.Add(topLeft); SViewportWindows.Add(topRight);
+    SViewportWindows.Add(bottomLeft); SViewportWindows.Add(bottomRight);
+
+    RootWindow = std::make_unique<SSplitterH>(TopVerticalSplitter, BottomVerticalSplitter);
+    RootWindow->SetRect({
+        0, 0,                               // TopLeft, TopRight 
+        static_cast<uint32>(ScreenWidth), // Width
+        static_cast<uint32>(ScreenHeight) // Height
+        });
+    RootWindow->UpdateLayout();
+    UE_LOG("InScreen Resolution : %d %d", static_cast<uint32>(ScreenWidth), static_cast<uint32>(ScreenHeight));
+#pragma endregion
+
+#pragma region Multi Camera Initialization
+    FTransform ZY = FTransform(FVector(-5, 0, 1), FVector(0, 0, 0), FVector(1, 1, 1));
+    FTransform ZX = FTransform(FVector(0, 5, 1), FVector(0, 0, -90), FVector(1, 1, 1));
+    FTransform XY = FTransform(FVector(0, 0, 5), FVector(0, 90, 0), FVector(1, 1, 1));
+    ACamera* CamZY = World->SpawnActor<ACamera>(); CamZY->SetActorTransform(ZY); CamZY->SetProjectionMode(ECameraProjectionMode::Orthographic);
+    ACamera* CamZX = World->SpawnActor<ACamera>(); CamZX->SetActorTransform(ZX); CamZX->SetProjectionMode(ECameraProjectionMode::Orthographic);
+    ACamera* CamXY = World->SpawnActor<ACamera>(); CamXY->SetActorTransform(XY); CamXY->SetProjectionMode(ECameraProjectionMode::Orthographic);
+
+    ACamera* CamPerspective = World->SpawnActor<ACamera>();
+    Cameras.Add(std::make_shared<ACamera>(*CamZY));
+    Cameras.Add(std::make_shared<ACamera>(*CamZX));
+    Cameras.Add(std::make_shared<ACamera>(*CamPerspective));
+    Cameras.Add(std::make_shared<ACamera>(*CamXY));
+
+    if (topLeft) topLeft->SetCamera(Cameras[0]);
+    if (topRight) topRight->SetCamera(Cameras[1]);
+    if (bottomLeft) bottomLeft->SetCamera(Cameras[3]);
+    if (bottomRight) bottomRight->SetCamera(Cameras[2]); 
+    // 원랜 0,1,2,3순서이지만 카메라 마지막 부분만 마우스 조작되는 관계로 0132로 해놓음
+    // TODO : 위에서 아래로 내려다보는 카메라 FIX
+    // TODO : Hover 후 키입력 시 카메라 모드 변경하도록
+
+    FEditorManager::Get().SetCamera(CamPerspective);
+
+#pragma endregion
 }

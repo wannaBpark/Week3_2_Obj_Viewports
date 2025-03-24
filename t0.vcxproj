@@ -161,6 +161,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Object\Material\Material.cpp" />
+    <ClCompile Include="Source\Object\Actor\ATarzan.cpp" />
     <ClCompile Include="Source\Core\Container\ObjectIterator.cpp" />
     <ClCompile Include="Source\Object\Mesh\ObjManager.cpp" />
     <ClCompile Include="Source\Core\EngineConfig.cpp" />
@@ -222,8 +224,12 @@
     <ClCompile Include="Source\Object\PrimitiveComponent\UPrimitiveComponent.cpp" />
     <ClCompile Include="Source\Object\World\World.cpp" />
     <ClCompile Include="Source\Object\Actor\Sphere.cpp" />
+    <ClCompile Include="Source\Core\Rendering\D3DViewports\SWidget.cpp" />
     <ClCompile Include="Source\Object\StaticMeshComponent\StaticMeshComponent.cpp" />
+    <ClCompile Include="Source\Core\Rendering\UI\StaticMeshInspector.cpp" />
     <ClCompile Include="URaycastSystem.cpp" />
+    <ClCompile Include="Source\Core\Rendering\D3DViewports\Viewport.cpp" />
+    <ClCompile Include="Source\Core\Rendering\D3DViewports\ViewportClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\AtlasPixelShader.hlsl">
@@ -292,6 +298,9 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="Shaders\ShaderMesh.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Shaders\ShaderTest.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -307,10 +316,17 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Core\Delegate\Delegate.h" />
+    <ClInclude Include="Source\Core\Delegate\DelegateCombination.h" />
+    <ClInclude Include="Source\Object\Material\Material.h" />
+    <ClInclude Include="Source\Object\Actor\ATarzan.h" />
     <ClInclude Include="Source\Core\Container\ObjectIterator.h" />
     <ClInclude Include="Source\Object\Mesh\ObjManager.h" />
     <ClInclude Include="Source\Core\EngineConfig.h" />
     <ClInclude Include="Source\Core\FSceneManager.h" />
+    <ClInclude Include="Source\Core\Rendering\D3DViewports\SSpliter.h" />
+    <ClInclude Include="Source\Core\Rendering\D3DViewports\SViewportWindow.h" />
+    <ClInclude Include="Source\Core\Rendering\D3DViewports\SWindow.h" />
     <ClInclude Include="Source\Core\Rendering\SubUVManager.h" />
     <ClInclude Include="Source\Core\Rendering\TextAtlasManager.h" />
     <ClInclude Include="Source\Core\Template\RemoveReference.h" />
@@ -460,11 +476,11 @@
     <ClInclude Include="Source\ThirdParty\ImGui\imstb_truetype.h" />
     <ClInclude Include="Source\ThirdParty\iniparser.hpp" />
     <ClInclude Include="Source\ThirdParty\SimpleJSON\Json.hpp" />
-    <ClCompile Include="Source\Core\Rendering\UI.cpp" />
+    <ClCompile Include="Source\Core\Rendering\UI\UI.cpp" />
     <ClCompile Include="Source\Core\Rendering\URenderer.cpp" />
     <ClCompile Include="Source\Primitive\PrimitiveVertices.cpp" />
     <ClInclude Include="Source\Core\Engine.h" />
-    <ClInclude Include="Source\Core\Rendering\UI.h" />
+    <ClInclude Include="Source\Core\Rendering\UI\UI.h" />
     <ClInclude Include="Source\Core\Rendering\URenderer.h" />
     <ClCompile Include="Source\Object\Actor\Picker.cpp" />
     <ClInclude Include="Source\Object\Gizmo\GizmoHandle.h" />
@@ -484,9 +500,13 @@
     <ClInclude Include="Source\Object\Actor\Sphere.h" />
     <ClInclude Include="Source\ThirdParty\stb-master\stb_image.h" />
     <ClInclude Include="Source\ThirdParty\stb-master\stb_image_write.h" />
+    <ClInclude Include="Source\Core\Rendering\D3DViewports\SWidget.h" />
     <ClInclude Include="Source\Object\StaticMeshComponent\StaticMeshComponent.h" />
+    <ClInclude Include="Source\Core\Rendering\UI\StaticMeshInspector.h" />
     <ClInclude Include="UColliders.h" />
     <ClInclude Include="URaycastSystem.h" />
+    <ClInclude Include="Source\Core\Rendering\D3DViewports\Viewport.h" />
+    <ClInclude Include="Source\Core\Rendering\D3DViewports\ViewportClient.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Textures\Explosion.PNG" />

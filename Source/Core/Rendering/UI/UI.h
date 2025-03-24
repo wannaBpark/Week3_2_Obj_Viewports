@@ -2,6 +2,7 @@
 #define _TCHAR_DEFINED
 #include <Windows.h>
 #include "ImGui/imgui.h"
+#include "ImGui/imgui_internal.h"
 
 class AActor;
 class URenderer;
@@ -21,6 +22,7 @@ public:
 	void OnUpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight);
 
 public:// UIWindows
+	void RenderGameView();
     void RenderControlPanel();
 	void RenderMemoryUsage();
     void RenderPrimitiveSelection();
@@ -94,4 +96,7 @@ private:
 	int TotalFrame;
 
 	int AtlasSaveCondition = 0;
+
+	// staticmesh inspector
+	class FStaticMeshInspector* StaticMeshInspector = nullptr;
 };

@@ -3,8 +3,11 @@
 #include "Core/Container/ObjectIterator.h"
 #include "Core/Engine.h"
 #include "Object/ObjectFactory.h"
+#include "Object/Material/Material.h"
+#include "MeshBuilder.h"
 
-TMap<FString, FStaticMesh*> FObjManager::ObjStaticMeshMap;
+TMap<FName, FStaticMesh*> FObjManager::ObjStaticMeshMap;
+TMap<FName, FObjMaterialInfo> FObjManager::MaterialMap;
 
 FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
 {
@@ -21,8 +24,15 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
 	MeshData->Vertices = MeshBuilder.GetVertices();
 	MeshData->Indices = MeshBuilder.GetIndices();
 	MeshData->GroupNames = MeshBuilder.GetGroupNames();
-	MeshData->Materials = MeshBuilder.GetMaterials();
+	MeshData->SubMeshes = MeshBuilder.GetSubMeshes();
 
+	auto Mats = MeshBuilder.GetMaterials();
+
+	for (auto& Kvp : Mats)
+	{
+		// 실제 생성된 MeshData의 머티리얼 정보를 가리키도록
+		MaterialMap.Add(Kvp.first, Kvp.second);
+	}
 
     return MeshData;
 }
@@ -40,4 +50,38 @@ UStaticMesh* FObjManager::LoadObjStaticMesh(const FString& PathFileName)
 	FStaticMesh* MeshAsset = LoadObjStaticMeshAsset(PathFileName);
 	UStaticMesh* StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>();
 	StaticMesh->SetStaticMeshAsset(MeshAsset);
+	ObjStaticMeshMap.Add(PathFileName, MeshAsset);
+
+	return StaticMesh;
+}
+
+class UMaterial* FObjManager::LoadMaterial(const FName& MaterialName)
+{
+	for (TObjectIterator<UMaterial> It(UEngine::Get().GObjects.begin(), UEngine::Get().GObjects.end()); It; ++It)
+	{
+		UMaterial* Material = *It;
+
+		if (Material && Material->GetMaterialName() == MaterialName)
+			return Material;
+	}
+
+	//FString MatNameDebug = MaterialName.ToString();
+	FObjMaterialInfo* MaterialInfoPtr = MaterialMap.Find(MaterialName);
+	if (MaterialInfoPtr)
+	{
+		UMaterial* Material = FObjectFactory::ConstructObject<UMaterial>();
+		MaterialInfoPtr->MaterialName = MaterialName;
+		Material->SetMaterialInfo(MaterialName, *MaterialInfoPtr);
+		return Material;
+	};
+
+	return nullptr;
+}
+
+void FObjManager::ReleaseResources()
+{
+	for (auto& Kvp : ObjStaticMeshMap)
+	{
+		delete Kvp.second;
+	};
 }
