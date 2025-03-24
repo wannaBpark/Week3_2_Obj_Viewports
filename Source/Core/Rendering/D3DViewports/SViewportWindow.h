@@ -36,12 +36,7 @@ public:
                 DXViewport.TopLeftY + DXViewport.Height );*/
             if (Camera)
             {
-                Camera->SetAspectRatio(static_cast<float>(DXViewport.Width / DXViewport.Height));
-                // Orthographic
-                if (static_cast<uint32>(Camera->GetProjectionMode()) == 1) 
-                {
-                    Camera->SetViewportSize(DXViewport.Width, DXViewport.Height);
-                }
+                Camera->SetViewportSize(DXViewport.Width, DXViewport.Height);
                 FEditorManager::Get().SetCamera(this->Camera.get());
             }
 
