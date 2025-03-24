@@ -5,7 +5,7 @@ cbuffer constants : register(b0)
     uint bUseVertexColor;
     float3 eyeWorldPos;
     float4 indexColor;
-}
+} 
 
 struct VS_INPUT
 {

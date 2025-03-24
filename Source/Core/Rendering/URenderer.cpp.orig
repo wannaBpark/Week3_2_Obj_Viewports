@@ -232,8 +232,12 @@ void URenderer::CreateConstantBuffer()
     idx = CreateConstantBuffer<FDepthConstants>();      // DepthConstants : 2
     idx = CreateConstantBuffer<FAtlasConstants>();           // Atlas CBuffer : 3
     idx = CreateConstantBuffer<FLightConstants>();           // Lighting 테스트용 CBuffer : 4
-    idx = CreateConstantBuffer<FStaticMeshVertexConstant>(); // STaticMesh용 Cbuffer : 5
-    idx = CreateConstantBuffer<FLineConstants>();           // Line에 대한 카메라 4대 테스트용 CBuffer : 6
+<<<<<<< HEAD
+    idx = CreateConstantBuffer<FLineConstants>();           // Line에 대한 카메라 4대 테스트용 CBuffer : 5
+    idx = CreateConstantBuffer<FViewportConstant>();        // Viewport viewmatrix index저장용 : 6
+=======
+    idx = CreateConstantBuffer<FStaticMeshVertexConstant>();
+>>>>>>> main
     UE_LOG("constantbuffer size : %d", idx);
 }
 
