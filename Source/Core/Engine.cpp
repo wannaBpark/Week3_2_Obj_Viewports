@@ -1,5 +1,5 @@
 #include "Engine.h"
-
+#include <windowsx.h> // GET_X_LPARAM 등의 매크로
 #include <iostream>
 #include "Object/ObjectFactory.h"
 #include "Object/World/World.h"
@@ -35,6 +35,8 @@ LRESULT UEngine::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         return true;
     }
     
+    UEngine& EngineInstance = UEngine::Get();
+
     switch (uMsg)
     {
         // 창이 제거될 때 (창 닫기, Alt+F4 등)
@@ -47,6 +49,16 @@ LRESULT UEngine::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
             APlayerInput::Get().KeyOnceUp(static_cast<EKeyCode>( wParam ));
         }
+        break;
+    case WM_MOUSEMOVE:
+    {
+        int x = GET_X_LPARAM(lParam);
+        int y = GET_Y_LPARAM(lParam);
+        FPoint mousePos(static_cast<uint32>(x), static_cast<uint32>(y));
+        if (EngineInstance.RootWindow)
+            EngineInstance.RootWindow->OnMouseMove(mousePos);
+        break;
+    }
         break;
     case WM_KEYUP:
         APlayerInput::Get().KeyUp(static_cast<EKeyCode>( wParam ));
@@ -64,7 +76,7 @@ LRESULT UEngine::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         APlayerInput::Get().HandleMouseInput(hWnd, lParam, false, true);
         break;
     case WM_SIZE:
-		UEngine::Get().UpdateWindowSize(LOWORD(lParam), HIWORD(lParam));
+		EngineInstance.UpdateWindowSize(LOWORD(lParam), HIWORD(lParam));
 		break;
     default:
         return DefWindowProc(hWnd, uMsg, wParam, lParam);

@@ -53,7 +53,7 @@ public:
 	{
 		if (bRenderable) 
 		{
-			UE_LOG("Base Window Render");
+			//UE_LOG("Base Window Render");
 			bRenderable = false;
 		}
 	}
