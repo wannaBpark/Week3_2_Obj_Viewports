@@ -5,6 +5,7 @@
 #include <sstream>
 #include <fstream>
 
+using namespace cereal;
 class FArchive
 {
 private:
