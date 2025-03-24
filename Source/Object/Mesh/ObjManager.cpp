@@ -65,14 +65,23 @@ class UMaterial* FObjManager::LoadMaterial(const FName& MaterialName)
 			return Material;
 	}
 
-	FString MatNameDebug = MaterialName.ToString();
+	//FString MatNameDebug = MaterialName.ToString();
 	FObjMaterialInfo* MaterialInfoPtr = MaterialMap.Find(MaterialName);
 	if (MaterialInfoPtr)
 	{
 		UMaterial* Material = FObjectFactory::ConstructObject<UMaterial>();
+		MaterialInfoPtr->MaterialName = MaterialName;
 		Material->SetMaterialInfo(MaterialName, *MaterialInfoPtr);
 		return Material;
 	};
 
 	return nullptr;
+}
+
+void FObjManager::ReleaseResources()
+{
+	for (auto& Kvp : ObjStaticMeshMap)
+	{
+		delete Kvp.second;
+	};
 }

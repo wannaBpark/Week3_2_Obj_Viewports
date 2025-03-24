@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "Object/Actor/Camera.h"
-#include "URenderer.h"
+#include "Core/Rendering/URenderer.h"
 #include "Core/HAL/PlatformMemory.h"
 #include "ImGui/imgui_impl_dx11.h"
 #include "ImGui/imgui_impl_win32.h"
@@ -30,11 +30,18 @@
 #include "Object/Gizmo/WorldGizmo.h"
 #include "Core/FSceneManager.h"
 #include "Object/Gizmo/Axis.h"
-
+#include "Object/Material/Material.h"
 #include "JsonSaveHelper.h"
+#include <Object/StaticMeshComponent/StaticMeshComponent.h>
+#include "StaticMeshInspector.h"
 
 #define INI_PATH "./editor.ini" // grid scale 저장할 ini 파일 경로
 
+
+UI::~UI()
+{
+	Shutdown();
+}
 
 void UI::Initialize(HWND hWnd, const URenderer& Renderer, UINT ScreenWidth, UINT ScreenHeight)
 {
@@ -108,6 +115,9 @@ void UI::Shutdown()
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+
+    if (StaticMeshInspector)
+        delete StaticMeshInspector;
 }
 
 void UI::OnUpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
@@ -469,7 +479,28 @@ void UI::RenderPropertyWindow()
     }
     
     AActor* selectedActor = FEditorManager::Get().GetSelectedActor();
-    if (selectedActor != nullptr)
+    USceneComponent* selectedComp = FEditorManager::Get().GetSelectedComponent();
+    if (selectedComp != nullptr)
+    {
+        if (selectedComp->IsA<UStaticMeshComponent>())
+        {
+			UStaticMeshComponent* StaticMeshComp = static_cast<UStaticMeshComponent*>(selectedComp);
+            if (StaticMeshInspector == nullptr)
+            {
+                StaticMeshInspector = new FStaticMeshInspector();
+                StaticMeshInspector->Init(StaticMeshComp);
+            }
+            else
+            {
+                if (StaticMeshInspector->GetCurrentStaticMeshComponent() != StaticMeshComp)
+                {
+                    StaticMeshInspector->Init(StaticMeshComp);
+                }
+            }
+            StaticMeshInspector->Update();
+        }
+    }
+    else if (selectedActor != nullptr)
     {
         FTransform selectedTransform = selectedActor->GetActorTransform();
         float position[] = { selectedTransform.GetPosition().X, selectedTransform.GetPosition().Y, selectedTransform.GetPosition().Z };
@@ -602,9 +633,12 @@ void UI::RenderSceneManager()
             actors = FSceneManager::Get().GetScene(0)->GetActors();
 
         for (auto actor : actors) {
-            UClass* uClass = actor->GetClass();
+            /*UClass* uClass = actor->GetClass();
             if (uClass == AAxis::StaticClass() || uClass == AWorldGrid::StaticClass() || uClass == AWorldGizmo::StaticClass() ||
                 uClass == ACamera::StaticClass() || uClass == APicker::StaticClass() || uClass == AGizmoHandle::StaticClass())
+                continue;*/
+
+            if (actor->IsGizmoActor())
                 continue;
 
             char buffer[64];
@@ -620,6 +654,12 @@ void UI::RenderSceneManager()
                 ImGui::Indent();
                 for (auto component : actor->GetComponents()) {
                     ImGui::Text(*component->GetFName().ToString());
+					if (ImGui::IsItemClicked()) {
+                        if (component->IsA<USceneComponent>())
+                        {
+    						APicker::SetSelectedComponent(actor->GetRootComponent());
+                        }
+					}
                 }
                 ImGui::Unindent();
                 ImGui::TreePop();

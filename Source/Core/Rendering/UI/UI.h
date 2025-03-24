@@ -94,4 +94,7 @@ private:
 	int TotalFrame;
 
 	int AtlasSaveCondition = 0;
+
+	// staticmesh inspector
+	class FStaticMeshInspector* StaticMeshInspector = nullptr;
 };

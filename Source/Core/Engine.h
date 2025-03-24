@@ -4,7 +4,7 @@
 
 #include "HAL/PlatformType.h"
 #include "Rendering/URenderer.h"
-#include "Rendering/UI.h"
+#include "Rendering/UI/UI.h"
 #include "AbstractClass/Singleton.h"
 #include "Container/Map.h"
 #include "Core/Container/Array.h"
@@ -67,6 +67,7 @@ private:
     void InitWorld();
     void ShutdownWindow();
     void UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight);
+    void PreloadResources();
 
 public:
 	UWorld* GetWorld() const { return World; }

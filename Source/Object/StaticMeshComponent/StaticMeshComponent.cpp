@@ -41,6 +41,7 @@ void UStaticMeshComponent::SetStaicMesh(const FString& staticMeshPath)
 	RenderResource.VertexConstantIndex = 5;
 
 	// 머티리얼 로드
+	Materials.Empty();
 	for (auto& Kvp : StaticMesh->GetStaticMeshAsset()->SubMeshes)
 	{
 		auto Material = FObjManager::LoadMaterial(Kvp.second.MaterialName);
@@ -60,4 +61,24 @@ void UStaticMeshComponent::CreateIndexBuffer()
 	auto Indices = StaticMesh->GetStaticMeshAsset()->Indices;
 	RenderResource.numVertices = Indices.Num();
 	IndexBuffer = UEngine::Get().GetRenderer()->CreateIndexBuffer(Indices);
+}
+
+const UMaterial* UStaticMeshComponent::GetMaterial(uint32 Index)
+{
+	if (Index >= Materials.Num())
+	{
+		UE_LOG("UStaticMeshComp : Index is out of range");
+		return nullptr;
+	}
+	return Materials[Index];
+}
+
+void UStaticMeshComponent::SetMaterial(uint32 Index, UMaterial* InMaterial)
+{
+	if (Index >= Materials.Num())
+	{
+		UE_LOG("UStaticMeshComp : Index is out of range");
+		return;
+	}
+	Materials[Index] = InMaterial;
 }

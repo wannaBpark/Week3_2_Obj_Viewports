@@ -4,6 +4,7 @@
 void UMaterial::SetMaterialInfo(const FName& Name, const FObjMaterialInfo& ObjInfo)
 {
 	MaterialName = Name;
+
 	Ambient = ObjInfo.Ambient;
 	Diffuse = ObjInfo.Diffuse;
 	Specular = ObjInfo.Specular;

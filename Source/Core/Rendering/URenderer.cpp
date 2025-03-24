@@ -895,7 +895,7 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
     {
 		FSubMesh SubMesh = kvp.second;
 
-        UMaterial* Mat = FObjManager::LoadMaterial(SubMesh.MaterialName);
+        const UMaterial* Mat = MeshComp->GetMaterial(SubMesh.Index);
         if (Mat != nullptr)
         {
 			auto srv = ShaderResourceViewMap[Mat->TextureMapIndex].Get();
