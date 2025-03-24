@@ -17,6 +17,7 @@
 #include "Object/PrimitiveComponent/UPrimitiveComponent.h"
 #include "Static/FEditorManager.h"
 #include "Core/FSceneManager.h" 
+#include <Object/Actor/ATarzan.h>
 
 
 void UWorld::BeginPlay()
@@ -273,6 +274,10 @@ void UWorld::LoadWorld(const char* SceneName)
 		{
 			Actor = SpawnActor<AWorldText>();
 		}
+		else if (ObjectInfo->ObjectType == "Tarzan")
+		{
+			Actor = SpawnActor<ATarzan>();
+		}
 		// !TODO : 추가된 액터에대한 Spawn로직 추가
 		else
 		{
@@ -303,7 +308,7 @@ UWorldInfo UWorld::GetWorldInfo() const
 		WorldInfo.ObjctInfos[i] = new UObjectInfo();
 		const FTransform& Transform = actor->GetActorTransform();
 		WorldInfo.ObjctInfos[i]->Location = Transform.GetPosition();
-		WorldInfo.ObjctInfos[i]->Rotation = Transform.GetRotation();
+		WorldInfo.ObjctInfos[i]->Rotation = Transform.GetRotation().GetEuler();
 		WorldInfo.ObjctInfos[i]->Scale = Transform.GetScale();
 		const char* ActorName = actor->GetTypeName();
 		WorldInfo.ObjctInfos[i]->ObjectType = ActorName;

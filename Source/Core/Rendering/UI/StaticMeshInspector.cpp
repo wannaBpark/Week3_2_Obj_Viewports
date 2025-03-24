@@ -65,6 +65,8 @@ void FStaticMeshInspector::UpdateStaticMeshCombo()
 			{
 				StaticMeshIndex = i;
 				Component->SetStaicMesh(StaticMeshes[i]->PathFileName);
+				// 메시바뀌면 머티리얼 갱신해줘야 함
+				ComponentMaterials = Component->GetMaterials();
 			}
 			if (IsSelected)
 			{
