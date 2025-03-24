@@ -13,6 +13,7 @@
 class UObject;
 class UWorld;
 class SViewportWindow;
+class ACamera;
 enum class EScreenMode : uint8
 {
     Windowed,    // 창 모드
@@ -79,6 +80,8 @@ public:
     ObjectType* GetObjectByUUID(uint32 InUUID) const;
     UObject* GetObjectByUUID(uint32 InUUID) const;
 
+    void SetViewportCameras();
+
 private:
     bool IsRunning = false;
     EScreenMode ScreenMode = EScreenMode::Windowed;
@@ -106,6 +109,7 @@ private:
     class UWorld* World;
     std::unique_ptr<SSplitterH> RootWindow;
     TArray<std::shared_ptr<SViewportWindow>> SViewportWindows;
+    TArray<std::shared_ptr<ACamera>> Cameras;
 
 public:
     // TArray<std::shared_ptr<UObject>> GObjects;

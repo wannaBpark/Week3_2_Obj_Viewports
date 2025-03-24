@@ -410,45 +410,6 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
         DXViewport.TopLeftX, DXViewport.TopLeftY,
         DXViewport.TopLeftX + DXViewport.Width,
         DXViewport.TopLeftY + DXViewport.Height);
-    //this->SetViewport(ViewportInfos[0]);
-    //for (uint32 i{ 0 }; i < NumViewports; i++)
-    //{
-    //    UE_LOG("Viewport[%d]: X=%.1f, Y=%.1f, W=%.1f, H=%.1f", i, ViewportInfos[i].TopLeftX, ViewportInfos[i].TopLeftY,
-    //                                                              ViewportInfos[i].Width, ViewportInfos[i].Height);
-    //    ComPtr<ID3D11Buffer> pBuffer = ConstantBufferMap[6];
-    //    DeviceContext->RSSetViewports(1, &ViewportInfos[i]);
-    //    if (i >= 0) // 0 = 원본 뷰포트는 viewmatrix 수정필요 없으므로
-    //    {
-    //        // 상수 버퍼가 이미 설정된 상태에서 ViewportIndex만 업데이트
-    //        
-    //        D3D11_MAPPED_SUBRESOURCE ms;
-
-    //        // Map 호출로 ViewportIndex만 업데이트
-    //        HRESULT hr = DeviceContext->Map(pBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
-    //        if (SUCCEEDED(hr))
-    //        {
-    //            if (VC == 4 || VC == 5) {
-    //                FViewportConstant* Cbuffer = static_cast<FViewportConstant*>(ms.pData);
-    //                Cbuffer->VPIndex = i; // ViewportIndex만 변경
-    //            }
-    //            DeviceContext->Unmap(pBuffer.Get(), 0);
-    //        }
-    //        else
-    //        {
-    //            // Map 실패 시 로그 출력 또는 오류 처리
-    //            continue;
-    //        }
-    //    }
-    //    if (bUseIndexBuffer == true)
-    //    {
-    //        RenderPrimitiveIndexed(VertexBufferMap[Type].Get(), IndexBufferMap[Type].Get(), numVertices);
-    //    }
-    //    else
-    //    {
-    //        RenderPrimitiveInternal(VertexBufferMap[Type].Get(), numVertices);
-    //    }
-    //    // 뷰포트 설정 (중복 설정 방지 가능)
-    //}   
     // 렌더링 호출
     if (bUseIndexBuffer == true)
     {

@@ -21,6 +21,11 @@ public:
         DXViewport.MaxDepth = 1.0f;
     }
 
+    void SetCamera(std::shared_ptr<ACamera> InCamera)
+    {
+        if (InCamera) { Camera = InCamera; }
+    }
+
     void Render() override 
     {
         if (bRenderable) {
@@ -29,6 +34,18 @@ public:
                 DXViewport.TopLeftX, DXViewport.TopLeftY, 
                 DXViewport.TopLeftX + DXViewport.Width, 
                 DXViewport.TopLeftY + DXViewport.Height );*/
+            if (Camera)
+            {
+                // Orthographic
+                if (static_cast<uint32>(Camera->GetProjectionMode()) == 1) 
+                {
+                    float aspectRatio = DXViewport.Width / DXViewport.Height;
+                    float viewportSize = max(DXViewport.Width, DXViewport.Height);
+                    //
+                    //Camera->SetViewportSize(viewportSize);
+                }
+                FEditorManager::Get().SetCamera(this->Camera.get());
+            }
 
             UEngine::Get().GetRenderer()->SetViewport(DXViewport);
             UEngine::Get().GetWorld()->Render();

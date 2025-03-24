@@ -24,12 +24,12 @@ class ACamera : public AActor
 
 public:
     ACamera();
-    //ACamera(ECameraProjectionMode prjMode, ); // Constructor : Set Orthographic Camera
+    ACamera(FVector Position, FVector Rotation, ECameraProjectionMode::Type ProjMode); // Constructor : Set Orthographic Camera
 
 private:    
     float Near;
     float Far;
-    // 화면각
+    // 화면각  
     float FieldOfView;
     // orthographic 사용 시 view범위
     float ViewportSize;
@@ -49,11 +49,13 @@ public:
     void SetViewportSize(float inViewprotSize);
     void SetFar(float Far);
     void SetNear(float Near);
+    void SetProjectionMode(ECameraProjectionMode::Type InMode);
     
     float GetFieldOfView() const;
     float GetViewportSize() const;
     float GetNear() const;
     float GetFar() const;
+    ECameraProjectionMode::Type GetProjectionMode() const;
 
         
     FVector GetForward() const

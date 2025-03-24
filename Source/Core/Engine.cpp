@@ -235,27 +235,6 @@ void UEngine::InitWindow(int InScreenWidth, int InScreenHeight)
     ShowWindow(WindowHandle, SW_SHOW);
     SetForegroundWindow(WindowHandle);
     SetFocus(WindowHandle);
-
-#pragma region Multi Viewports               // 
-    auto topLeft = std::make_shared<SViewportWindow>();
-    auto topRight = std::make_shared<SViewportWindow>();
-    auto bottomLeft = std::make_shared<SViewportWindow>();
-    auto bottomRight = std::make_shared<SViewportWindow>();
-    auto TopVerticalSplitter = std::make_shared<SSplitterV>(topLeft, topRight);
-    auto BottomVerticalSplitter = std::make_shared<SSplitterV>(bottomLeft, bottomRight);
-
-    SViewportWindows.Add(topLeft); SViewportWindows.Add(topRight);
-    SViewportWindows.Add(bottomLeft); SViewportWindows.Add(bottomRight);
-
-    RootWindow = std::make_unique<SSplitterH>(TopVerticalSplitter, BottomVerticalSplitter);
-    RootWindow->SetRect({
-        0, 0,                               // TopLeft, TopRight 
-        static_cast<uint32>(InScreenWidth), // Width
-        static_cast<uint32>(InScreenHeight) // Height
-    });
-    RootWindow->UpdateLayout();
-    UE_LOG("InScreen Resolution : %d %d", static_cast<uint32>(InScreenWidth), static_cast<uint32>(InScreenHeight));
-#pragma endregion
     //AllocConsole(); // 콘솔 창 생성
 
     //// 표준 출력 및 입력을 콘솔과 연결
@@ -280,12 +259,11 @@ void UEngine::InitWorld()
     World->SceneName = "MainScene";
     FSceneManager::Get().AddScene(World);
 
-    FEditorManager::Get().SetCamera(World->SpawnActor<ACamera>());
+    //FEditorManager::Get().SetCamera(World->SpawnActor<ACamera>());
+#pragma region Viewport and Camera Settings
+    SetViewportCameras();
+#pragma endregion
 
-    //// Test
-    //AArrow* Arrow = World->SpawnActor<AArrow>();
-    //World->SpawnActor<ASphere>();
-    
     World->SpawnActor<AAxis>();
     APicker* Picker = World->SpawnActor<APicker>();
     FEditorManager::Get().SetBoundingBox(Picker->GetBoundingBoxComp());
@@ -346,4 +324,55 @@ UObject* UEngine::GetObjectByUUID(uint32 InUUID) const
         return Obj->get();
     }
     return nullptr;
+}
+
+
+void UEngine::SetViewportCameras()
+{
+#pragma region Multi Viewports               // 
+    auto topLeft = std::make_shared<SViewportWindow>();
+    auto topRight = std::make_shared<SViewportWindow>();
+    auto bottomLeft = std::make_shared<SViewportWindow>();
+    auto bottomRight = std::make_shared<SViewportWindow>();
+    auto TopVerticalSplitter = std::make_shared<SSplitterV>(topLeft, topRight);
+    auto BottomVerticalSplitter = std::make_shared<SSplitterV>(bottomLeft, bottomRight);
+
+    SViewportWindows.Add(topLeft); SViewportWindows.Add(topRight);
+    SViewportWindows.Add(bottomLeft); SViewportWindows.Add(bottomRight);
+
+    RootWindow = std::make_unique<SSplitterH>(TopVerticalSplitter, BottomVerticalSplitter);
+    RootWindow->SetRect({
+        0, 0,                               // TopLeft, TopRight 
+        static_cast<uint32>(ScreenWidth), // Width
+        static_cast<uint32>(ScreenHeight) // Height
+        });
+    RootWindow->UpdateLayout();
+    UE_LOG("InScreen Resolution : %d %d", static_cast<uint32>(ScreenWidth), static_cast<uint32>(ScreenHeight));
+#pragma endregion
+
+#pragma region Multi Camera Initialization
+    FTransform ZY = FTransform(FVector(-5, 0, 1), FVector(0, 0, 0), FVector(1, 1, 1));
+    FTransform ZX = FTransform(FVector(0, 5, 1), FVector(0, 0, -90), FVector(1, 1, 1));
+    FTransform XY = FTransform(FVector(0, 0, 5), FVector(0, 90, 0), FVector(1, 1, 1));
+    ACamera* CamZY = World->SpawnActor<ACamera>(); CamZY->SetActorTransform(ZY); CamZY->SetProjectionMode(ECameraProjectionMode::Orthographic);
+    ACamera* CamZX = World->SpawnActor<ACamera>(); CamZX->SetActorTransform(ZX); CamZX->SetProjectionMode(ECameraProjectionMode::Orthographic);
+    ACamera* CamXY = World->SpawnActor<ACamera>(); CamXY->SetActorTransform(XY); CamXY->SetProjectionMode(ECameraProjectionMode::Orthographic);
+
+    ACamera* CamPerspective = World->SpawnActor<ACamera>();
+    Cameras.Add(std::make_shared<ACamera>(*CamZY));
+    Cameras.Add(std::make_shared<ACamera>(*CamZX));
+    Cameras.Add(std::make_shared<ACamera>(*CamPerspective));
+    Cameras.Add(std::make_shared<ACamera>(*CamXY));
+
+    if (topLeft) topLeft->SetCamera(Cameras[0]);
+    if (topRight) topRight->SetCamera(Cameras[1]);
+    if (bottomLeft) bottomLeft->SetCamera(Cameras[3]);
+    if (bottomRight) bottomRight->SetCamera(Cameras[2]); 
+    // 원랜 0,1,2,3순서이지만 카메라 마지막 부분만 마우스 조작되는 관계로 0132로 해놓음
+    // TODO : 위에서 아래로 내려다보는 카메라 FIX
+    // TODO : Hover 후 키입력 시 카메라 모드 변경하도록
+
+    FEditorManager::Get().SetCamera(CamPerspective);
+
+#pragma endregion
 }
