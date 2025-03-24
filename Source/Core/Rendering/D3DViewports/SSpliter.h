@@ -191,23 +191,22 @@ public:
         if (IsOverCenter(MousePos))
         {
             bIsCenterDrag = bIsDragging = true;
-            LastMousePos = MousePos;
             ::SetCursor(LoadCursor(nullptr, IDC_SIZEALL));
         }
         else if (IsOverVerticalBorder(MousePos))
         {
             bIsVerticalDrag = bIsDragging = true;
-            LastMousePos = MousePos;
             ::SetCursor(LoadCursor(nullptr, IDC_SIZEWE));  // 좌우 아이콘
-            UE_LOG("SSplitterH: Vertical Border Mouse Down, start dragging vertical only");
+            UE_LOG("SSplitterH: Vertical Border Mouse Down, ONLY Start Dragging Vertical");
         }
         else if (IsOverBorder(MousePos))
         {
             bIsDragging = true;
-            LastMousePos = MousePos;
             ::SetCursor(LoadCursor(nullptr, IDC_SIZENS));
-            UE_LOG("SSplitterH: Border Mouse Down, start dragging");
+            UE_LOG("SSplitterH: Border Mouse Down, General Mouse Drag");
         }
+        LastMousePos = MousePos;
+
     }
 
 
