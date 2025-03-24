@@ -429,10 +429,10 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
 
     DeviceContext->RSGetViewports(&NumViewports, &DXViewport); // RSGetViewports 호출
 
-    UE_LOG("Rendering CALL VIEWPORT  (%f, %f) - (%f, %f)",
+    /*UE_LOG("Rendering CALL VIEWPORT  (%f, %f) - (%f, %f)",
         DXViewport.TopLeftX, DXViewport.TopLeftY,
         DXViewport.TopLeftX + DXViewport.Width,
-        DXViewport.TopLeftY + DXViewport.Height);
+        DXViewport.TopLeftY + DXViewport.Height);*/
     // 렌더링 호출
     if (bUseIndexBuffer == true)
     {
@@ -853,8 +853,9 @@ void URenderer::UpdateViewMatrix(const FTransform& CameraTransform)
 
 void URenderer::UpdateProjectionMatrix(ACamera* Camera)
 {
-    float AspectRatio = UEngine::Get().GetScreenRatio();
-
+    float AspectRatio = Camera->GetAspectRatio();
+    float Width = Camera->GetWidth();
+    float Height = Camera->GetHeight();
     float FOV = FMath::DegreesToRadians(Camera->GetFieldOfView());
     float ViewportSize = Camera->GetViewportSize();
     float Near = Camera->GetNear();
@@ -866,7 +867,7 @@ void URenderer::UpdateProjectionMatrix(ACamera* Camera)
     }
     else if (Camera->ProjectionMode == ECameraProjectionMode::Orthographic)
     {
-        ProjectionMatrix = FMatrix::OrthoForLH(ViewportSize, ViewportSize, Near, Far);
+        ProjectionMatrix = FMatrix::OrthoForLH(Width/100.f, Height/100.f, Near, Far);
     }
 }
 

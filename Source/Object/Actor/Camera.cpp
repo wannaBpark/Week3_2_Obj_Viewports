@@ -49,6 +49,12 @@ void ACamera::SetViewportSize(float inViewprotSize)
     ViewportSize = inViewprotSize;
 }
 
+void ACamera::SetViewportSize(float InWidth, float InHeight)
+{
+    Width = InWidth;
+    Height = InHeight;
+}
+
 void ACamera::SetFar(float Far)
 {
     this->Far = Far;
@@ -82,6 +88,21 @@ float ACamera::GetNear() const
 float ACamera::GetFar() const
 {
     return Far;
+}
+
+float ACamera::GetAspectRatio() const
+{
+    return Width / Height;
+}
+
+float ACamera::GetWidth() const
+{
+    return Width;
+}
+
+float ACamera::GetHeight() const
+{
+    return Height;
 }
 
 ECameraProjectionMode::Type ACamera::GetProjectionMode() const
