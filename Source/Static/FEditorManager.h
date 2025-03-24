@@ -1,5 +1,6 @@
 #pragma once
 #include "Object/Actor/Actor.h"
+#include "Object/USceneComponent.h"
 
 class AGizmoHandle;
 class UStringComponent;
@@ -22,6 +23,9 @@ public:
 
     void SetBoundingBox(UBoundingBoxComp* InBoundingBoxComp);
     void SetStringComp(UStringComponent* InStringComp);
+
+    void SelectComponent(USceneComponent* NewSceneComponent);
+    USceneComponent* GetSelectedComponent() { return SelectedComponent; }
     
 private:
     ACamera* Camera = nullptr;
@@ -29,4 +33,5 @@ private:
     AGizmoHandle* GizmoHandle = nullptr;
 	UStringComponent* StringComp = nullptr;
     UBoundingBoxComp* BoundingBoxComp = nullptr;
+    USceneComponent* SelectedComponent = nullptr;
 };

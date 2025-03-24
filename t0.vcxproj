@@ -225,6 +225,7 @@
     <ClCompile Include="Source\Object\World\World.cpp" />
     <ClCompile Include="Source\Object\Actor\Sphere.cpp" />
     <ClCompile Include="Source\Object\StaticMeshComponent\StaticMeshComponent.cpp" />
+    <ClCompile Include="Source\Core\Rendering\UI\StaticMeshInspector.cpp" />
     <ClCompile Include="URaycastSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -382,11 +383,11 @@
     <ClInclude Include="Source\ThirdParty\ImGui\imstb_truetype.h" />
     <ClInclude Include="Source\ThirdParty\iniparser.hpp" />
     <ClInclude Include="Source\ThirdParty\SimpleJSON\Json.hpp" />
-    <ClCompile Include="Source\Core\Rendering\UI.cpp" />
+    <ClCompile Include="Source\Core\Rendering\UI\UI.cpp" />
     <ClCompile Include="Source\Core\Rendering\URenderer.cpp" />
     <ClCompile Include="Source\Primitive\PrimitiveVertices.cpp" />
     <ClInclude Include="Source\Core\Engine.h" />
-    <ClInclude Include="Source\Core\Rendering\UI.h" />
+    <ClInclude Include="Source\Core\Rendering\UI\UI.h" />
     <ClInclude Include="Source\Core\Rendering\URenderer.h" />
     <ClCompile Include="Source\Object\Actor\Picker.cpp" />
     <ClInclude Include="Source\Object\Gizmo\GizmoHandle.h" />
@@ -407,6 +408,7 @@
     <ClInclude Include="Source\ThirdParty\stb-master\stb_image.h" />
     <ClInclude Include="Source\ThirdParty\stb-master\stb_image_write.h" />
     <ClInclude Include="Source\Object\StaticMeshComponent\StaticMeshComponent.h" />
+    <ClInclude Include="Source\Core\Rendering\UI\StaticMeshInspector.h" />
     <ClInclude Include="UColliders.h" />
     <ClInclude Include="URaycastSystem.h" />
   </ItemGroup>

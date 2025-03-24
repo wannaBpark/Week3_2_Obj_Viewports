@@ -26,6 +26,7 @@ struct FNormalVertex
 struct FSubMesh
 {
 	FName GroupName = "Default";
+	uint32 Index = 0;
 	uint32 StartIndex = 0;
 	uint32 NumIndices = 0;
 

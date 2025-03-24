@@ -29,6 +29,10 @@ public:
 	ID3D11Buffer* VertexBuffer;
 	ID3D11Buffer* IndexBuffer;
 
+	const TArray<UMaterial*>& GetMaterials() { return Materials; }
+	const UMaterial* GetMaterial(uint32 Index);
+	void SetMaterial(uint32 Index, UMaterial* InMaterial);
+
 private:
 	TArray<class UMaterial*> Materials;
 };
