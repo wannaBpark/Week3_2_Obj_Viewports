@@ -12,9 +12,15 @@ protected:
 public:
     explicit SSplitter(std::shared_ptr<SWindow> LT, std::shared_ptr<SWindow> RB) : SideLT(LT), SideRB(RB) { }
 
-    virtual void OnDrag(float Delta) = 0; // [순수 가상 함수 오버라이딩 필요] : 마우스 드래그에 따른 창 크기를 조절할 함수입니다
+    virtual void OnDrag(float Delta)
+    {
+        SplitRatio += Delta;
+        SplitRatio = std::clamp(SplitRatio, 0.1f, 0.9f);
+        UpdateLayout();
+        UE_LOG("SSplitterH: Dragging, SplitRatio = %.2f", SplitRatio);
+    }
 
-    virtual void Render() override
+    virtual void Render() override // 자신과 자신의 자식(Swindow or Splitter)을 렌더
     {
         Super::Render();
         if (SideLT) SideLT->Render();
@@ -93,29 +99,14 @@ public:
             LastMousePos = MousePos;
         }
     }
-    
-    virtual void OnMouseUp(const FPoint& MousePos) override
-    {
-        bIsDragging = false;
-        ::SetCursor(LoadCursor(nullptr, IDC_ARROW));
-        UE_LOG("SSpliterV : Mouse Up, stop dragging");
-    }
-
-    void OnDrag(float Delta) override
-    {
-        SplitRatio += Delta;
-        SplitRatio = std::clamp(SplitRatio, 0.1f, 0.9f);
-        UpdateLayout();
-        UE_LOG("SSplitterV: Dragging, SplitRatio = %.2f", SplitRatio);
-    }
 
     void UpdateLayout() override
     {
         Super::UpdateLayout();
 
         // 전체 width에서 border 영역을 빼면 사용 가능한 너비
-        uint32_t availableWidth = Rect.W - BorderThickness;
-        uint32_t leftWidth = static_cast<uint32_t>(availableWidth * SplitRatio);
+        uint32 availableWidth = Rect.W - BorderThickness;
+        uint32 leftWidth = static_cast<uint32>(availableWidth * SplitRatio);
 
         // 왼쪽 창의 rect (border 제외)
         FRect leftRect = Rect;
@@ -148,7 +139,7 @@ public:
     // 마우스 좌표가 수평 경계 영역에 있는지 검사
     bool IsOverBorder(const FPoint& MousePos) const
     {
-        uint32_t topHeight = static_cast<uint32_t>(Rect.H * SplitRatio);
+        uint32 topHeight = static_cast<uint32>(Rect.H * SplitRatio);
         FRect borderRect = {
             Rect.X,
             Rect.Y + topHeight - BorderThickness / 2,
@@ -162,12 +153,12 @@ public:
     bool IsOverCenter(const FPoint& MousePos) const
     {
         // vertical border (위쪽 splitter 기준; top과 bottom은 동일한 분할을 가짐)
-        uint32_t AvailableWidth = Rect.W - BorderThickness;
-        uint32_t leftWidth = static_cast<uint32_t>(AvailableWidth * TopSplitterV->GetSplitRatio());
+        uint32 AvailableWidth = Rect.W - BorderThickness;
+        uint32 leftWidth = static_cast<uint32>(AvailableWidth * TopSplitterV->GetSplitRatio());
 
         // horizontal border (자신의 border)
-        uint32_t AvailableHeight = Rect.H - BorderThickness;
-        uint32_t topHeight = static_cast<uint32_t>(AvailableHeight * SplitRatio);
+        uint32 AvailableHeight = Rect.H - BorderThickness;
+        uint32 topHeight = static_cast<uint32>(AvailableHeight * SplitRatio);
 
         FRect CenterRect = {
             Rect.X + leftWidth,
@@ -182,7 +173,7 @@ public:
     {
         // top splitter의 vertical border 영역을 기준으로 계산 (bottom도 동일하다고 가정)
         FRect topRect = TopSplitterV->GetRect();
-        uint32_t leftWidth = static_cast<uint32_t>(topRect.W * TopSplitterV->GetSplitRatio());
+        uint32 leftWidth = static_cast<uint32>(topRect.W * TopSplitterV->GetSplitRatio());
         FRect BorderRect = {
             topRect.X + leftWidth - BorderThickness / 2,
             topRect.Y,
@@ -214,6 +205,7 @@ public:
         {
             bIsDragging = true;
             LastMousePos = MousePos;
+            ::SetCursor(LoadCursor(nullptr, IDC_SIZENS));
             UE_LOG("SSplitterH: Border Mouse Down, start dragging");
         }
     }
@@ -237,7 +229,6 @@ public:
 
             if (bIsVerticalDrag) // Vertical 축 드래그 : 좌우 delta만 적용
             {
-
                 TopSplitterV->OnDrag(normalizedDeltaX);
                 BottomSplitterV->OnDrag(normalizedDeltaX);
             }
@@ -254,29 +245,17 @@ public:
         }
     }
 
-    virtual void OnMouseUp(const FPoint& MousePos) override
+    void OnMouseUp(const FPoint& MousePos) override
     {
-        bIsDragging = bIsCenterDrag = bIsVerticalDrag = false;
-        ::SetCursor(LoadCursor(nullptr, IDC_ARROW));
-
-        if (TopSplitterV)    { TopSplitterV->OnMouseUp(MousePos);    }
-        if (BottomSplitterV) { BottomSplitterV->OnMouseUp(MousePos); }
-        UE_LOG("SSplitterH: Mouse Up, stop dragging");
-    }
-
-    void OnDrag(float Delta) override 
-    {
-        SplitRatio += Delta;
-        SplitRatio = std::clamp(SplitRatio, 0.1f, 0.9f);
-        UpdateLayout();
-        UE_LOG("SSplitterH: Dragging, SplitRatio = %.2f", SplitRatio);
+        bIsCenterDrag = bIsVerticalDrag = false;
+        Super::OnMouseUp(MousePos);
     }
 
     void UpdateLayout() override {
         Super::UpdateLayout();
 
-        uint32_t availableHeight = Rect.H - BorderThickness;
-        uint32_t topHeight = static_cast<uint32_t>(availableHeight * SplitRatio);
+        uint32 availableHeight = Rect.H - BorderThickness;
+        uint32 topHeight = static_cast<uint32>(availableHeight * SplitRatio);
 
         FRect topRect = Rect;
         topRect.H = topHeight;
