@@ -218,6 +218,7 @@ public:
 	*/
 	FNameEntry Resolve(uint32 Hash) const
 	{
+		auto* t = this;
 		return *DisplayPool.Find(Hash);
 	}
 
@@ -317,15 +318,15 @@ FString FName::ToString() const
 		return { TEXT("None") };
 	}
 
-	// TODO: WIDECHAR에 대응 해야함
 	FNameEntry Entry = FNamePool::Get().Resolve(DisplayIndex);
 	return {
 		// Entry.Header.IsWide ? Entry.WideName : Entry.AnsiName
+#if IS_WIDECHAR
+		Entry.WideName
+#else
 		Entry.AnsiName
+#endif
 	};
 }
 
-bool FName::operator==(const FName& Other) const
-{
-	return ComparisonIndex == Other.ComparisonIndex;
-}
+//FORCEINLINE bool FName::operator==(const FName& Other) const

@@ -207,7 +207,7 @@ inline bool FVector::operator!=(const FVector& Other) const
     return X != Other.X || Y != Other.Y || Z != Other.Z;
 }
 
-struct alignas(16) FVector4 : public FVector
+struct FVector4 : public FVector
 {
     using FVector::X;
     using FVector::Y;
@@ -234,3 +234,13 @@ inline FVector4& FVector4::operator/=(float Scalar)
     return *this;
 }
 
+struct FVector2D
+{
+	float X, Y;
+
+	FVector2D() : X(0), Y(0) {}
+	FVector2D(float InX, float InY) : X(InX), Y(InY) {}
+
+	static const FVector2D ZeroVector;
+	static const FVector2D OneVector;
+};

@@ -13,6 +13,11 @@
 #include "Static/FEditorManager.h"
 #include "Object/Gizmo/WorldGizmo.h"
 #include "Core/FSceneManager.h"
+#include "EngineConfig.h"
+#include "Core/Container/ObjectIterator.h"
+#include "Object/Mesh/ObjManager.h"
+#include "Object/Actor/ATarzan.h"
+
 
 #include "Core/Rendering/D3DViewports/SViewportWindow.h"
 
@@ -74,14 +79,25 @@ void UEngine::Initialize(
     EScreenMode InScreenMode
 )
 {
+    EngineConfig = new FEngineConfig();
+    EngineConfig->LoadEngineConfig();
+
+	int StoredWidth = EngineConfig->GetEngineConfigValue<int>(EEngineConfigValueType::EEC_ScreenWidth);
+	int StoredHeight = EngineConfig->GetEngineConfigValue<int>(EEngineConfigValueType::EEC_ScreenHeight);
+
     WindowInstance = hInstance;
     WindowTitle = InWindowTitle;
     WindowClassName = InWindowClassName;
     ScreenMode = InScreenMode;
-    ScreenWidth = InScreenWidth;
-    ScreenHeight = InScreenHeight;
+    ScreenWidth = StoredWidth;
+    ScreenHeight = StoredHeight;
 
-    InitWindow(InScreenWidth, InScreenHeight);
+    InitWindow(ScreenWidth, ScreenHeight);
+
+	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenWidth, ScreenWidth);
+	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenHeight, ScreenHeight);
+
+    // InitWindow(InScreenWidth, InScreenHeight);
     InitRenderer();
 
     InitWorld();
@@ -141,6 +157,18 @@ void UEngine::Run()
         Renderer->Prepare();          
         //Renderer->PrepareShader();    // 각 rendercomponent에서 호출
 
+        for (TObjectIterator<UPrimitiveComponent> It(UEngine::Get().GObjects.begin(), UEngine::Get().GObjects.end());
+            It;
+            ++It)
+        {
+            UPrimitiveComponent* prim = *It;
+
+            //if (prim)
+            //{
+            //    UE_LOG(TEXT("Found PrimitiveCompnent : %s"), *prim->GetName());
+            //}
+        }
+
 		// World Update
 		if (World)
 		{
@@ -181,6 +209,7 @@ void UEngine::Run()
 
 void UEngine::Shutdown()
 {
+    World->ClearWorld();
     ShutdownWindow();
 }
 
@@ -263,6 +292,23 @@ void UEngine::InitWorld()
 #pragma region Viewport and Camera Settings
     SetViewportCameras();
 #pragma endregion
+	ACamera* Camera = Cameras[2].get();
+    FEditorManager::Get().SetCamera(Camera);
+	FTransform CameraTransform = Camera->GetActorTransform();
+    // Camera ini 세팅
+    float CamPosX = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraPosX);
+	float CamPosY = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraPosY);
+	float CamPosZ = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraPosZ);
+	CameraTransform.SetPosition(FVector(CamPosX, CamPosY, CamPosZ));
+    
+	float CamRotX = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotX);
+	float CamRotY = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotY);
+	float CamRotZ = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotZ);
+	float CamRotW = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotW);
+    CameraTransform.SetRotation(FQuat(CamRotX, CamRotY, CamRotZ, CamRotW));
+
+	Camera->SetActorTransform(CameraTransform);
+
 
     World->SpawnActor<AAxis>();
     APicker* Picker = World->SpawnActor<APicker>();
@@ -272,6 +318,15 @@ void UEngine::InitWorld()
     World->SpawnActor<AWorldGrid>();
     AWorldGizmo* WorldGizmo = World->SpawnActor<AWorldGizmo>();
 	/*World->BeginPlay();*/
+
+	FString DefaultSceneName = "MainScene";
+
+    // preload
+    PreloadResources();
+
+	World->LoadWorld(*DefaultSceneName);
+
+	ATarzan* Tarzan = World->SpawnActor<ATarzan>();
 }
 
 void UEngine::ShutdownWindow()
@@ -283,6 +338,12 @@ void UEngine::ShutdownWindow()
     WindowInstance = nullptr;
 
 	ui.Shutdown();
+
+    EngineConfig->SaveAllConfig();
+	delete EngineConfig;
+
+    // 프리로드 리소스 해제
+	FObjManager::ReleaseResources();
 }
 
 void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
@@ -315,6 +376,23 @@ void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
         });
         RootWindow->UpdateLayout();
     }
+	// 전체 윈도우 영역 가져와서 ini에 저장
+	RECT WindowRect;
+
+	GetWindowRect(WindowHandle, &WindowRect);
+
+	UINT TotalWidth = WindowRect.right - WindowRect.left;
+	UINT TotalHeignt = WindowRect.bottom - WindowRect.top;
+
+	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenWidth, TotalWidth);
+	EngineConfig->SaveEngineConfig<int>(EEngineConfigValueType::EEC_ScreenHeight, TotalHeignt);
+
+}
+
+void UEngine::PreloadResources()
+{
+	FObjManager::LoadObjStaticMeshAsset(TEXT("Assets/2PX7U16XARLGHIM3W48FS86MJ.obj"));
+>>>>>>> main
 }
 
 UObject* UEngine::GetObjectByUUID(uint32 InUUID) const

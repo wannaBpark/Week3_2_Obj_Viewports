@@ -246,10 +246,20 @@
     <ClCompile Include="Source\Object\UtilComponent\UStringComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="Source\Core\Rendering\D3DViewports\Viewport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Core\Rendering\D3DViewports\ViewportClient.cpp">
+=======
+    <ClCompile Include="Source\MeshBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ObjReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Object\StaticMeshComponent\MeshComponent.cpp">
+>>>>>>> main
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -515,6 +525,22 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Core\Rendering\D3DViewports\SWindow.h">
+    <ClInclude Include="Source\MeshBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ObjReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Rendering\RendererDefine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Template\RemoveReference.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Template\Template.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\StaticMeshComponent\MeshComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

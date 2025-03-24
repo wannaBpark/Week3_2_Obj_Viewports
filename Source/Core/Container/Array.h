@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <algorithm>
 #include <utility>
 #include <vector>
@@ -39,6 +39,8 @@ public:
     // 이동 생성자
     TArray(TArray&& Other) noexcept;
 
+	TArray(SIZE_T Count);
+
     // 복사 할당 연산자
     TArray& operator=(const TArray& Other);
 
@@ -58,6 +60,7 @@ public:
         requires std::is_invocable_r_v<bool, Predicate, const T&>
     SizeType RemoveAll(const Predicate& Pred);
     T* GetData();
+    const T* GetData() const;
 
     /**
      * Array에서 Item을 찾습니다.
@@ -106,6 +109,11 @@ TArray<T, Allocator>::TArray(const TArray& Other): PrivateVector(Other.PrivateVe
 
 template <typename T, typename Allocator>
 TArray<T, Allocator>::TArray(TArray&& Other) noexcept: PrivateVector(std::move(Other.PrivateVector))
+{
+}
+
+template<typename T, typename Allocator>
+inline TArray<T, Allocator>::TArray(SIZE_T Count) : PrivateVector(Count)
 {
 }
 
@@ -211,6 +219,12 @@ typename TArray<T, Allocator>::SizeType TArray<T, Allocator>::RemoveAll(const Pr
 
 template <typename T, typename Allocator>
 T* TArray<T, Allocator>::GetData()
+{
+    return PrivateVector.data();
+}
+
+template<typename T, typename Allocator>
+inline const T* TArray<T, Allocator>::GetData() const
 {
     return PrivateVector.data();
 }

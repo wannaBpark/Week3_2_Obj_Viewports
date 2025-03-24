@@ -10,6 +10,8 @@
 #include "Core/Container/Array.h"
 
 #include "Core/Math/Vector.h"
+#include "Core/Container/String.h"
+
 struct FPosColorNormalTex;
 struct BufferInfo
 {
@@ -37,6 +39,7 @@ class FBufferCache
 {
 private:
 	std::unordered_map <EPrimitiveType, BufferInfo> Cache;
+	std::unordered_map <FString, BufferInfo> StaticMeshCache;
 
 public:
 	FBufferCache();

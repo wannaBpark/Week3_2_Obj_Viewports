@@ -7,6 +7,7 @@
 #include "Core/Math/Plane.h"
 
 #include "../URaycastSystem.h"
+#include "Core/EngineConfig.h"
 
 APlayerController::APlayerController() {
 
@@ -85,6 +86,17 @@ void APlayerController::HandleCameraMovement(float DeltaTime) {
     CameraTransform.Translate(NewVelocity * DeltaTime * CamSpeed);
     Camera->SetActorTransform(CameraTransform); //임시용
     // FCamera::Get().SetVelocity(NewVelocity);
+
+    // ini에 Camera위치 저장
+	FEngineConfig* EngineConfig = UEngine::Get().GetEngineConfig();
+	EngineConfig->SaveEngineConfig<float>(EEngineConfigValueType::EEC_EditorCameraPosX, CameraTransform.GetPosition().X);
+	EngineConfig->SaveEngineConfig<float>(EEngineConfigValueType::EEC_EditorCameraPosY, CameraTransform.GetPosition().Y);
+	EngineConfig->SaveEngineConfig<float>(EEngineConfigValueType::EEC_EditorCameraPosZ, CameraTransform.GetPosition().Z);
+
+	EngineConfig->SaveEngineConfig<float>(EEngineConfigValueType::EEC_EditorCameraRotX, CameraTransform.GetRotation().X);
+	EngineConfig->SaveEngineConfig<float>(EEngineConfigValueType::EEC_EditorCameraRotY, CameraTransform.GetRotation().Y);
+	EngineConfig->SaveEngineConfig<float>(EEngineConfigValueType::EEC_EditorCameraRotZ, CameraTransform.GetRotation().Z);
+	EngineConfig->SaveEngineConfig<float>(EEngineConfigValueType::EEC_EditorCameraRotW, CameraTransform.GetRotation().W);
 }
 
 void APlayerController::HandleGizmoMovement(float DeltaTime)

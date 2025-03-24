@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Core/Math/Matrix.h"
+#include "Core/Math/Vector.h"
+
 #define BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(StructType) \
     class alignas(16) StructType \
     { \
@@ -51,6 +54,8 @@ enum class InputLayoutType
     POSCOLORNORMAL,
     POSNORMALTEX,
     POSCOLORNORMALTEX,
+
+    POSNORMALTANGENTCOLORTEX,
 };
 
 // Constant Buffer 구조체 정의
@@ -121,6 +126,13 @@ struct FLineConstants
 BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FViewportConstant)
     SHADER_PARAMETER(uint32, VPIndex)
     SHADER_PARAMETER(FVector, Padding)
+END_GLOBAL_SHADER_PARAMETER_STRUCT()
+
+
+BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FStaticMeshVertexConstant)
+    SHADER_PARAMETER(FMatrix, Model)
+    SHADER_PARAMETER(FMatrix, View)
+    SHADER_PARAMETER(FMatrix, Projection)
 END_GLOBAL_SHADER_PARAMETER_STRUCT()
 
 
