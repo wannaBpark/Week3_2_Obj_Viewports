@@ -11,6 +11,8 @@
 #include "Core/Rendering/BufferCache.h" // 그리드 동적 렌더링
 #include "Object/StaticMeshComponent/StaticMeshComponent.h"
 
+#include "Static/FEditorManager.h"
+
 // 아래는 Texture에 쓸 이미지 로딩용
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -935,11 +937,22 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
     DeviceContext->VSSetConstantBuffers(0, 1, ConstantBufferMap[VC].GetAddressOf());
     //DeviceContext->PSSetConstantBuffers(0, 1, ConstantBufferMap[PC].GetAddressOf());
 
+    ID3D11Buffer* psConstantBuffers[] = {
+    ConstantBufferMap[7].Get(), // GlobalLightConstant
+    ConstantBufferMap[8].Get(), // MaterialConstant
+    ConstantBufferMap[9].Get()  // CameraPositionConstant
+    };
+    DeviceContext->PSSetConstantBuffers(0, _countof(psConstantBuffers), psConstantBuffers);
+
     FMatrix m = MeshComp->GetComponentTransform().GetMatrix();
-    FQuat quat = MeshComp->GetComponentTransform().GetRotation();
+
+    FMatrix modelWorld = m;
+    modelWorld.M[3][0] = modelWorld.M[3][1] = modelWorld.M[3][2] = 0;
+    modelWorld = modelWorld.Inverse();
+    FMatrix InvTranspose = FMatrix::Transpose(FMatrix::Transpose(modelWorld));
 
     FStaticMeshVertexConstant vc = {
-        .InverseTranspose = FMatrix::Transpose(m.GetRotateMatrix(quat)),
+        .InverseTranspose = InvTranspose,
         .Model = FMatrix::Transpose(m),
         .View = FMatrix::Transpose(ViewMatrix),
         .Projection = FMatrix::Transpose(ProjectionMatrix),
@@ -953,13 +966,13 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
         .Specular = FVector4(1.f, 1.f, 1.f, 1.f),
         .Emissive = FVector4(0.f, 0.f, 0.f, 1.0f),
         .Padding1 = 0,
-        .Direction = FVector(0.1f, -1.f, -1.f),
+        .Direction = FVector(1.f, -1.f, -1.f).GetSafeNormal(),
         .Padding = 0,
     };
 
     UpdateBuffer(globalLightConstant, 7);
 
-    FVector camPos = ViewMatrix.GetTranslation();
+    FVector camPos = FEditorManager::Get().GetCamera()->GetActorTransform().GetPosition();
 
     FCameraPositionConstant camPosConstant = {
         .CameraPosition = camPos

@@ -86,11 +86,13 @@ PS_INPUT mainVS(VS_INPUT input)
     
     output.color = input.color;
     output.texcoord = input.texcoord;
+    
+    // input.normal = float3(0, 0, 0);
 
-    if (length(input.normal) < 0.1f)
+    if (length(input.normal) < 0.001f)
         output.normal = input.normal;
     else
-        output.normal = normalize(mul(float4(input.normal, 1.0f), InverseTranspose).xyz);
+        output.normal = normalize(mul(float4(input.normal, 0.f), InverseTranspose).xyz);
 
     output.tangent = input.tangent;
     
@@ -108,12 +110,12 @@ float4 ComputeLight(float3 normal, float2 uv, float3 worldPosition)
     // Ambient 처리
     {
         float4 color = GlobalLight.Ambient * Material.Ambient;
-        ambientColor = g_DiffuseMap.Sample(g_sampler0, uv) * color;
+        ambientColor = g_DiffuseMap.Sample(g_sampler0, float2(uv.x, uv.y)) * color;
     }
     
     // Diffuse 처리
     {
-        float4 color = g_DiffuseMap.Sample(g_sampler0, uv);
+        float4 color = g_DiffuseMap.Sample(g_sampler0, float2(uv.x, uv.y));
         float value = dot(-GlobalLight.Direction, normalize(normal));
         diffuseColor = color * value * GlobalLight.Diffuse * Material.Diffuse;
     }
@@ -160,7 +162,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
     if (length(input.normal) <= 0.1f)
         color = float4(g_DiffuseMap.Sample(g_sampler0, float2(input.texcoord.x, input.texcoord.y)).xyz, 1.0f);
     else
-        color = ComputeLight(input.normal, input.texcoord, input.worldPos);
+        color = ComputeLight(-input.normal, input.texcoord, input.worldPos);
     
     
     output.color = float4(color.xyz, 1.0f);
