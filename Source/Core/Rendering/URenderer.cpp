@@ -429,10 +429,10 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
 
     DeviceContext->RSGetViewports(&NumViewports, &DXViewport); // RSGetViewports 호출
 
-    UE_LOG("Rendering CALL VIEWPORT  (%f, %f) - (%f, %f)",
+    /*UE_LOG("Rendering CALL VIEWPORT  (%f, %f) - (%f, %f)",
         DXViewport.TopLeftX, DXViewport.TopLeftY,
         DXViewport.TopLeftX + DXViewport.Width,
-        DXViewport.TopLeftY + DXViewport.Height);
+        DXViewport.TopLeftY + DXViewport.Height);*/
     // 렌더링 호출
     if (bUseIndexBuffer == true)
     {

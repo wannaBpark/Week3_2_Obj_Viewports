@@ -32,20 +32,70 @@ public:
 
     float GetSplitRatio() const { return SplitRatio; }
     std::shared_ptr<SWindow> GetSideLT() { return SideLT; }
+    std::shared_ptr<SWindow> GetSideRB() { return SideRB; }
 };
 
 
 class SSplitterV final : public SSplitter
 {
     using Super = SSplitter;
+private:
+    const uint32 BorderThickness = 4;
+    FPoint LastMousePos;
 public:
     explicit SSplitterV(std::shared_ptr<SWindow> Left, std::shared_ptr<SWindow> Right) : SSplitter(Left, Right) {}
+
+    bool IsOverBorder(const FPoint& MousePos) const
+    {
+        uint32 leftWidth = static_cast<uint32>(Rect.W * SplitRatio);
+        FRect BorderRect = {
+            .X = Rect.X + leftWidth - BorderThickness / 2,
+            .Y = Rect.Y,
+            .W = BorderThickness,
+            .H = Rect.H,
+        };
+        return IsInRect(MousePos, BorderRect);
+    }
+
+    virtual void OnMouseDown(const FPoint& MousePos) override
+    {
+        // 경계 영역에서만 드래그 시작하도록
+        if (IsOverBorder(MousePos))
+        {
+            bIsDragging = true;
+            LastMousePos = MousePos;
+            UE_LOG("SSplitterV: Border Mouse Down, start dragging");
+        }
+    }
+
+    virtual void OnMouseMove(const FPoint& MousePos) override
+    {
+        if (bIsDragging)
+        {
+            // X축 이동량 기준으로 delta 계산
+            int deltaX = static_cast<int>(MousePos.X) - static_cast<int>(LastMousePos.X);
+            float normalizedDelta = static_cast<float>(deltaX) / static_cast<float>(Rect.W);
+            OnDrag(normalizedDelta);
+            LastMousePos = MousePos;
+        }
+        else if (IsOverBorder(MousePos))
+        {
+            UE_LOG("SSplitterV: Mouse Hovering over border");
+        }
+    }
+    
+    virtual void OnMouseUp(const FPoint& MousePos) override
+    {
+        bIsDragging = false;
+        UE_LOG("SSpliterV : Mouse Up, stop dragging");
+    }
 
     void OnDrag(float Delta) override
     {
         SplitRatio += Delta;
         SplitRatio = std::clamp(SplitRatio, 0.2f, 0.8f);
         UpdateLayout();
+        UE_LOG("SSplitterV: Dragging, SplitRatio = %.2f", SplitRatio);
     }
 
     void UpdateLayout() override
@@ -67,6 +117,8 @@ public:
 
 class SSplitterH final : public SSplitter {
 private:
+    const uint32 BorderThickness = 4;
+    FPoint LastMousePos;
     std::shared_ptr<SSplitterV> TopSplitterV;
     std::shared_ptr<SSplitterV> BottomSplitterV;
 
@@ -75,10 +127,49 @@ public:
         : SSplitter(Top, Bottom), TopSplitterV(Top), BottomSplitterV(Bottom) {
     }
 
+    // 마우스 좌표가 수평 경계 영역에 있는지 검사
+    bool IsOverBorder(const FPoint& MousePos) const
+    {
+        uint32_t topHeight = static_cast<uint32_t>(Rect.H * SplitRatio);
+        FRect borderRect;
+        borderRect.X = Rect.X;
+        borderRect.Y = Rect.Y + topHeight - BorderThickness / 2;
+        borderRect.W = Rect.W;
+        borderRect.H = BorderThickness;
+        return IsInRect(MousePos, borderRect);
+    }
+
+    virtual void OnMouseDown(const FPoint& MousePos) override
+    {
+        if (IsOverBorder(MousePos))
+        {
+            bIsDragging = true;
+            LastMousePos = MousePos;
+            UE_LOG("SSplitterH: Border Mouse Down, start dragging");
+        }
+    }
+
+    virtual void OnMouseMove(const FPoint& MousePos) override
+    {
+        if (bIsDragging)
+        {
+            // Y축 이동량 기준 delta 계산
+            int deltaY = static_cast<int>(MousePos.Y) - static_cast<int>(LastMousePos.Y);
+            float normalizedDelta = static_cast<float>(deltaY) / static_cast<float>(Rect.H);
+            OnDrag(normalizedDelta);
+            LastMousePos = MousePos;
+        }
+        else if (IsOverBorder(MousePos))
+        {
+            UE_LOG("SSplitterH: Mouse Hovering over border");
+        }
+    }
+
     void OnDrag(float Delta) override {
         SplitRatio += Delta;
         SplitRatio = std::clamp(SplitRatio, 0.2f, 0.8f);
         UpdateLayout();
+        UE_LOG("SSplitterH: Dragging, SplitRatio = %.2f", SplitRatio);
     }
 
     void UpdateLayout() override {
