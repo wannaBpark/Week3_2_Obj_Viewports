@@ -17,9 +17,25 @@ ACamera::ACamera()
 
     RootComponent = AddComponent<USceneComponent>();
     
-    FTransform StartPos = GetActorTransform();
-    StartPos.SetPosition(FVector(-5, 0, 0));
-    SetActorTransform(StartPos);
+    FTransform Transform = GetActorTransform();
+    Transform.SetPosition(FVector(-5, 0, 0));
+    SetActorTransform(Transform);
+}
+
+ACamera::ACamera(FVector Position, FVector Rotation, ECameraProjectionMode::Type ProjMode)
+{
+    Near = 0.1f;
+    Far = 100.f;
+    FieldOfView = 45.f;
+    ViewportSize = 10.f;
+    ProjectionMode = ECameraProjectionMode::Perspective;
+
+    RootComponent = AddComponent<USceneComponent>();
+
+    FTransform Transform = GetActorTransform();
+    Transform.SetPosition(Position);
+    Transform.SetRotation(Rotation);
+    SetActorTransform(Transform);
 }
 
 
@@ -33,6 +49,12 @@ void ACamera::SetViewportSize(float inViewprotSize)
     ViewportSize = inViewprotSize;
 }
 
+void ACamera::SetViewportSize(float InWidth, float InHeight)
+{
+    Width = InWidth;
+    Height = InHeight;
+}
+
 void ACamera::SetFar(float Far)
 {
     this->Far = Far;
@@ -41,6 +63,11 @@ void ACamera::SetFar(float Far)
 void ACamera::SetNear(float Near)
 {
     this->Near = Near;
+}
+
+void ACamera::SetProjectionMode(ECameraProjectionMode::Type InMode)
+{
+    this->ProjectionMode = InMode;
 }
 
 float ACamera::GetFieldOfView() const
@@ -61,4 +88,24 @@ float ACamera::GetNear() const
 float ACamera::GetFar() const
 {
     return Far;
+}
+
+float ACamera::GetAspectRatio() const
+{
+    return Width / Height;
+}
+
+float ACamera::GetWidth() const
+{
+    return Width;
+}
+
+float ACamera::GetHeight() const
+{
+    return Height;
+}
+
+ECameraProjectionMode::Type ACamera::GetProjectionMode() const
+{
+    return this->ProjectionMode;
 }

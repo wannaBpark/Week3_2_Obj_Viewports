@@ -1,15 +1,20 @@
-cbuffer constants : register(b0)
+cbuffer LineConstants : register(b0)
 {
-    matrix MVP;
-    float4 CustomColor;
+    matrix Model;
+    matrix Views[4];
+    matrix Projection;
+    uint bIsPicked;
+    float3 Padding1;
+    float4 CustomColor; // 3개 x,y,z축 컬러에 사용
     uint bUseVertexColor;
-    float3 eyeWorldPos;
-    float4 indexColor;
+    float3 Padding3;
+    uint ViewportIndex;
+    float3 Padding2;
 }
-
+ 
 struct VS_INPUT
 {
-    float3 position : POSITION;   // 격자 선분의 위치
+    float3 position : POSITION;   // 격자, 바운딩 박스 선분의 위치
     float4 color : COLOR;         // 선분의 색상
 };
 
@@ -23,11 +28,13 @@ struct PS_INPUT
 PS_INPUT mainVS(VS_INPUT input)
 {
     PS_INPUT output;
+    float4 position;
 
-    // 변환된 위치를 MVP 행렬을 통해 클립 공간으로 변환
-    output.position = mul(float4(input.position, 1.0f), MVP);
-
-    output.color = input.color; // 색상 그대로 전달
-
+    position = mul(float4(input.position, 1.0f), Model);
+    matrix View = Views[0];
+    position = mul(position, View);
+    output.position = mul(position, Projection); // TODO
+    output.color = bUseVertexColor == 1 ? input.color : CustomColor;
+    
     return output;
 }

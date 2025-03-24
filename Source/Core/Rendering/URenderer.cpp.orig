@@ -232,8 +232,12 @@ void URenderer::CreateConstantBuffer()
     idx = CreateConstantBuffer<FDepthConstants>();      // DepthConstants : 2
     idx = CreateConstantBuffer<FAtlasConstants>();           // Atlas CBuffer : 3
     idx = CreateConstantBuffer<FLightConstants>();           // Lighting 테스트용 CBuffer : 4
-    idx = CreateConstantBuffer<FStaticMeshVertexConstant>(); // STaticMesh용 Cbuffer : 5
-    idx = CreateConstantBuffer<FLineConstants>();           // Line에 대한 카메라 4대 테스트용 CBuffer : 6
+<<<<<<< HEAD
+    idx = CreateConstantBuffer<FLineConstants>();           // Line에 대한 카메라 4대 테스트용 CBuffer : 5
+    idx = CreateConstantBuffer<FViewportConstant>();        // Viewport viewmatrix index저장용 : 6
+=======
+    idx = CreateConstantBuffer<FStaticMeshVertexConstant>();
+>>>>>>> main
     UE_LOG("constantbuffer size : %d", idx);
 }
 
@@ -429,10 +433,10 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
 
     DeviceContext->RSGetViewports(&NumViewports, &DXViewport); // RSGetViewports 호출
 
-    /*UE_LOG("Rendering CALL VIEWPORT  (%f, %f) - (%f, %f)",
+    UE_LOG("Rendering CALL VIEWPORT  (%f, %f) - (%f, %f)",
         DXViewport.TopLeftX, DXViewport.TopLeftY,
         DXViewport.TopLeftX + DXViewport.Width,
-        DXViewport.TopLeftY + DXViewport.Height);*/
+        DXViewport.TopLeftY + DXViewport.Height);
     // 렌더링 호출
     if (bUseIndexBuffer == true)
     {
@@ -853,9 +857,8 @@ void URenderer::UpdateViewMatrix(const FTransform& CameraTransform)
 
 void URenderer::UpdateProjectionMatrix(ACamera* Camera)
 {
-    float AspectRatio = Camera->GetAspectRatio();
-    float Width = Camera->GetWidth();
-    float Height = Camera->GetHeight();
+    float AspectRatio = UEngine::Get().GetScreenRatio();
+
     float FOV = FMath::DegreesToRadians(Camera->GetFieldOfView());
     float ViewportSize = Camera->GetViewportSize();
     float Near = Camera->GetNear();
@@ -867,7 +870,7 @@ void URenderer::UpdateProjectionMatrix(ACamera* Camera)
     }
     else if (Camera->ProjectionMode == ECameraProjectionMode::Orthographic)
     {
-        ProjectionMatrix = FMatrix::OrthoForLH(Width/100.f, Height/100.f, Near, Far);
+        ProjectionMatrix = FMatrix::OrthoForLH(ViewportSize, ViewportSize, Near, Far);
     }
 }
 
