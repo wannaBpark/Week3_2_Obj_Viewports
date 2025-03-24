@@ -151,6 +151,8 @@ public:
 
     virtual void OnMouseMove(const FPoint& MousePos) override
     {
+        if (TopSplitterV) TopSplitterV->OnMouseMove(MousePos);
+        if (BottomSplitterV) BottomSplitterV->OnMouseMove(MousePos);
         if (bIsDragging)
         {
             // Y축 이동량 기준 delta 계산
