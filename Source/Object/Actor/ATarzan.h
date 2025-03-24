@@ -10,5 +10,7 @@ class ATarzan :
 public:
     ATarzan();
     virtual ~ATarzan() = default;
+	virtual const char* GetTypeName() override;
+
 };
 
