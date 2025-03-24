@@ -134,17 +134,18 @@ bool FObjImporter::LoadMTL(const FString& filename)
 	std::string currentMaterial;
 	std::string line;
 
+    FName CurrentMaterialName;
 	while (std::getline(file, line))
 	{
 		std::istringstream iss(line);
 		std::string token;
 		iss >> token;
 
-		FName CurrentMaterialName = FName(currentMaterial);
-
 		if (token == "newmtl")
 		{
 			iss >> currentMaterial;
+            CurrentMaterialName = FName(currentMaterial);
+            MaterialsPerGroup[CurrentMaterialName].MaterialName = CurrentMaterialName;
 			//MaterialsPerGroup[currentMaterial] = FObjMaterialInfo();            // newmtl 토큰 파싱 시에만 새로운 Material추가 (이름 = newmtl 다음 토큰)
 		}
 		else if (token == "Ka")

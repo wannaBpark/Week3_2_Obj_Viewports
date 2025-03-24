@@ -350,8 +350,6 @@ void UEngine::InitWorld()
     PreloadResources();
 
 	World->LoadWorld(*DefaultSceneName);
-
-	ATarzan* Tarzan = World->SpawnActor<ATarzan>();
 }
 
 void UEngine::ShutdownWindow()
@@ -417,7 +415,7 @@ void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
 void UEngine::PreloadResources()
 {
 	FObjManager::LoadObjStaticMeshAsset(TEXT("Assets/2PX7U16XARLGHIM3W48FS86MJ.obj"));
-    FObjManager::LoadObjStaticMeshAsset(TEXT("Assets/Dice.obj"));
+	FObjManager::LoadObjStaticMeshAsset(TEXT("Assets/Dice.obj"));
 }
 
 UObject* UEngine::GetObjectByUUID(uint32 InUUID) const
