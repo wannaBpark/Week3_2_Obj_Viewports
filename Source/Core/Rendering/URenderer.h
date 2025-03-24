@@ -194,10 +194,10 @@ public:
     FMatrix GetViewportMatrixById(uint32 i) { return ViewportMatrices[i]; }
 
     void SetViewport(D3D11_VIEWPORT& CurViewport) { 
-        UE_LOG("RSSET Viewport (%f, %f) - (%f, %f)",
+        /*UE_LOG("RSSET Viewport (%f, %f) - (%f, %f)",
             CurViewport.TopLeftX, CurViewport.TopLeftY,
             CurViewport.TopLeftX + CurViewport.Width,
-            CurViewport.TopLeftY + CurViewport.Height);
+            CurViewport.TopLeftY + CurViewport.Height);*/
         DeviceContext->RSSetViewports(1, &CurViewport); }
 #pragma endregion
 

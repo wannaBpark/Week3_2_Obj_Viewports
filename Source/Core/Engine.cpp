@@ -1,5 +1,5 @@
 #include "Engine.h"
-
+#include <windowsx.h> // GET_X_LPARAM 등의 매크로
 #include <iostream>
 #include "Object/ObjectFactory.h"
 #include "Object/World/World.h"
@@ -35,6 +35,8 @@ LRESULT UEngine::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         return true;
     }
     
+    UEngine& EngineInstance = UEngine::Get();
+
     switch (uMsg)
     {
         // 창이 제거될 때 (창 닫기, Alt+F4 등)
@@ -48,15 +50,38 @@ LRESULT UEngine::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             APlayerInput::Get().KeyOnceUp(static_cast<EKeyCode>( wParam ));
         }
         break;
+    case WM_MOUSEMOVE:
+    {
+        int x = GET_X_LPARAM(lParam);
+        int y = GET_Y_LPARAM(lParam);
+        FPoint mousePos(static_cast<uint32>(x), static_cast<uint32>(y));
+        if (EngineInstance.RootWindow)
+            EngineInstance.RootWindow->OnMouseMove(mousePos);
+        break;
+    }
     case WM_KEYUP:
         APlayerInput::Get().KeyUp(static_cast<EKeyCode>( wParam ));
         break;
     case WM_LBUTTONDOWN:
+    {
         APlayerInput::Get().HandleMouseInput(hWnd, lParam, true, false);
+        int x = GET_X_LPARAM(lParam);
+        int y = GET_Y_LPARAM(lParam);
+        FPoint mousePos(static_cast<uint32>(x), static_cast<uint32>(y));
+        if (EngineInstance.RootWindow)
+            EngineInstance.RootWindow->OnMouseDown(mousePos);
         break;
+    }
     case WM_LBUTTONUP:
+    {
         APlayerInput::Get().HandleMouseInput(hWnd, lParam, false, false);
+        int x = GET_X_LPARAM(lParam);
+        int y = GET_Y_LPARAM(lParam);
+        FPoint mousePos(static_cast<uint32>(x), static_cast<uint32>(y));
+        if (EngineInstance.RootWindow)
+            EngineInstance.RootWindow->OnMouseUp(mousePos);
         break;
+    }
     case WM_RBUTTONDOWN:
         APlayerInput::Get().HandleMouseInput(hWnd, lParam, true, true);
         break;
@@ -64,7 +89,7 @@ LRESULT UEngine::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         APlayerInput::Get().HandleMouseInput(hWnd, lParam, false, true);
         break;
     case WM_SIZE:
-		UEngine::Get().UpdateWindowSize(LOWORD(lParam), HIWORD(lParam));
+		EngineInstance.UpdateWindowSize(LOWORD(lParam), HIWORD(lParam));
 		break;
     default:
         return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -429,8 +454,9 @@ void UEngine::SetViewportCameras()
 
 #pragma region Multi Camera Initialization
     FTransform ZY = FTransform(FVector(-5, 0, 1), FVector(0, 0, 0), FVector(1, 1, 1));
-    FTransform ZX = FTransform(FVector(0, 5, 1), FVector(0, 0, -90), FVector(1, 1, 1));
-    FTransform XY = FTransform(FVector(0, 0, 5), FVector(0, 90, 0), FVector(1, 1, 1));
+    FTransform ZX = FTransform(FVector(0, 10, 1), FVector(0, 0, -90), FVector(1, 1, 1));
+    FTransform XY = FTransform(FVector(0, 0, 5), FVector(0,89.9,-89.9), FVector(1, 1, 1));
+    
     ACamera* CamZY = World->SpawnActor<ACamera>(); CamZY->SetActorTransform(ZY); CamZY->SetProjectionMode(ECameraProjectionMode::Orthographic);
     ACamera* CamZX = World->SpawnActor<ACamera>(); CamZX->SetActorTransform(ZX); CamZX->SetProjectionMode(ECameraProjectionMode::Orthographic);
     ACamera* CamXY = World->SpawnActor<ACamera>(); CamXY->SetActorTransform(XY); CamXY->SetProjectionMode(ECameraProjectionMode::Orthographic);
