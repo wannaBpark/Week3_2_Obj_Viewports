@@ -22,7 +22,7 @@ EPrimitiveType UStaticMeshComponent::GetType()
 	return EPrimitiveType::EPT_Mesh;
 }
 
-void UStaticMeshComponent::SetStaicMesh(const FString& staticMeshPath)
+void UStaticMeshComponent::SetStaticMesh(const FString& staticMeshPath)
 {
 	StaticMesh = FObjManager::LoadObjStaticMesh(staticMeshPath);
 

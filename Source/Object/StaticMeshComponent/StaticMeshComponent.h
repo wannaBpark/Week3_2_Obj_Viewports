@@ -19,7 +19,7 @@ class UStaticMeshComponent :
 	virtual EPrimitiveType GetType() override;
 
 public:
-	void SetStaicMesh(const FString& staticMeshPath);
+	void SetStaticMesh(const FString& staticMeshPath);
 private:
 	void CreateVertexBuffer();
 	void CreateIndexBuffer();

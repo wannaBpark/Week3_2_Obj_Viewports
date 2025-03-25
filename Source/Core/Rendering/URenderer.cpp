@@ -11,6 +11,8 @@
 #include "Core/Rendering/BufferCache.h" // 그리드 동적 렌더링
 #include "Object/StaticMeshComponent/StaticMeshComponent.h"
 
+#include "Static/FEditorManager.h"
+
 // 아래는 Texture에 쓸 이미지 로딩용
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -161,10 +163,13 @@ void URenderer::CreateShader()
     }
 
     SAFE_RELEASE(VertexShaderCSO);  SAFE_RELEASE(PixelShaderCSO);
-    D3DCompileFromFile(L"Shaders/GridVertexShader.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", 0, 0, &GridVertexShaderCSO, &ErrorMsg);
+    DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+    shaderFlags |= D3DCOMPILE_DEBUG;
+    shaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+    D3DCompileFromFile(L"Shaders/GridVertexShader.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", shaderFlags, 0, &GridVertexShaderCSO, &ErrorMsg);
     Device->CreateVertexShader(GridVertexShaderCSO->GetBufferPointer(), GridVertexShaderCSO->GetBufferSize(), nullptr, &GridVertexShader);
 
-    D3DCompileFromFile(L"Shaders/GridPixelShader.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", 0, 0, &GridPixelShaderCSO, &ErrorMsg);
+    D3DCompileFromFile(L"Shaders/GridPixelShader.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", shaderFlags, 0, &GridPixelShaderCSO, &ErrorMsg);
     Device->CreatePixelShader(GridPixelShaderCSO->GetBufferPointer(), GridPixelShaderCSO->GetBufferSize(), nullptr, &GridPixelShader);
 
     SAFE_RELEASE(VertexShaderCSO);  SAFE_RELEASE(PixelShaderCSO);
@@ -175,16 +180,13 @@ void URenderer::CreateShader()
     Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &LightPosTexPixelShader);
 
     SAFE_RELEASE(VertexShaderCSO);  SAFE_RELEASE(PixelShaderCSO);
-    DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-    shaderFlags |= D3DCOMPILE_DEBUG;
-    shaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
-    HRESULT result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", shaderFlags, 0, &VertexShaderCSO, &ErrorMsg);
+    HRESULT result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", 0, 0, &VertexShaderCSO, &ErrorMsg);
     Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &MeshVertexShader);
 
 	it = InputLayouts.find(InputLayoutType::POSNORMALTANGENTCOLORTEX);
 	Device->CreateInputLayout(it->second.data(), it->second.size(), VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), &MeshInputLayout);
 
-    result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", shaderFlags, 0, &PixelShaderCSO, &ErrorMsg);
+    result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", 0, 0, &PixelShaderCSO, &ErrorMsg);
     Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &MeshPixelShader);
 
     ShaderMapVS.insert({ 0, SimpleVertexShader});                               // 여기서 Vertex Shader, Pixel Shader, InputLayout 추가
@@ -234,6 +236,10 @@ void URenderer::CreateConstantBuffer()
     idx = CreateConstantBuffer<FLightConstants>();           // Lighting 테스트용 CBuffer : 4
     idx = CreateConstantBuffer<FStaticMeshVertexConstant>(); // STaticMesh용 Cbuffer : 5
     idx = CreateConstantBuffer<FLineConstants>();           // Line에 대한 카메라 4대 테스트용 CBuffer : 6
+    idx = CreateConstantBuffer<FGlobalLightConstant>();           // Lighting 적용 Global light : 7
+    idx = CreateConstantBuffer<FMaterialConstant>();           // Lighting 적용 material : 8
+    idx = CreateConstantBuffer<FCameraPositionConstant>();           // Lighting 적용 camera position : 9
+    
     UE_LOG("constantbuffer size : %d", idx);
 }
 
@@ -933,15 +939,49 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
     DeviceContext->VSSetConstantBuffers(0, 1, ConstantBufferMap[VC].GetAddressOf());
     //DeviceContext->PSSetConstantBuffers(0, 1, ConstantBufferMap[PC].GetAddressOf());
 
+    ID3D11Buffer* psConstantBuffers[] = {
+    ConstantBufferMap[VC].Get(),
+    ConstantBufferMap[7].Get(), // GlobalLightConstant
+    ConstantBufferMap[9].Get(),  // CameraPositionConstant
+    ConstantBufferMap[8].Get(), // MaterialConstant
+    };
+    DeviceContext->PSSetConstantBuffers(0, _countof(psConstantBuffers), psConstantBuffers);
+
     FMatrix m = MeshComp->GetComponentTransform().GetMatrix();
 
+    FMatrix modelWorld = m;
+    //modelWorld.M[3][0] = modelWorld.M[3][1] = modelWorld.M[3][2] = 0;
+    modelWorld = modelWorld.Inverse();
+    FMatrix InvTranspose = modelWorld;
+
     FStaticMeshVertexConstant vc = {
+        .InverseTranspose = InvTranspose,
         .Model = FMatrix::Transpose(m),
         .View = FMatrix::Transpose(ViewMatrix),
         .Projection = FMatrix::Transpose(ProjectionMatrix),
     };
 
     UpdateBuffer(vc, VC);
+
+    FGlobalLightConstant globalLightConstant = {
+        .Ambient = FVector4(0.1f, 0.1f, 0.1f, 1.f),
+        .Diffuse = FVector4(1.f, 1.f, 1.f, 1.f),
+        .Specular = FVector4(1.f, 1.f, 1.f, 1.f),
+        .Emissive = FVector4(0.f, 0.f, 0.f, 1.0f),
+        .Padding1 = 0,
+        .Direction = FVector(1.f, -1.f, -1.f).GetSafeNormal(),
+        .Padding = 0,
+    };
+
+    UpdateBuffer(globalLightConstant, 7);
+
+    FVector camPos = FEditorManager::Get().GetCamera()->GetActorTransform().GetPosition();
+
+    FCameraPositionConstant camPosConstant = {
+        .CameraPosition = camPos
+    };
+
+    UpdateBuffer(camPosConstant, 9);
 
     TMap<FName, FSubMesh>& SubMeshes = MeshComp->StaticMesh->GetStaticMeshAsset()->SubMeshes;
 
@@ -952,6 +992,16 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
         const UMaterial* Mat = MeshComp->GetMaterial(SubMesh.Index);
         if (Mat != nullptr)
         {
+            FMaterialConstant matConstant = {
+                .Ambient = Mat->Ambient,
+                .Diffuse = Mat->Diffuse,
+                .Specular = Mat->Specular,
+                .Emissive = Mat->Emissive,
+                .Roughness = 250 - Mat->Shininess,
+            };
+
+            UpdateBuffer(matConstant, 8);
+
 			auto srv = ShaderResourceViewMap[Mat->TextureMapIndex].Get();
 			DeviceContext->PSSetSamplers(0, 1, SamplerMap[0].GetAddressOf());
 
