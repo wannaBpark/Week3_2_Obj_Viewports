@@ -205,19 +205,9 @@ bool UWorld::DestroyActor(AActor* InActor)
 
 void UWorld::SaveWorld()
 {
-	//const UWorldInfo& WorldInfo = GetWorldInfo();
-	//JsonSaveHelper::SaveScene(WorldInfo);
 	FArchive WorldAr;
 	WorldAr << *this;
-	std::string WorldBinary = WorldAr.SaveToBinary();
-
-	std::string FileName = "World.Bin";
-	std::ofstream os(FileName, std::ios::binary);
-
-	uint32 Size = static_cast<uint32>(WorldBinary.size());
-	os.write(reinterpret_cast<const char*>(&Size), sizeof(Size));
-	os.write(WorldBinary.c_str(), Size);
-
+	WorldAr.SaveToFile("World.bin");
 }
 
 void UWorld::AddZIgnoreComponent(UPrimitiveComponent* InComponent)
@@ -228,89 +218,9 @@ void UWorld::AddZIgnoreComponent(UPrimitiveComponent* InComponent)
 
 void UWorld::LoadWorld(const char* SceneName)
 {
-	//if (SceneName == nullptr || strcmp(SceneName, "") == 0){
-	//	return;
-	//}
-	//
-	//UWorldInfo* WorldInfo = JsonSaveHelper::LoadScene(SceneName);
-	//if (WorldInfo == nullptr) return;
-
-	//ClearWorld();
-
-	//Version = WorldInfo->Version;
-	//this->SceneName = WorldInfo->SceneName;
-	//uint32 ActorCount = WorldInfo->ActorCount;
-
-	//// Type 확인
-	//for (uint32 i = 0; i < ActorCount; i++)
-	//{
-	//	UObjectInfo* ObjectInfo = WorldInfo->ObjctInfos[i];
-	//	FTransform Transform = FTransform(ObjectInfo->Location, FQuat(), ObjectInfo->Scale);
-	//	Transform.Rotate(ObjectInfo->Rotation);
-
-	//	AActor* Actor = nullptr;
-
-	//	//UClass* ClassInfo = UClass::GetClass(ObjectInfo->ObjectType);
-	//	
-	//	if (ObjectInfo->ObjectType == "Actor")
-	//	{
-	//		Actor = SpawnActor<AActor>();
-	//	}
-	//	else if (ObjectInfo->ObjectType == "Sphere")
-	//	{
-	//		Actor = SpawnActor<ASphere>();
-	//	}
-	//	else if (ObjectInfo->ObjectType == "Cube")
-	//	{
-	//		Actor = SpawnActor<ACube>();
-	//	}
-	//	else if (ObjectInfo->ObjectType == "Arrow")
-	//	{
-	//		Actor = SpawnActor<AArrow>();
-	//	}
-	//	else if (ObjectInfo->ObjectType == "Cylinder")
-	//	{
-	//		Actor = SpawnActor<ACylinder>();
-	//	}
-	//	else if (ObjectInfo->ObjectType == "Cone")
-	//	{
-	//		Actor = SpawnActor<ACone>();
-	//	}
-	//	else if (ObjectInfo->ObjectType == "Circle")
-	//	{
-	//		Actor = SpawnActor<ACircle>();
-	//	}
-	//	else if (ObjectInfo->ObjectType == "WorldText")
-	//	{
-	//		Actor = SpawnActor<AWorldText>();
-	//	}
-	//	else if (ObjectInfo->ObjectType == "Tarzan")
-	//	{
-	//		Actor = SpawnActor<ATarzan>();
-	//	}
-	//	// !TODO : 추가된 액터에대한 Spawn로직 추가
-	//	else
-	//	{
-	//		UE_LOG("Unknown Actor Type");
-	//		continue;
-	//	}
-
-	//	if(Actor)
-	//		Actor->SetActorTransform(Transform);
-	//}
-
 	FArchive WorldAr;
-	std::string FileName = "World.Bin";
-	std::ifstream is(FileName, std::ios::binary);
-	uint32 Size = 0;
-	is.read(reinterpret_cast<char*>(&Size), sizeof(Size));
-	std::string WorldBinary;
-	WorldBinary.resize(Size);
-	is.read(&WorldBinary[0], Size);
-
-	WorldAr.LoadFromBinary(WorldBinary);
+	WorldAr.LoadFromFile("World.bin");
 	WorldAr >> *this;
-
 }
 
 UWorldInfo UWorld::GetWorldInfo() const

@@ -41,6 +41,28 @@ public:
 		Stream.seekp(0);  // 쓰기 위치 초기화
 	}
 
+	void SaveToFile(const std::string& FilePath)
+	{
+		std::ofstream File(FilePath, std::ios::binary);
+		if (File.is_open())
+		{
+			File << SaveToBinary();
+			File.close();
+		}
+	}
+
+	void LoadFromFile(const std::string& FilePath)
+	{
+		std::ifstream File(FilePath, std::ios::binary);
+		if (File.is_open())
+		{
+			std::stringstream Buffer;
+			Buffer << File.rdbuf();
+			LoadFromBinary(Buffer.str());
+			File.close();
+		}
+	}
+
 #pragma region Operator Overload
 
 	template <typename T>
