@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <vector>
 
 #include "Core/AbstractClass/Singleton.h"
@@ -117,6 +117,81 @@ enum class EKeyCode : uint8_t
     RControl = 0xA3,
     LAlt = 0xA4,
     RAlt = 0xA5,
+    None = 0xA6,
+};
+
+enum class EMouseButton
+{
+    Left = 0,
+    Right = 1,
+    Middle = 2,
+    Max = 3,
+};
+
+
+enum EMouseCursor
+{
+    /** Causes no mouse cursor to be visible */
+    None,
+
+    /** Default cursor (arrow) */
+    Default,
+
+    /** Text edit beam */
+    TextEditBeam,
+
+    /** Resize horizontal */
+    ResizeLeftRight,
+
+    /** Resize vertical */
+    ResizeUpDown,
+
+    /** Resize diagonal */
+    ResizeSouthEast,
+
+    /** Resize other diagonal */
+    ResizeSouthWest,
+
+    /** MoveItem */
+    CardinalCross,
+
+    /** Target Cross */
+    Crosshairs,
+
+    /** Hand cursor */
+    Hand,
+
+    /** Grab Hand cursor */
+    GrabHand,
+
+    /** Grab Hand cursor closed */
+    GrabHandClosed,
+
+    /** a circle with a diagonal line through it */
+    SlashedCircle,
+
+    /** Eye-dropper cursor for picking colors */
+    EyeDropper,
+
+    /** Custom cursor shape for platforms that support setting a native cursor shape. Same as specifying None if not set. */
+    Custom,
+
+    /** Number of cursors we support */
+    TotalCursorCount
+};
+
+struct FPointer
+{
+public:
+    FPointer()
+        : ScreenSpacePosition(FVector2D())
+        , LastScreenSpacePosition(FVector2D())
+        , CursorDelta(FVector2D())
+    { }
+
+    FVector2D ScreenSpacePosition;
+    FVector2D LastScreenSpacePosition;
+    FVector2D CursorDelta;
 };
 
 class APlayerInput : public TSingleton<APlayerInput>
@@ -138,7 +213,7 @@ public:
     void SetMousePos();
     void ExpireOnce();
     
-    void HandleMouseInput(HWND hWnd, LPARAM lParam, bool isDown, bool isRight);
+    void HandleMouseInput(HWND hWnd, LPARAM lParam, bool isDown, EMouseButton InMouseButton);
     
     std::vector<EKeyCode> GetPressedKeys();
 
@@ -149,43 +224,49 @@ public:
      */
     [[nodiscard]] bool IsPressedKey(EKeyCode key) const;
 
-    void MouseKeyDown(FVector MouseDownPoint, FVector WindowSize, int isRight);
+    void MouseKeyDown(FVector MouseDownPoint, FVector WindowSize, EMouseButton InMouseButton);
 
-    void MouseKeyUp(FVector MouseUpPoint, FVector WindowSize, int isRight);
+    void MouseKeyUp(FVector MouseUpPoint, FVector WindowSize, EMouseButton InMouseButton);
     void PreProcessInput();
     void TickPlayerInput();
 
-    bool IsPressedMouse(bool isRight) { return mouse[isRight]; }
+    bool IsPressedMouse(EMouseButton InMouseButton) { return mouse[static_cast<uint32>(InMouseButton)]; }
 
-    bool GetMouseDown(bool isRight) { return onceMouse[isRight]; }
+    bool GetMouseDown(EMouseButton InMouseButton) { return onceMouse[static_cast<uint32>(InMouseButton)]; }
 
     [[nodiscard]] bool GetKeyDown(EKeyCode KeyCode) const { return _onceKeys[static_cast<uint32>(KeyCode)];}
 
-    FVector GetMouseDownPos(int isRight) { return MouseKeyDownPos[isRight]; }
+    FVector GetMouseDownPos(EMouseButton InMouseButton) { return MouseKeyDownPos[static_cast<uint32>(InMouseButton)]; }
 
-    FVector GetMouseDownNDCPos(int isRight) { return MouseKeyDownNDCPos[isRight]; }
+    FVector GetMouseDownNDCPos(EMouseButton InMouseButton) { return MouseKeyDownNDCPos[static_cast<uint32>(InMouseButton)]; }
 
     FVector GetMousePos() { return MousePos;}
     FVector GetMouseNDCPos() { return MouseNDCPos;}
     FVector GetMousePrePos() { return MousePrePos;}
+
+    FPointer GetPointer() const { return Pointer; };
     
     FVector CalNDCPos(FVector MousePos, FVector WindowSize);
 
     void SetMousePrePos(FVector PMP) { MousePrePos = PMP;}
     void SetMousePos(FVector MP){ SetMousePrePos(MousePos); MousePos = MP;}
     void SetMouseNDCPos(FVector MNP) {MouseNDCPos = MNP;}
+
+    void SetPointer(FVector2D position);
     
 private:
     // std::unordered_map<EKeyCode, std::unordered_set<void()>> InputHandlers; //인풋핸들러 각 오브젝트에서 키에 해당하는 함수를 할당한 다음 업데이트에서 눌린 키에 해당하는 함수 계속 돌려줘서 실행 
 
-    bool mouse[2]; //0이 좌클릭 1이 우클릭
+    bool mouse[static_cast<uint32>(EMouseButton::Max)]; //0이 좌클릭 1이 우클릭
     bool onceMouse[2];
     bool _keys[256];
     bool _onceKeys[256];
     bool bIsBlockInput = false;
-    FVector MouseKeyDownPos[2];
-    FVector MouseKeyDownNDCPos[2];
+    FVector MouseKeyDownPos[static_cast<uint32>(EMouseButton::Max)];
+    FVector MouseKeyDownNDCPos[static_cast<uint32>(EMouseButton::Max)];
     FVector MousePrePos;
     FVector MousePos;
     FVector MouseNDCPos;
+
+    FPointer Pointer;
 };

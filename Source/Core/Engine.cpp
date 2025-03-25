@@ -46,16 +46,16 @@ LRESULT UEngine::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         APlayerInput::Get().KeyUp(static_cast<EKeyCode>( wParam ));
         break;
     case WM_LBUTTONDOWN:
-        APlayerInput::Get().HandleMouseInput(hWnd, lParam, true, false);
+        APlayerInput::Get().HandleMouseInput(hWnd, lParam, true, EMouseButton::Left);
         break;
     case WM_LBUTTONUP:
-        APlayerInput::Get().HandleMouseInput(hWnd, lParam, false, false);
+        APlayerInput::Get().HandleMouseInput(hWnd, lParam, false, EMouseButton::Left);
         break;
     case WM_RBUTTONDOWN:
-        APlayerInput::Get().HandleMouseInput(hWnd, lParam, true, true);
+        APlayerInput::Get().HandleMouseInput(hWnd, lParam, true, EMouseButton::Right);
         break;
     case WM_RBUTTONUP:
-        APlayerInput::Get().HandleMouseInput(hWnd, lParam, false, true);
+        APlayerInput::Get().HandleMouseInput(hWnd, lParam, false, EMouseButton::Right);
         break;
     case WM_SIZE:
 		UEngine::Get().UpdateWindowSize(LOWORD(lParam), HIWORD(lParam));

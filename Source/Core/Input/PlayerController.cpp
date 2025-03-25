@@ -16,7 +16,7 @@ void APlayerController::HandleCameraMovement(float DeltaTime) {
 
     FVector NewVelocity(0, 0, 0);
 
-    if (APlayerInput::Get().IsPressedMouse(true) == false)
+    if (APlayerInput::Get().IsPressedMouse(EMouseButton::Right) == false)
     {
         // Camera->SetVelocity(NewVelocity);
         return;
@@ -89,7 +89,7 @@ void APlayerController::HandleCameraMovement(float DeltaTime) {
 
 void APlayerController::HandleGizmoMovement(float DeltaTime)
 {
-    if (APlayerInput::Get().IsPressedMouse(false) == false)
+    if (APlayerInput::Get().IsPressedMouse(EMouseButton::Left) == false)
     {
         return;
     }

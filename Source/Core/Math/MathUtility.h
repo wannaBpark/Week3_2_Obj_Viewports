@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cmath>
 #include "Core/HAL/PlatformType.h"
 
@@ -163,5 +163,19 @@ struct FMath
 	[[nodiscard]] static FORCEINLINE T Square(T Value)
     {
 	    return Value*Value;
+    }
+    [[nodiscard]] static FORCEINLINE int32 CeilToInt32(float F)
+    {
+        // 변환: -0.5 - (F + F) = -0.5 - 2 * F
+        float transformed = -0.5f - 2.0f * F;
+        // std::round로 반올림
+        int32_t rounded = static_cast<int32_t>(std::round(transformed));
+        // 산술적 오른쪽 시프트로 2로 나누고 부호를 반전하여 최종 결과를 계산
+        return -(rounded / 2);
+    }
+
+    [[nodiscard]] static FORCEINLINE int32 RoundToInt32(float F)
+    {
+        return static_cast<int32_t>(std::round(2.0f * F + 0.5f)) / 2;
     }
 };

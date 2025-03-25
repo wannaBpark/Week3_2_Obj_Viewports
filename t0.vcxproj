@@ -161,10 +161,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Core\Rendering\D3DViewports\Geometry.cpp" />
-    <ClCompile Include="Source\Core\Rendering\D3DViewports\FRenderTarget.cpp" />
+    <ClCompile Include="Source\Core\Math\Transform.cpp" />
+    <ClCompile Include="Source\Core\Rendering\Widget\Reply.cpp" />
+    <ClCompile Include="Source\Core\Math\IntPoint.cpp" />
+    <ClCompile Include="Source\Core\Rendering\Widget\ArrangedWidget.cpp" />
+    <ClCompile Include="Source\Core\Math\Geometry.cpp" />
+    <ClCompile Include="Source\Core\Rendering\D3DViewports\RenderTarget.cpp" />
     <ClCompile Include="Source\Core\FSceneManager.cpp" />
-    <ClCompile Include="Source\Core\Rendering\D3DViewports\Margin.cpp" />
+    <ClCompile Include="Source\Core\Rendering\Widget\Margin.cpp" />
+    <ClCompile Include="Source\Core\Rendering\Widget\SPanel.cpp" />
+    <ClCompile Include="Source\Core\Rendering\Widget\SWindow.cpp" />
     <ClCompile Include="Source\Core\Rendering\SubUVManager.cpp" />
     <ClCompile Include="Source\Core\Rendering\TextAtlasManager.cpp" />
     <ClCompile Include="Source\Object\Actor\Circle.cpp" />
@@ -219,10 +225,11 @@
     <ClCompile Include="Source\Object\PrimitiveComponent\UPrimitiveComponent.cpp" />
     <ClCompile Include="Source\Object\World\World.cpp" />
     <ClCompile Include="Source\Object\Actor\Sphere.cpp" />
-    <ClCompile Include="Source\Core\Rendering\D3DViewports\SWidget.cpp" />
+    <ClCompile Include="Source\Core\Rendering\Widget\SWidget.cpp" />
+    <ClCompile Include="Source\Core\Rendering\Widget\SViewport.cpp" />
+    <ClCompile Include="Source\Core\Rendering\Widget\Spliter.cpp" />
     <ClCompile Include="URaycastSystem.cpp" />
     <ClCompile Include="Source\Core\Rendering\D3DViewports\Viewport.cpp" />
-    <ClCompile Include="Source\Core\Rendering\D3DViewports\ViewportClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\AtlasPixelShader.hlsl">
@@ -306,14 +313,18 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Core\Rendering\D3DViewports\Geometry.h" />
-    <ClInclude Include="Source\Core\Rendering\D3DViewports\FRenderTarget.h" />
+    <ClInclude Include="Source\Core\Rendering\Widget\Reply.h" />
+    <ClInclude Include="Source\Core\Math\IntPoint.h" />
+    <ClInclude Include="Source\Core\Rendering\Widget\ArrangedWidget.h" />
+    <ClInclude Include="Source\Core\Math\Geometry.h" />
+    <ClInclude Include="Source\Core\Rendering\D3DViewports\RenderTarget.h" />
     <ClInclude Include="Source\Core\Delegate\Delegate.h" />
     <ClInclude Include="Source\Core\Delegate\DelegateCombination.h" />
     <ClInclude Include="Source\Core\FSceneManager.h" />
-    <ClInclude Include="Source\Core\Rendering\D3DViewports\Margin.h" />
-    <ClInclude Include="Source\Core\Rendering\D3DViewports\SSpliter.h" />
-    <ClInclude Include="Source\Core\Rendering\D3DViewports\SWindow.h" />
+    <ClInclude Include="Source\Core\Rendering\Widget\Margin.h" />
+    <ClInclude Include="Source\Core\Rendering\Widget\SPanel.h" />
+    <ClInclude Include="Source\Core\Rendering\Widget\SSpliter.h" />
+    <ClInclude Include="Source\Core\Rendering\Widget\SWindow.h" />
     <ClInclude Include="Source\Core\Rendering\SubUVManager.h" />
     <ClInclude Include="Source\Core\Rendering\TextAtlasManager.h" />
     <ClInclude Include="Source\Object\Actor\SubUV.h" />
@@ -395,11 +406,12 @@
     <ClInclude Include="Source\Object\Actor\Sphere.h" />
     <ClInclude Include="Source\ThirdParty\stb-master\stb_image.h" />
     <ClInclude Include="Source\ThirdParty\stb-master\stb_image_write.h" />
-    <ClInclude Include="Source\Core\Rendering\D3DViewports\SWidget.h" />
+    <ClInclude Include="Source\Core\Rendering\Widget\SWidget.h" />
+    <ClInclude Include="Source\Core\Rendering\Widget\SViewport.h" />
+    <ClInclude Include="Source\Core\Rendering\Widget\Spliter.h" />
     <ClInclude Include="UColliders.h" />
     <ClInclude Include="URaycastSystem.h" />
     <ClInclude Include="Source\Core\Rendering\D3DViewports\Viewport.h" />
-    <ClInclude Include="Source\Core\Rendering\D3DViewports\ViewportClient.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Textures\Explosion.PNG" />

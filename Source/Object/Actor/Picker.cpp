@@ -58,7 +58,7 @@ void APicker::LateTick(float DeltaTime)
 {
     AActor::LateTick(DeltaTime);
 
-    if (APlayerInput::Get().IsPressedMouse(false) && !ImGui::GetIO().WantCaptureMouse)
+    if (APlayerInput::Get().IsPressedMouse(EMouseButton::Left) && !ImGui::GetIO().WantCaptureMouse)
     {
         POINT pt = GetMousePoint();
         UActorComponent* PickedComponent = GetAcotrByPixelPicking(pt);
@@ -76,7 +76,7 @@ void APicker::LateTick(float DeltaTime)
         }
     }
 
-    if (APlayerInput::Get().GetMouseDown(false) && !ImGui::GetIO().WantCaptureMouse) {
+    if (APlayerInput::Get().GetMouseDown(EMouseButton::Left) && !ImGui::GetIO().WantCaptureMouse) {
 
         POINT pt = GetMousePoint();
         UActorComponent* PickedComponent = GetAcotrByPixelPicking(pt);

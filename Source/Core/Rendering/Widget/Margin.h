@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/Math/Vector.h"
 
 enum EOrientation : int
 {
@@ -57,7 +58,7 @@ public:
 	}
 
 	/** Construct a Margin where Horizontal describes Left and Right spacing while Vertical describes Top and Bottom spacing */
-	FMargin(const FVector2 InVector)
+	FMargin(const FVector2D InVector)
 		: Left(InVector.X)
 		, Top(InVector.Y)
 		, Right(InVector.X)
@@ -150,9 +151,9 @@ public:
 	 * @return The top left offset.
 	 */
 
-	FVector2 GetTopLeft2f() const
+	FVector2D GetTopLeft2() const
 	{
-		return FVector2(Left, Top);
+		return FVector2D(Left, Top);
 	}
 
 	/**
@@ -160,9 +161,9 @@ public:
 	 *
 	 * @return Cumulative margin size.
 	 */
-	FVector2 GetDesiredSize2f() const
+	FVector2D GetDesiredSize2() const
 	{
-		return FVector2(Left + Right, Top + Bottom);
+		return FVector2D(Left + Right, Top + Bottom);
 	}
 
 	/**

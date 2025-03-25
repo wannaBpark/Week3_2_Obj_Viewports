@@ -390,3 +390,65 @@ FMatrix FMatrix::OrthoForLH(float ViewWidth, float VeiwHeight, float NearPlane, 
 
 	return Result;
 }
+
+FMatrix2x2::FMatrix2x2(const FVector2D& Scale)
+{
+	M[0][0] = Scale.X; M[0][1] = 0.0f;
+	M[1][0] = 0.0f; M[1][1] = Scale.Y;
+}
+
+FMatrix2x2::FMatrix2x2(const FQuat2& Quat)
+{
+	M[0][0] = Quat.GetVector().X; M[0][1] = -Quat.GetVector().Y;
+	M[1][0] = Quat.GetVector().Y; M[1][1] = Quat.GetVector().X;
+}
+
+FVector2D FMatrix2x2::TransformPoint(const FVector2D& Point) const
+{
+	return FVector2D(
+		Point.X * M[0][0] + Point.Y * M[0][1],
+		Point.X * M[1][0] + Point.Y * M[1][1]
+	);
+}
+
+FVector2D FMatrix2x2::TransformVector(const FVector2D& Vector) const
+{
+	return FVector2D(
+		Vector.X * M[0][0] + Vector.Y * M[0][1],
+		Vector.X * M[1][0] + Vector.Y * M[1][1]
+	);
+}
+
+FMatrix2x2 FMatrix2x2::Concatenate(const FMatrix2x2& RHS) const
+{
+	FMatrix2x2 Result = FMatrix2x2(
+		M[0][0] * RHS.M[0][0] + M[0][1] * RHS.M[1][0], M[0][0] * RHS.M[0][1] + M[0][1] * RHS.M[1][1],
+		M[1][0] * RHS.M[0][0] + M[1][1] * RHS.M[1][0], M[1][0] * RHS.M[0][1] + M[1][1] * RHS.M[1][1]
+	);
+
+	return Result;
+}
+
+FMatrix2x2 FMatrix2x2::Inverse() const
+{
+	float Det = M[0][0] * M[1][1] - M[0][1] * M[1][0];
+	if (Det == 0.0f)
+	{
+		return FMatrix2x2();
+	}
+	float InvDet = 1.0f / Det;
+	return FMatrix2x2(
+		M[1][1] * InvDet, -M[0][1] * InvDet,
+		-M[1][0] * InvDet, M[0][0] * InvDet
+	);
+}
+
+FVector2D FMatrix2x2::GetScaleSquared() const
+{
+	return FVector2D(M[0][0] * M[0][0] + M[0][1] * M[0][1], M[1][0] * M[1][0] + M[1][1] * M[1][1]);
+}
+
+FVector2D FMatrix2x2::GetScale() const
+{
+	return FVector2D(FMath::Sqrt(M[0][0] * M[0][0] + M[0][1] * M[0][1]), FMath::Sqrt(M[1][0] * M[1][0] + M[1][1] * M[1][1]));
+}

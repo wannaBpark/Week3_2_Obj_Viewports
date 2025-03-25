@@ -2,7 +2,9 @@
 
 struct FVector4;
 struct FVector;
+struct FVector2D;
 struct FQuat;
+struct FQuat2;
 
 struct alignas(16) FMatrix
 {
@@ -49,4 +51,64 @@ struct alignas(16) FMatrix
 	FVector4 TransformVector4(const FVector4& Vector) const;
 
 	class FTransform GetTransform() const;
+};
+
+struct FMatrix2x2
+{
+	float M[2][2];
+	FMatrix2x2()
+	{
+		M[0][0] = 1.0f; M[0][1] = 0.0f;
+		M[1][0] = 0.0f;	M[1][1] = 1.0f;
+	}
+
+	FMatrix2x2(float In00, float In01, float In10, float In11)
+	{
+		M[0][0] = In00; M[0][1] = In01;
+		M[1][0] = In10; M[1][1] = In11;
+	}
+
+	FMatrix2x2(float Scale)
+	{
+		M[0][0] = Scale; M[0][1] = 0.0f;
+		M[1][0] = 0.0f; M[1][1] = Scale;
+	};
+
+	FMatrix2x2(const FVector2D& Scale);
+
+
+	FMatrix2x2(const FQuat2& Quat);
+
+
+	FVector2D TransformPoint(const FVector2D& Point) const;
+
+	FVector2D TransformVector(const FVector2D& Vector) const;
+
+
+	FMatrix2x2 Concatenate(const FMatrix2x2& RHS) const;
+
+
+	FMatrix2x2 Inverse() const;
+
+
+	inline bool operator== (const FMatrix2x2& Other) const
+	{
+		return M[0][0] == Other.M[0][0] && M[0][1] == Other.M[0][1] &&
+			M[1][0] == Other.M[1][0] && M[1][1] == Other.M[1][1];
+	}
+
+	inline bool operator!= (const FMatrix2x2& Other) const
+	{
+		return !(*this == Other);
+	}
+
+	FVector2D GetScaleSquared() const;
+
+	FVector2D GetScale() const;
+
+	inline bool IsIdentity() const
+	{
+		return M[0][0] == 1.0f && M[0][1] == 0.0f &&
+			M[1][0] == 0.0f && M[1][1] == 1.0f;
+	}
 };

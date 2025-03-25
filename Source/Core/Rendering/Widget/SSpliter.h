@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/Rendering/D3DViewports/SWindow.h"
+#include "Core/Rendering/Widget/SWindow.h"
 
 class SSplitter : public SWindow
 {

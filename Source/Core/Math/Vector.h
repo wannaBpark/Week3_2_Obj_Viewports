@@ -12,8 +12,8 @@ struct FVector
     static const FVector OneVector;
 
 public:
-    static FVector Zero() { return {0, 0, 0}; }
-    static FVector One() { return {1, 1, 1}; }
+    static FVector Zero() { return { 0, 0, 0 }; }
+    static FVector One() { return { 1, 1, 1 }; }
     static FVector Forward() { return { 1,0,0 }; }
     static FVector Up() { return { 0,0,1 }; }
     static FVector Right() { return { 0,1,0 }; }
@@ -80,46 +80,46 @@ inline FVector FVector::CrossProduct(const FVector& A, const FVector& B)
 
 inline float FVector::Distance(const FVector& V1, const FVector& V2)
 {
-    return FMath::Sqrt(FMath::Square(V2.X-V1.X) + FMath::Square(V2.Y-V1.Y) + FMath::Square(V2.Z-V1.Z));
+    return FMath::Sqrt(FMath::Square(V2.X - V1.X) + FMath::Square(V2.Y - V1.Y) + FMath::Square(V2.Z - V1.Z));
 }
 
 inline float FVector::Length() const
 {
-    return FMath::Sqrt(X*X + Y*Y + Z*Z);
+    return FMath::Sqrt(X * X + Y * Y + Z * Z);
 }
 
 inline float FVector::LengthSquared() const
 {
-    return X*X + Y*Y + Z*Z;
+    return X * X + Y * Y + Z * Z;
 }
 
 inline FVector FVector::GetUnsafeNormal() const
 {
-    const float Scale = FMath::InvSqrt(X*X+Y*Y+Z*Z);
-    return {X*Scale, Y*Scale, Z*Scale};
+    const float Scale = FMath::InvSqrt(X * X + Y * Y + Z * Z);
+    return { X * Scale, Y * Scale, Z * Scale };
 }
 
 inline FVector FVector::GetSafeNormal(float Tolerance) const
 {
-    const float SquareSum = X*X + Y*Y + Z*Z;
+    const float SquareSum = X * X + Y * Y + Z * Z;
 
     // Not sure if it's safe to add tolerance in there. Might introduce too many errors
-    if(SquareSum == 1.f)
+    if (SquareSum == 1.f)
     {
         return *this;
-    }		
-    else if(SquareSum < Tolerance)
+    }
+    else if (SquareSum < Tolerance)
     {
         return ZeroVector;
     }
     const float Scale = FMath::InvSqrt(SquareSum);
-    return {X*Scale, Y*Scale, Z*Scale};
+    return { X * Scale, Y * Scale, Z * Scale };
 }
 
 inline bool FVector::Normalize(float Tolerance)
 {
-    const float SquareSum = X*X + Y*Y + Z*Z;
-    if(SquareSum > Tolerance)
+    const float SquareSum = X * X + Y * Y + Z * Z;
+    if (SquareSum > Tolerance)
     {
         const float Scale = FMath::InvSqrt(SquareSum);
         X *= Scale; Y *= Scale; Z *= Scale;
@@ -140,7 +140,7 @@ inline FVector FVector::Cross(const FVector& Other) const
 
 inline FVector FVector::operator+(const FVector& Other) const
 {
-    return {X + Other.X, Y + Other.Y, Z + Other.Z};
+    return { X + Other.X, Y + Other.Y, Z + Other.Z };
 }
 
 inline FVector& FVector::operator+=(const FVector& Other)
@@ -151,7 +151,7 @@ inline FVector& FVector::operator+=(const FVector& Other)
 
 inline FVector FVector::operator-(const FVector& Other) const
 {
-    return {X - Other.X, Y - Other.Y, Z - Other.Z};
+    return { X - Other.X, Y - Other.Y, Z - Other.Z };
 }
 
 inline FVector& FVector::operator-=(const FVector& Other)
@@ -162,12 +162,12 @@ inline FVector& FVector::operator-=(const FVector& Other)
 
 inline FVector FVector::operator*(const FVector& Other) const
 {
-    return {X * Other.X, Y * Other.Y, Z * Other.Z};
+    return { X * Other.X, Y * Other.Y, Z * Other.Z };
 }
 
 inline FVector FVector::operator*(float Scalar) const
 {
-    return {X * Scalar, Y * Scalar, Z * Scalar};
+    return { X * Scalar, Y * Scalar, Z * Scalar };
 }
 
 inline FVector& FVector::operator*=(float Scalar)
@@ -178,12 +178,12 @@ inline FVector& FVector::operator*=(float Scalar)
 
 inline FVector FVector::operator/(const FVector& Other) const
 {
-    return {X / Other.X, Y / Other.Y, Z / Other.Z};
+    return { X / Other.X, Y / Other.Y, Z / Other.Z };
 }
 
 inline FVector FVector::operator/(float Scalar) const
 {
-    return {X / Scalar, Y / Scalar, Z / Scalar};
+    return { X / Scalar, Y / Scalar, Z / Scalar };
 }
 
 inline FVector& FVector::operator/=(float Scalar)
@@ -194,7 +194,7 @@ inline FVector& FVector::operator/=(float Scalar)
 
 inline FVector FVector::operator-() const
 {
-    return {-X, -Y, -Z};
+    return { -X, -Y, -Z };
 }
 
 inline bool FVector::operator==(const FVector& Other) const
@@ -234,3 +234,28 @@ inline FVector4& FVector4::operator/=(float Scalar)
     return *this;
 }
 
+struct FVector2D
+{
+    float X, Y;
+
+    FVector2D() : X(0), Y(0) {}
+    FVector2D(float InX, float InY) : X(InX), Y(InY) {}
+
+    static const FVector2D ZeroVector;
+    static const FVector2D OneVector;
+
+	FVector2D operator+(const FVector2D& Other) const;
+	FVector2D& operator+=(const FVector2D& Other);
+
+	FVector2D operator-(const FVector2D& Other) const;
+	FVector2D& operator-=(const FVector2D& Other);
+
+	bool operator==(const FVector2D& Other) const;
+	bool operator!=(const FVector2D& Other) const;
+
+	FVector2D operator*(float Scalar) const;
+
+    FVector2D operator/(const FVector2D& Other) const;
+
+    FVector2D RoundToVector() const;
+};
