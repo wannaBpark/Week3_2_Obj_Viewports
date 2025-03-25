@@ -9,11 +9,8 @@ ATarzan::ATarzan()
 	UStaticMeshComponent* MeshComponent = AddComponent<UStaticMeshComponent>();
 	RootComponent = MeshComponent;
 
-	//MeshComponent->SetStaticMesh(TEXT("Assets/2PX7U16XARLGHIM3W48FS86MJ.obj"));
-	//MeshComponent->SetStaticMesh(TEXT("Assets/CheckerSphere.obj"));
-	MeshComponent->SetStaticMesh(TEXT("Assets/Earth.obj"));
-	//MeshComponent->SetStaticMesh(TEXT("Assets/High_Earth.obj"));
-	//MeshComponent->SetStaticMesh(TEXT("Assets/Tarzan_textured_MaterialGroups.obj"));
+	MeshComponent->SetStaticMesh(TEXT("Assets/2PX7U16XARLGHIM3W48FS86MJ.obj"));
+
 
 	FTransform Tr = GetActorTransform();
 	//Tr.Rotate(FVector(-90, 0, 0));

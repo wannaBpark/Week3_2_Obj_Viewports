@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ContainerAllocator.h"
+#include "Serialization/Archive.h"
 
 
 template <typename T, typename Allocator>
@@ -82,6 +83,15 @@ public:
     template <typename Compare>
         requires std::is_invocable_r_v<bool, Compare, const T&, const T&>
     void Sort(const Compare& CompFn);
+
+    void Serialize(FArchive& Ar) const
+    {
+		Ar << PrivateVector;
+    }
+    void Deserialize(FArchive& Ar)
+    {
+		Ar >> PrivateVector;
+    }
 };
 
 

@@ -530,7 +530,7 @@ void UI::RenderPropertyWindow()
             selectedTransform.SetScale(scale[0], scale[1], scale[2]);
             selectedActor->SetActorTransform(selectedTransform);
         }
-        TSet<UActorComponent*> components = selectedActor->GetComponents();
+        TArray<UActorComponent*> components = selectedActor->GetComponents();
         
         for (auto component : components) { // TODO: Update에서 dynamic_cast 하는 거 너무 낭비인듯, FName 만들어지면 FName으로 비교
             auto comp = dynamic_cast<UPrimitiveComponent*>(component);

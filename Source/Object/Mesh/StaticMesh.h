@@ -77,5 +77,6 @@ struct FObjMaterialInfo
 	uint32 Illum;
 	FName TextureName;
 	uint32 TextureMapIndex;
+	FString TexturePath;
 };
 
