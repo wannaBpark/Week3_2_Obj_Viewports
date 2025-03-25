@@ -79,7 +79,7 @@ PS_INPUT mainVS(VS_INPUT input)
     
     float4 position = float4(input.position.xyz, 1.0f);
     
-    input.normal = input.position.xyz;
+    //input.normal = input.position.xyz;
 
     position = mul(position, Model);
     output.worldPos = position.xyz;
