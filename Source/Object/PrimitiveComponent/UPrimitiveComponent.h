@@ -187,8 +187,8 @@ public:
 		RenderResource.InputLayoutType = InputLayoutType::POSCOLOR;
 		RenderResource.VertexShaderIndex = 3; // Line VS PS : 3
 		RenderResource.PixelShaderIndex = 3;
-		RenderResource.VertexConstantIndex = 5;  // Line Constants : 5
-		RenderResource.PixelConstantIndex = 5;
+		RenderResource.VertexConstantIndex = 6;  // Line Constants : 5
+		RenderResource.PixelConstantIndex = 6;
 		RenderResource.bUseIndexBuffer = false;
 	}
 	virtual ~ULineComp() = default;
@@ -388,8 +388,8 @@ public:
 		RenderResource.bUseIndexBuffer = true;*/
 		RenderResource.VertexShaderIndex = 3; // Line VS PS : 3
 		RenderResource.PixelShaderIndex = 3;
-		RenderResource.VertexConstantIndex = 5;  // Line Constants : 5
-		RenderResource.PixelConstantIndex = 5;
+		RenderResource.VertexConstantIndex = 6;  // Line Constants : 5
+		RenderResource.PixelConstantIndex = 6;
 		RenderResource.bUseIndexBuffer = true;
 	}
 
@@ -424,8 +424,8 @@ public:
 		RenderResource.bUseIndexBuffer = false;*/
 		RenderResource.VertexShaderIndex = 3; // Line VS PS : 3
 		RenderResource.PixelShaderIndex = 3;
-		RenderResource.VertexConstantIndex = 5;  // Line Constants : 5
-		RenderResource.PixelConstantIndex = 5;
+		RenderResource.VertexConstantIndex = 6;  // Line Constants : 5
+		RenderResource.PixelConstantIndex = 6;
 		RenderResource.bUseIndexBuffer = false;
 		bUseVertexColor = false;
 		//RenderResource.ShaderResourceViewIndices.emplace().push_back(0);	// TextAtlas 추가 필요

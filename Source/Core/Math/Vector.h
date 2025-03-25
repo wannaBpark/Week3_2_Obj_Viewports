@@ -207,7 +207,7 @@ inline bool FVector::operator!=(const FVector& Other) const
     return X != Other.X || Y != Other.Y || Z != Other.Z;
 }
 
-struct alignas(16) FVector4 : public FVector
+struct FVector4 : public FVector
 {
     using FVector::X;
     using FVector::Y;

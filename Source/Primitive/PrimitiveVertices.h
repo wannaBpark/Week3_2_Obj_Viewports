@@ -27,6 +27,7 @@ enum class EPrimitiveType : uint8
 	EPT_BoundingBox,
 	EPT_WORLDGRID,
 	EPT_SubUV,
+	EPT_Mesh,
 	EPT_Max,
 };
 

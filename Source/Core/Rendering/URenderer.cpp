@@ -9,6 +9,7 @@
 #include "Object/PrimitiveComponent/UPrimitiveComponent.h"
 #include "Static/FEditorManager.h"
 #include "Core/Rendering/BufferCache.h" // 그리드 동적 렌더링
+#include "Object/StaticMeshComponent/StaticMeshComponent.h"
 
 // 아래는 Texture에 쓸 이미지 로딩
 #define STB_IMAGE_IMPLEMENTATION
@@ -23,6 +24,8 @@
 
 #include "Core/Rendering/TextAtlasManager.h";
 #include "Core/Rendering/SubUVManager.h";
+#include "Object/Mesh/ObjManager.h"
+#include "Object/Material/Material.h"
 
 #include "Debug/DebugConsole.h"
 
@@ -82,6 +85,10 @@ void URenderer::CreateShader()
     ID3D11VertexShader* AtlasVertexShader;
     ID3D11PixelShader* AtlasPixelShader;
     ID3D11PixelShader* AtlasNoClipPixelShader;
+    ID3D11VertexShader* MeshVertexShader;
+    ID3D11PixelShader* MeshPixelShader;
+	ID3D11InputLayout* MeshInputLayout;
+
     ID3DBlob* VertexShaderCSO;
     ID3DBlob* PosTexVertexShaderCSO;
     ID3DBlob* PixelShaderCSO;
@@ -167,11 +174,25 @@ void URenderer::CreateShader()
     D3DCompileFromFile(L"Shaders/LightPosTexPixelShader.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", 0, 0, &PixelShaderCSO, &ErrorMsg);
     Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &LightPosTexPixelShader);
 
+    SAFE_RELEASE(VertexShaderCSO);  SAFE_RELEASE(PixelShaderCSO);
+    DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+    shaderFlags |= D3DCOMPILE_DEBUG;
+    shaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+    HRESULT result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", shaderFlags, 0, &VertexShaderCSO, &ErrorMsg);
+    Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &MeshVertexShader);
+
+	it = InputLayouts.find(InputLayoutType::POSNORMALTANGENTCOLORTEX);
+	Device->CreateInputLayout(it->second.data(), it->second.size(), VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), &MeshInputLayout);
+
+    result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", shaderFlags, 0, &PixelShaderCSO, &ErrorMsg);
+    Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &MeshPixelShader);
+
     ShaderMapVS.insert({ 0, SimpleVertexShader});                               // 여기서 Vertex Shader, Pixel Shader, InputLayout 추가
     ShaderMapVS.insert({ 1, PosTexVertexShader});
     ShaderMapVS.insert({ 2, AtlasVertexShader });
     ShaderMapVS.insert({ 3, GridVertexShader });            // Line : 3
     ShaderMapVS.insert({ 4, LightPosTexVertexShader });
+    ShaderMapVS.insert({ 5, MeshVertexShader });
 
     ShaderMapPS.insert({ 0, SimplePixelShader });
     ShaderMapPS.insert({ 1, PosTexPixelShader });
@@ -179,9 +200,11 @@ void URenderer::CreateShader()
     ShaderMapPS.insert({ 3, GridPixelShader });             // Line : 3
     ShaderMapPS.insert({ 4, LightPosTexPixelShader });
     ShaderMapPS.insert({ 5, AtlasNoClipPixelShader });
+    ShaderMapPS.insert({ 6, MeshPixelShader });
 
     InputLayoutMap.insert({ InputLayoutType::POSCOLOR, SimpleInputLayout });
     InputLayoutMap.insert({ InputLayoutType::POSCOLORNORMALTEX, PosTexInputLayout });
+	InputLayoutMap.insert({ InputLayoutType::POSNORMALTANGENTCOLORTEX, MeshInputLayout });
 
     
 
@@ -209,8 +232,8 @@ void URenderer::CreateConstantBuffer()
     idx = CreateConstantBuffer<FDepthConstants>();      // DepthConstants : 2
     idx = CreateConstantBuffer<FAtlasConstants>();           // Atlas CBuffer : 3
     idx = CreateConstantBuffer<FLightConstants>();           // Lighting 테스트용 CBuffer : 4
-    idx = CreateConstantBuffer<FLineConstants>();           // Line에 대한 카메라 4대 테스트용 CBuffer : 5
-    idx = CreateConstantBuffer<FViewportConstant>();        // Viewport viewmatrix index저장용 : 6
+    idx = CreateConstantBuffer<FStaticMeshVertexConstant>(); // STaticMesh용 Cbuffer : 5
+    idx = CreateConstantBuffer<FLineConstants>();           // Line에 대한 카메라 4대 테스트용 CBuffer : 6
     UE_LOG("constantbuffer size : %d", idx);
 }
 
@@ -397,60 +420,30 @@ void URenderer::RenderPrimitive(UPrimitiveComponent* PrimitiveComp, FRenderResou
         DeviceContext->PSSetShaderResources(0, static_cast<UINT>(SRVArray.size()), SRVArray.data());
         DeviceContext->PSSetSamplers(0, 1, SamplerMap[0].GetAddressOf());                                           // TODO : 샘플러 기본 1개로 설정되있는 것 각자 여러개 접근토록 바꿔야 함
     }
-	
-
     this->Stride = stride;
     DeviceContext->IASetInputLayout(InputLayoutMap[ILType].Get());
     DeviceContext->IASetPrimitiveTopology(Topology);                                    // 실제 토폴로지 세팅
 
-    for (uint32 i{ 0 }; i < NumViewports; i++)
+    D3D11_VIEWPORT DXViewport;
+    UINT NumViewports = 1; // 뷰포트 개수 초기화
+
+    DeviceContext->RSGetViewports(&NumViewports, &DXViewport); // RSGetViewports 호출
+
+    /*UE_LOG("Rendering CALL VIEWPORT  (%f, %f) - (%f, %f)",
+        DXViewport.TopLeftX, DXViewport.TopLeftY,
+        DXViewport.TopLeftX + DXViewport.Width,
+        DXViewport.TopLeftY + DXViewport.Height);*/
+    // 렌더링 호출
+    if (bUseIndexBuffer == true)
     {
-        UE_LOG("Viewport[%d]: X=%.1f, Y=%.1f, W=%.1f, H=%.1f", i, ViewportInfos[i].TopLeftX, ViewportInfos[i].TopLeftY,
-                                                                  ViewportInfos[i].Width, ViewportInfos[i].Height);
-        ComPtr<ID3D11Buffer> pBuffer = ConstantBufferMap[6];
-        DeviceContext->RSSetViewports(1, &ViewportInfos[i]);
-        if (i >= 0) // 0 = 원본 뷰포트는 viewmatrix 수정필요 없으므로
-        {
-            // 상수 버퍼가 이미 설정된 상태에서 ViewportIndex만 업데이트
-            
-            D3D11_MAPPED_SUBRESOURCE ms;
+        RenderPrimitiveIndexed(VertexBufferMap[Type].Get(), IndexBufferMap[Type].Get(), numVertices);
+    }
+    else
+    {
+        RenderPrimitiveInternal(VertexBufferMap[Type].Get(), numVertices);
+    }
 
-            // Map 호출로 ViewportIndex만 업데이트
-            HRESULT hr = DeviceContext->Map(pBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &ms);
-            if (SUCCEEDED(hr))
-            {
-                if (VC == 4 || VC == 5) {
-                    FViewportConstant* Cbuffer = static_cast<FViewportConstant*>(ms.pData);
-                    Cbuffer->VPIndex = i; // ViewportIndex만 변경
-                }
-                DeviceContext->Unmap(pBuffer.Get(), 0);
-            }
-            else
-            {
-                // Map 실패 시 로그 출력 또는 오류 처리
-                continue;
-            }
-        }
-
-        // 뷰포트 설정 (중복 설정 방지 가능)
-        
-
-        // 렌더링 호출
-        if (bUseIndexBuffer == true)
-        {
-            RenderPrimitiveIndexed(VertexBufferMap[Type].Get(), IndexBufferMap[Type].Get(), numVertices);
-        }
-        else
-        {
-            RenderPrimitiveInternal(VertexBufferMap[Type].Get(), numVertices);
-        }
-        //DeviceContext->ClearRenderTargetView(FrameBufferRTV, ClearColor);
-        //DeviceContext->ClearRenderTargetView(PickingFrameBufferRTV, ClearColor);
-        //DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-    }   
-
-}
+} 
 
 void URenderer::RenderPrimitiveInternal(ID3D11Buffer* pBuffer, UINT numVertices) const
 {
@@ -742,16 +735,11 @@ void URenderer::UpdateConstantDepth(int Depth) const
     DeviceContext->Unmap(ConstantsDepthBuffer, 0);
 }
 
-void URenderer::PrepareMain()
+void URenderer::PrepareMain() const
 {
 	DeviceContext->OMSetDepthStencilState(DepthStencilState, 0);                // DepthStencil 상태 설정. StencilRef: 스텐실 테스트 결과의 레퍼런스
     DeviceContext->OMSetRenderTargets(2, RTVs, DepthStencilView);
     DeviceContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
-}
-
-void URenderer::PrepareMainShader()
-{
-    //DeviceContext->PSSetShader(SimplePixelShader, nullptr, 0);
 }
 
 FVector URenderer::GetRayDirectionFromClick(FVector MPos)
@@ -865,8 +853,9 @@ void URenderer::UpdateViewMatrix(const FTransform& CameraTransform)
 
 void URenderer::UpdateProjectionMatrix(ACamera* Camera)
 {
-    float AspectRatio = UEngine::Get().GetScreenRatio();
-
+    float AspectRatio = Camera->GetAspectRatio();
+    float Width = Camera->GetWidth();
+    float Height = Camera->GetHeight();
     float FOV = FMath::DegreesToRadians(Camera->GetFieldOfView());
     float ViewportSize = Camera->GetViewportSize();
     float Near = Camera->GetNear();
@@ -878,7 +867,7 @@ void URenderer::UpdateProjectionMatrix(ACamera* Camera)
     }
     else if (Camera->ProjectionMode == ECameraProjectionMode::Orthographic)
     {
-        ProjectionMatrix = FMatrix::OrthoForLH(ViewportSize, ViewportSize, Near, Far);
+        ProjectionMatrix = FMatrix::OrthoForLH(Width/100.f, Height/100.f, Near, Far);
     }
 }
 
@@ -918,6 +907,58 @@ void URenderer::OnResizeComplete()
 
     RTVs[0] = FrameBufferRTV;
     RTVs[1] = PickingFrameBufferRTV;
+}
+
+void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
+{
+	DeviceContext->OMSetDepthStencilState(DepthStencilState, 0);                // DepthStencil 상태 설정. StencilRef: 스텐실 테스트 결과의 레퍼런스
+
+    if (MeshComp == nullptr) return;
+
+    uint32 stride = sizeof(FNormalVertex);
+    uint32 offset = 0;
+    DeviceContext->IASetInputLayout(InputLayoutMap[InputLayoutType::POSNORMALTANGENTCOLORTEX].Get());
+    DeviceContext->IASetVertexBuffers(0, 1, &MeshComp->VertexBuffer, &stride, &offset);
+    DeviceContext->IASetIndexBuffer(MeshComp->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+    DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    uint32 VS = MeshComp->RenderResource.VertexShaderIndex;
+    uint32 PS = MeshComp->RenderResource.PixelShaderIndex;
+    uint32 VC = MeshComp->RenderResource.VertexConstantIndex;
+
+    DeviceContext->VSSetShader(ShaderMapVS[VS].Get(), nullptr, 0);
+    DeviceContext->PSSetShader(ShaderMapPS[PS].Get(), nullptr, 0);
+
+    DeviceContext->VSSetConstantBuffers(0, 1, ConstantBufferMap[VC].GetAddressOf());
+    //DeviceContext->PSSetConstantBuffers(0, 1, ConstantBufferMap[PC].GetAddressOf());
+
+    FMatrix m = MeshComp->GetComponentTransform().GetMatrix();
+
+    FStaticMeshVertexConstant vc = {
+        .Model = FMatrix::Transpose(m),
+        .View = FMatrix::Transpose(ViewMatrix),
+        .Projection = FMatrix::Transpose(ProjectionMatrix),
+    };
+
+    UpdateBuffer(vc, VC);
+
+    TMap<FName, FSubMesh>& SubMeshes = MeshComp->StaticMesh->GetStaticMeshAsset()->SubMeshes;
+
+    for (const auto& kvp : SubMeshes)
+    {
+		FSubMesh SubMesh = kvp.second;
+
+        const UMaterial* Mat = MeshComp->GetMaterial(SubMesh.Index);
+        if (Mat != nullptr)
+        {
+			auto srv = ShaderResourceViewMap[Mat->TextureMapIndex].Get();
+			DeviceContext->PSSetSamplers(0, 1, SamplerMap[0].GetAddressOf());
+
+			DeviceContext->PSSetShaderResources(0, 1, &srv);
+			DeviceContext->DrawIndexed(SubMesh.NumIndices, SubMesh.StartIndex, 0);
+        }
+    }
 }
 
 void URenderer::RenderPickingTexture()
@@ -995,7 +1036,7 @@ void URenderer::CreateTextureSRV(const wchar_t* filename)
 }
 
 
-void URenderer::CreateTextureSRVW(const WIDECHAR* filename)
+uint32 URenderer::CreateTextureSRVW(const WIDECHAR* filename)
 {
     using namespace DirectX;
 
@@ -1008,8 +1049,8 @@ void URenderer::CreateTextureSRVW(const WIDECHAR* filename)
 
     if (FAILED(hr))
     {
-        UE_LOG("Failed to load texture");
-        return;
+        UE_LOG("Failed to load texture. %s", filename);
+        return -1;
     }
     assert(SRV.Get() != nullptr);
     // ShaderResourceViewMap에 추가
@@ -1017,4 +1058,6 @@ void URenderer::CreateTextureSRVW(const WIDECHAR* filename)
     ShaderResourceViewMap.insert({ idx, SRV });
 
     UE_LOG("Successfully loaded texture");
+
+    return idx;
 }

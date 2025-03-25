@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "Object/Actor/Camera.h"
-#include "URenderer.h"
+#include "Core/Rendering/URenderer.h"
 #include "Core/HAL/PlatformMemory.h"
 #include "ImGui/imgui_impl_dx11.h"
 #include "ImGui/imgui_impl_win32.h"
@@ -21,19 +21,21 @@
 #include "Object/Actor/WorldGrid.h"
 #include "Object/Actor/BillBoard.h"
 #include "Object/Actor/WorldText.h"
-#include "Object/UtilComponent/UStringComponent.h"
 #include "Object/Actor/SubUV.h"
+#include "Object/Actor/ATarzan.h"
+#include "Object/UtilComponent/UStringComponent.h"
 #include "Static/FEditorManager.h"
 #include "Object/World/World.h"
 #include "Object/Gizmo/GizmoHandle.h"
 #include "Object/Gizmo/WorldGizmo.h"
 #include "Core/FSceneManager.h"
 #include "Object/Gizmo/Axis.h"
-
+#include "Object/Material/Material.h"
 #include "JsonSaveHelper.h"
+#include <Object/StaticMeshComponent/StaticMeshComponent.h>
+#include "StaticMeshInspector.h"
 
 #define INI_PATH "./editor.ini" // grid scale 저장할 ini 파일 경로
-
 
 void UI::Initialize(HWND hWnd, const URenderer& Renderer, UINT ScreenWidth, UINT ScreenHeight)
 {
@@ -74,7 +76,7 @@ void UI::Update()
 
         ImVec2 CalculatedMousePos = ResizeToScreenByCurrentRatio(ImVec2(mousePos.x, mousePos.y));
         ImGui::GetIO().MousePos = CalculatedMousePos;
-        UE_LOG("MousePos: (%.1f, %.1f), DisplaySize: (%.1f, %.1f)\n",CalculatedMousePos.x, CalculatedMousePos.y, GetRatio().x, GetRatio().y);
+        //UE_LOG("MousePos: (%.1f, %.1f), DisplaySize: (%.1f, %.1f)\n",CalculatedMousePos.x, CalculatedMousePos.y, GetRatio().x, GetRatio().y);
     }
 
     
@@ -87,7 +89,7 @@ void UI::Update()
     {
         PreRatio = CurRatio;
         CurRatio = GetRatio();
-        UE_LOG("Current Ratio: %f, %f", CurRatio.x, CurRatio.y);
+        //UE_LOG("Current Ratio: %f, %f", CurRatio.x, CurRatio.y);
     }
     
     RenderGameView();
@@ -109,6 +111,9 @@ void UI::Shutdown()
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+
+    if (StaticMeshInspector)
+        delete StaticMeshInspector;
 }
 
 void UI::OnUpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
@@ -182,7 +187,7 @@ void UI::RenderMemoryUsage()
 
 void UI::RenderPrimitiveSelection()
 {
-    const char* items[] = { "Sphere", "Cube", "Cylinder", "Cone","Triangle","Circle", "BillBoard", "WorldText", "SubUV", "SubUV2"};
+    const char* items[] = { "Sphere", "Cube", "Cylinder", "Cone","Triangle","Circle", "BillBoard", "WorldText", "SubUV", "SubUV2", "Tarzan"};
 
     ImGui::Combo("Primitive", &currentItem, items, IM_ARRAYSIZE(items));
 
@@ -237,6 +242,10 @@ void UI::RenderPrimitiveSelection()
                 ASubUV* SubUV = World->SpawnActor<ASubUV>();
                 SubUV->SetAtlas("RollingChanhui.png");
             }
+            else if (strcmp(items[currentItem], "Tarzan") == 0)
+            {
+                World->SpawnActor<ATarzan>();
+            }
         }
     }
     ImGui::SameLine();
@@ -257,14 +266,13 @@ void UI::RenderPrimitiveSelection()
     if (ImGui::Button("New Scene"))
     {
         World->ClearWorld();
-        FEditorManager::Get().SetCamera(World->SpawnActor<ACamera>());
-        World->SpawnActor<AAxis>();
-        APicker* Picker = World->SpawnActor<APicker>();
-        FEditorManager::Get().SetBoundingBox(Picker->GetBoundingBoxComp());
-        FEditorManager::Get().SetStringComp(Picker->GetStringComponent());
+        //FEditorManager::Get().SetCamera(World->SpawnActor<ACamera>());
+        //World->SpawnActor<AAxis>();
+        //FEditorManager::Get().SetBoundingBox(Picker->GetBoundingBoxComp());
+        //FEditorManager::Get().SetStringComp(Picker->GetStringComponent());
 
-		UEngine::Get().GetWorld()->SpawnActor<AWorldGrid>();
-        UEngine::Get().GetWorld()->SpawnActor<AWorldGizmo>();
+		//UEngine::Get().GetWorld()->SpawnActor<AWorldGrid>();
+        //UEngine::Get().GetWorld()->SpawnActor<AWorldGizmo>();
         GetGridScaleFromIni();
         GetCameraStartSpeed();
 		
@@ -474,7 +482,28 @@ void UI::RenderPropertyWindow()
     }
     
     AActor* selectedActor = FEditorManager::Get().GetSelectedActor();
-    if (selectedActor != nullptr)
+    USceneComponent* selectedComp = FEditorManager::Get().GetSelectedComponent();
+    if (selectedComp != nullptr)
+    {
+        if (selectedComp->IsA<UStaticMeshComponent>())
+        {
+			UStaticMeshComponent* StaticMeshComp = static_cast<UStaticMeshComponent*>(selectedComp);
+            if (StaticMeshInspector == nullptr)
+            {
+                StaticMeshInspector = new FStaticMeshInspector();
+                StaticMeshInspector->Init(StaticMeshComp);
+            }
+            else
+            {
+                if (StaticMeshInspector->GetCurrentStaticMeshComponent() != StaticMeshComp)
+                {
+                    StaticMeshInspector->Init(StaticMeshComp);
+                }
+            }
+            StaticMeshInspector->Update();
+        }
+    }
+    else if (selectedActor != nullptr)
     {
         FTransform selectedTransform = selectedActor->GetActorTransform();
         float position[] = { selectedTransform.GetPosition().X, selectedTransform.GetPosition().Y, selectedTransform.GetPosition().Z };
@@ -607,9 +636,12 @@ void UI::RenderSceneManager()
             actors = FSceneManager::Get().GetScene(0)->GetActors();
 
         for (auto actor : actors) {
-            UClass* uClass = actor->GetClass();
+            /*UClass* uClass = actor->GetClass();
             if (uClass == AAxis::StaticClass() || uClass == AWorldGrid::StaticClass() || uClass == AWorldGizmo::StaticClass() ||
                 uClass == ACamera::StaticClass() || uClass == APicker::StaticClass() || uClass == AGizmoHandle::StaticClass())
+                continue;*/
+
+            if (actor->IsGizmoActor())
                 continue;
 
             char buffer[64];
@@ -625,6 +657,12 @@ void UI::RenderSceneManager()
                 ImGui::Indent();
                 for (auto component : actor->GetComponents()) {
                     ImGui::Text(*component->GetFName().ToString());
+					if (ImGui::IsItemClicked()) {
+                        if (component->IsA<USceneComponent>())
+                        {
+    						APicker::SetSelectedComponent(actor->GetRootComponent());
+                        }
+					}
                 }
                 ImGui::Unindent();
                 ImGui::TreePop();

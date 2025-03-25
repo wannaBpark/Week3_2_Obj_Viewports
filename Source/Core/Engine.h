@@ -4,14 +4,16 @@
 
 #include "HAL/PlatformType.h"
 #include "Rendering/URenderer.h"
-#include "Rendering/UI.h"
+#include "Rendering/UI/UI.h"
 #include "AbstractClass/Singleton.h"
 #include "Container/Map.h"
 #include "Core/Container/Array.h"
+#include "Core/Rendering/D3DViewports/SSpliter.h"
 
 class UObject;
 class UWorld;
-
+class SViewportWindow;
+class ACamera;
 enum class EScreenMode : uint8
 {
     Windowed,    // 창 모드
@@ -67,6 +69,7 @@ private:
     void InitWorld();
     void ShutdownWindow();
     void UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight);
+    void PreloadResources();
 
 public:
 	UWorld* GetWorld() const { return World; }
@@ -77,6 +80,8 @@ public:
         requires std::derived_from<ObjectType, UObject>
     ObjectType* GetObjectByUUID(uint32 InUUID) const;
     UObject* GetObjectByUUID(uint32 InUUID) const;
+
+    void SetViewportCameras();
 
 private:
     bool IsRunning = false;
@@ -103,10 +108,19 @@ private:
 
 private:
     class UWorld* World;
+    std::unique_ptr<SSplitterH> RootWindow;
+    TArray<std::shared_ptr<SViewportWindow>> SViewportWindows;
+    TArray<std::shared_ptr<ACamera>> Cameras;
 
 public:
     // TArray<std::shared_ptr<UObject>> GObjects;
     TMap<uint32, std::shared_ptr<UObject>> GObjects;
+
+private:
+    // private 생성자를 갖는 클래스의 인스턴스를 unique_ptr로 선언할 수 없음. Shutdown시 해제 필요
+    class FEngineConfig* EngineConfig;
+public:
+	FEngineConfig* GetEngineConfig() const { return EngineConfig; }
 };
 
 template <typename ObjectType> requires std::derived_from<ObjectType, UObject>

@@ -8,6 +8,8 @@
 
 AWorldGizmo::AWorldGizmo()
 {
+	bIsGizmo = true;
+
 	UCylinderComp* ZArrow = AddComponent<UCylinderComp>();
 	RootComponent = ZArrow;
 	ZArrow->SetRelativeTransform(FTransform(FVector(0.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 0.0f), FVector(1, 1, 1)));
@@ -65,3 +67,9 @@ void AWorldGizmo::Tick(float DeltaTime)
 	//FQuat InverseQuat = camRotation.Inverse();
 	//this->GetActorTransform().SetRotation(InverseQuat);
 }
+
+const char* AWorldGizmo::GetTypeName()
+{
+	return "WorldGizmo";
+}
+

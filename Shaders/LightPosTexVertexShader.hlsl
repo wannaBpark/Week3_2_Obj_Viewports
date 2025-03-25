@@ -15,11 +15,6 @@ cbuffer constants : register(b0)
     float3 Padding2;
 }
 
-cbuffer ViewportConstants : register(b1)
-{
-    uint VPIndex;
-    float3 padding;
-}
 
 struct VS_INPUT
 {
@@ -45,7 +40,7 @@ PS_INPUT mainVS(VS_INPUT input)
     output.posWorld = position;
     
     //matrix View = Views[ViewportIndex]; 
-    matrix View = Views[VPIndex];
+    matrix View = Views[0];
     position = mul(position, View);
     output.position = mul(position, Projection);
 

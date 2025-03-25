@@ -11,11 +11,6 @@ cbuffer LineConstants : register(b0)
     uint ViewportIndex;
     float3 Padding2;
 }
-cbuffer ViewportConstants : register(b1)
-{
-    uint VPIndex;
-    float3 padding;
-}
  
 struct VS_INPUT
 {
@@ -36,7 +31,7 @@ PS_INPUT mainVS(VS_INPUT input)
     float4 position;
 
     position = mul(float4(input.position, 1.0f), Model);
-    matrix View = Views[VPIndex];
+    matrix View = Views[0];
     position = mul(position, View);
     output.position = mul(position, Projection); // TODO
     output.color = bUseVertexColor == 1 ? input.color : CustomColor;

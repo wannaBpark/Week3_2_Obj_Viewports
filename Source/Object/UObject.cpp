@@ -18,8 +18,8 @@ UClass* UObject::StaticClass()
 	if (!StaticClassInfo)
 	{
 		constexpr size_t ClassSize = sizeof(UClass);
-		UClass* RawMemory = FPlatformMemory::Malloc<UClass, EAT_Object>(ClassSize);
-		UClass* ClassPtr = new(RawMemory) UClass("UObject", nullptr);
+		void* RawMemory = FPlatformMemory::Malloc<EAT_Object>(ClassSize);
+		UClass* ClassPtr = reinterpret_cast<UClass*>(new(RawMemory) UClass("UObject", nullptr));
 		StaticClassInfo = std::unique_ptr<UClass, UClassDeleter>(ClassPtr, UClassDeleter{});
 	}
 	return StaticClassInfo.get();

@@ -6,7 +6,7 @@
 
 #include <unordered_map> // ShaderMap
 
-#include "UI.h"
+#include "UI/UI.h"
 #include "Core/Math/Vector.h"
 // #include "Object/Actor/Camera.h"
 #include "Core/Rendering/BufferCache.h"
@@ -16,6 +16,8 @@
 #include "Core/Math/Plane.h"
 #include "Core/Rendering/ShaderParameterMacros.h" // InputlayoutType
 #include "../EEnum.h"
+
+#include "Debug/DebugConsole.h" // multi viewport 디버깅용
 
 using namespace Microsoft::WRL;
 struct FVertexSimple;
@@ -51,6 +53,7 @@ public:
 
     /** 렌더링 파이프라인을 준비 합니다. */
     void Prepare() const;
+    void PrepareMain() const;
 
     /** 셰이더를 준비 합니다. */
     void PrepareShader() const;
@@ -111,6 +114,8 @@ public:
 	void OnUpdateWindowSize(int Width, int Height);
 
     void OnResizeComplete();
+
+    void RenderMesh(class UStaticMeshComponent* MeshComp);
 
 protected:
     /** Direct3D Device 및 SwapChain을 생성합니다. */
@@ -184,8 +189,16 @@ public:
     FMatrix ViewZY = FMatrix::LookAtLH(FVector(-70.0f, 0.0f, 3.0f), FVector(3.0f, 0.0f, 0.0f), FVector(0.0f, 0.0f, 1.0f)); // 높이z 2
     FMatrix ViewZX = FMatrix::LookAtLH(FVector(0.0f, 7.0f, 3.0f), FVector(0.0f, -7.0f, 0.0f), FVector(0.0f, 0.0f, 1.0f)); // 높이 z 1
     FMatrix ViewYX = FMatrix::LookAtLH(FVector(0.0f, 0.0f, 15.0f), FVector(0.0f, 0.0f, -7.0f), FVector(0.0f, 1.0f, 0.0f));
+    //FMatrix ProjZY = FMatrix::OrthoForLH()
     FMatrix ViewportMatrices[4] = {I, ViewZY, ViewZX, ViewYX };
     FMatrix GetViewportMatrixById(uint32 i) { return ViewportMatrices[i]; }
+
+    void SetViewport(D3D11_VIEWPORT& CurViewport) { 
+        /*UE_LOG("RSSET Viewport (%f, %f) - (%f, %f)",
+            CurViewport.TopLeftX, CurViewport.TopLeftY,
+            CurViewport.TopLeftX + CurViewport.Width,
+            CurViewport.TopLeftY + CurViewport.Height);*/
+        DeviceContext->RSSetViewports(1, &CurViewport); }
 #pragma endregion
 
 public:
@@ -276,8 +289,8 @@ public:
             DeviceContext->Unmap(LineVertexBuffer, 0);
         }
 	}
-
-    ID3D11Buffer* CreateIndexBuffer( const std::vector<uint32>& indices)
+    
+    ID3D11Buffer* CreateIndexBuffer(const std::vector<uint32>& indices)
     {
         ID3D11Buffer* IndexBuffer;
         D3D11_BUFFER_DESC bufferDesc = {};
@@ -289,6 +302,25 @@ public:
 
         D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
         indexBufferData.pSysMem = indices.data();
+        indexBufferData.SysMemPitch = 0;
+        indexBufferData.SysMemSlicePitch = 0;
+
+        Device->CreateBuffer(&bufferDesc, &indexBufferData, &IndexBuffer);
+        return IndexBuffer;
+    }
+
+    ID3D11Buffer* CreateIndexBuffer(const TArray<uint32>& indices)
+    {
+        ID3D11Buffer* IndexBuffer;
+        D3D11_BUFFER_DESC bufferDesc = {};
+        bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;                       // 초기화 후 변경X
+        bufferDesc.ByteWidth = UINT(sizeof(uint32) * indices.Num());
+        bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+        bufferDesc.CPUAccessFlags = 0;                                  // 0 if no CPU access is necessary.
+        bufferDesc.StructureByteStride = sizeof(uint32);
+
+        D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
+        indexBufferData.pSysMem = indices.GetData();
         indexBufferData.SysMemPitch = 0;
         indexBufferData.SysMemSlicePitch = 0;
 
@@ -339,7 +371,7 @@ public:
 
     void CreateTextureSRV(const std::string& filename);
     void CreateTextureSRV(const WIDECHAR* filename);
-    void CreateTextureSRVW(const WIDECHAR* filename);
+    uint32 CreateTextureSRVW(const WIDECHAR* filename);
 #pragma endregion
 
 #pragma region picking
@@ -362,7 +394,6 @@ public:
 	void UpdateConstantPicking(FVector4 UUIDColor) const;
     void UpdateConstantDepth(int Depth) const;
     void PrepareMain();
-	void PrepareMainShader();
 
     FVector GetRayDirectionFromClick(FVector MPos);
 	FVector4 GetPixel(FVector MPos);
