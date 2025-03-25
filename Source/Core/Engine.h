@@ -98,6 +98,7 @@ private:
     int ScreenWidth = 0;
     int ScreenHeight = 0;
 
+    float curDeltaTime = 0;
     
 
 private:
@@ -122,6 +123,7 @@ private:
 public:
 	FEngineConfig* GetEngineConfig() const { return EngineConfig; }
     std::shared_ptr<ACamera> GetCameraByIdx(uint32 idx) { return Cameras[idx % Cameras.Num()]; }
+    float GetDeltaTime() const { return curDeltaTime; }
 };
 
 template <typename ObjectType> requires std::derived_from<ObjectType, UObject>

@@ -168,6 +168,7 @@ void UEngine::Run()
 
         const float DeltaTime =
             static_cast<float>(StartTime.QuadPart - EndTime.QuadPart) / static_cast<float>(Frequency.QuadPart);
+        curDeltaTime = DeltaTime;  // 각 viewport마다 렌더링을 따로 해줄때 input도 따로 받게하기 위함
 
         APlayerInput::Get().PreProcessInput();
         
@@ -213,10 +214,10 @@ void UEngine::Run()
 		}
 
         //각 Actor에서 TickActor() -> PlayerTick() -> TickPlayerInput() 호출하는데 지금은 Message에서 처리하고 있다.
-        APlayerInput::Get().TickPlayerInput(); //잘못된 위치. 위에 달린 주석대로 처리해야 정상 플레이어 액터 내에서만 처리해야할것같다.
-        
-        // TickPlayerInput
-        APlayerController::Get().ProcessPlayerInput(DeltaTime);
+        //APlayerInput::Get().TickPlayerInput(); //잘못된 위치. 위에 달린 주석대로 처리해야 정상 플레이어 액터 내에서만 처리해야할것같다.
+        //
+        //// TickPlayerInput
+        //APlayerController::Get().ProcessPlayerInput(DeltaTime);
         
 		// ui Update
         ui.Update();

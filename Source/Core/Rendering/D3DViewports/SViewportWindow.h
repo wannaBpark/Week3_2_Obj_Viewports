@@ -48,6 +48,14 @@ public:
             bRenderable = false;
             // TickPlayerInput
             //UEngine::Get().
+            // TODO : 내 윈도우를 hover하며 카메라조작하다가
+            // 다른 윈도우에 점유되면 안움직이도록 해야 함
+            if (bHovered) {
+                APlayerInput::Get().TickPlayerInput();
+                APlayerController::Get().ProcessPlayerInput(
+                    UEngine::Get().GetDeltaTime()
+                );
+            }
         }
     }
 
