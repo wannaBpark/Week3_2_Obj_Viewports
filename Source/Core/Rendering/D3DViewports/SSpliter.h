@@ -8,9 +8,13 @@ protected:
     std::shared_ptr<SWindow> SideLT; // Left 또는 Top
     std::shared_ptr<SWindow> SideRB; // Right 또는 Bottom
     float SplitRatio = 0.5f;
-    
+  
 public:
     explicit SSplitter(std::shared_ptr<SWindow> LT, std::shared_ptr<SWindow> RB) : SideLT(LT), SideRB(RB) { }
+public:
+    float GetSplitRatio() const { return SplitRatio; }
+    std::shared_ptr<SWindow> GetSideLT() { return SideLT; }
+    std::shared_ptr<SWindow> GetSideRB() { return SideRB; }
 
     virtual void OnDrag(float Delta)
     {
@@ -37,6 +41,13 @@ public:
         }
     }
 
+    // 마우스 움직임, 키 입력이 자식들에게 전달되며 알맞은 행동을 취합니다
+    virtual void OnMouseMove(const FPoint& MousePos) override
+    {
+        if (SideLT) SideLT->OnMouseMove(MousePos);
+        if (SideRB) SideRB->OnMouseMove(MousePos);
+    }
+
     virtual void OnMouseUp(const FPoint& MousePos) override
     {
         bIsDragging = false;
@@ -46,9 +57,12 @@ public:
         //UE_LOG("SSplitterH: Mouse Up, stop dragging");
     }
 
-    float GetSplitRatio() const { return SplitRatio; }
-    std::shared_ptr<SWindow> GetSideLT() { return SideLT; }
-    std::shared_ptr<SWindow> GetSideRB() { return SideRB; }
+    virtual void OnKeyDown(EKeyCode Key) override 
+    {
+        Super::OnKeyDown(Key);
+        if (SideLT) SideLT->OnKeyDown(Key);
+        if (SideRB) SideRB->OnKeyDown(Key);
+    }   
 };
 
 
@@ -82,12 +96,13 @@ public:
         {
             bIsDragging = true;
             LastMousePos = MousePos;
-            //UE_LOG("SSplitterV: Border Mouse Down, start dragging");
         }
     }
 
     virtual void OnMouseMove(const FPoint& MousePos) override
     {
+        Super::OnMouseMove(MousePos);
+
         // 경계 영역에 걸침 -> 드래그 아이콘으로 변경
         if (!bIsDragging && IsOverBorder(MousePos)) { ::SetCursor(LoadCursor(nullptr, IDC_SIZEWE)); }
 
@@ -197,13 +212,11 @@ public:
         {
             bIsVerticalDrag = bIsDragging = true;
             ::SetCursor(LoadCursor(nullptr, IDC_SIZEWE));  // 좌우 아이콘
-            //UE_LOG("SSplitterH: Vertical Border Mouse Down, ONLY Start Dragging Vertical");
         }
         else if (IsOverBorder(MousePos))
         {
             bIsDragging = true;
             ::SetCursor(LoadCursor(nullptr, IDC_SIZENS));
-            //UE_LOG("SSplitterH: Border Mouse Down, General Mouse Drag");
         }
         LastMousePos = MousePos;
 
@@ -212,6 +225,8 @@ public:
 
     virtual void OnMouseMove(const FPoint& MousePos) override
     {
+        Super::OnMouseMove(MousePos);
+
         if (!bIsDragging) // 중앙, 수직, 단일 수평 축에 대한 아이콘 변경 (hover시)
         {
             if (IsOverCenter(MousePos))      { ::SetCursor(LoadCursor(nullptr, IDC_SIZEALL)); }
@@ -267,5 +282,12 @@ public:
 
         TopSplitterV->UpdateLayout();
         BottomSplitterV->UpdateLayout();
+    }
+
+    // 키 이벤트 전파: 자식 SSplitterV에게 전달
+    virtual void OnKeyDown(EKeyCode Key) override 
+    {
+        if (TopSplitterV) TopSplitterV->OnKeyDown(Key);
+        if (BottomSplitterV) BottomSplitterV->OnKeyDown(Key);
     }
 };

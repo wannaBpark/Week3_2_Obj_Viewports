@@ -44,12 +44,22 @@ LRESULT UEngine::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         PostQuitMessage(0); // 프로그램 종료
         break;
     case WM_KEYDOWN:
-        APlayerInput::Get().KeyDown(static_cast<EKeyCode>(wParam));
-        if ((lParam>>30)%2 != 0)
+    {
+        EKeyCode Key = static_cast<EKeyCode>(wParam);
+        APlayerInput::Get().KeyDown(Key);
+        if (EngineInstance.RootWindow) // RootWindow가 존재하고, 중복입력이 아닐때에만 키 이벤트 전달
         {
-            APlayerInput::Get().KeyOnceUp(static_cast<EKeyCode>( wParam ));
+            if ((Key == EKeyCode::F || Key == EKeyCode::_1) && !(lParam & 0x40000000))
+            {
+                EngineInstance.RootWindow->OnKeyDown(Key);
+            }
+        }
+        if ((lParam >> 30) % 2 != 0)
+        {
+            APlayerInput::Get().KeyOnceUp(static_cast<EKeyCode>(wParam));
         }
         break;
+    }
     case WM_MOUSEMOVE:
     {
         int x = GET_X_LPARAM(lParam);
@@ -178,6 +188,7 @@ void UEngine::Run()
             }
 
         }
+
 		// Renderer Update
         Renderer->Prepare();          
         //Renderer->PrepareShader();    // 각 rendercomponent에서 호출
@@ -187,11 +198,6 @@ void UEngine::Run()
             ++It)
         {
             UPrimitiveComponent* prim = *It;
-
-            //if (prim)
-            //{
-            //    UE_LOG(TEXT("Found PrimitiveCompnent : %s"), *prim->GetName());
-            //}
         }
 
 		// World Update
@@ -455,26 +461,29 @@ void UEngine::SetViewportCameras()
     FTransform ZY = FTransform(FVector(-5, 0, 1), FVector(0, 0, 0), FVector(1, 1, 1));
     FTransform ZX = FTransform(FVector(0, 10, 1), FVector(0, 0, -90), FVector(1, 1, 1));
     FTransform XY = FTransform(FVector(0, 0, 5), FVector(0,89.9,-89.9), FVector(1, 1, 1));
-    
+    FTransform YX = FTransform(FVector(0, 0, -10), FVector(0, -89.9, -89.9), FVector(1, 1, 1));
+
     ACamera* CamZY = World->SpawnActor<ACamera>(); CamZY->SetActorTransform(ZY); CamZY->SetProjectionMode(ECameraProjectionMode::Orthographic);
     ACamera* CamZX = World->SpawnActor<ACamera>(); CamZX->SetActorTransform(ZX); CamZX->SetProjectionMode(ECameraProjectionMode::Orthographic);
     ACamera* CamXY = World->SpawnActor<ACamera>(); CamXY->SetActorTransform(XY); CamXY->SetProjectionMode(ECameraProjectionMode::Orthographic);
+    ACamera* CamYX = World->SpawnActor<ACamera>(); CamYX->SetActorTransform(YX); CamYX->SetProjectionMode(ECameraProjectionMode::Orthographic);
 
     ACamera* CamPerspective = World->SpawnActor<ACamera>();
     Cameras.Add(std::make_shared<ACamera>(*CamZY));
     Cameras.Add(std::make_shared<ACamera>(*CamZX));
     Cameras.Add(std::make_shared<ACamera>(*CamPerspective));
     Cameras.Add(std::make_shared<ACamera>(*CamXY));
+    Cameras.Add(std::make_shared<ACamera>(*CamYX));
 
-    if (topLeft) topLeft->SetCamera(Cameras[0]);
-    if (topRight) topRight->SetCamera(Cameras[1]);
-    if (bottomLeft) bottomLeft->SetCamera(Cameras[3]);
-    if (bottomRight) bottomRight->SetCamera(Cameras[2]); 
+    if (topLeft)     topLeft->SetCamera(Cameras[0], 0);
+    if (topRight)    topRight->SetCamera(Cameras[1] , 1);
+    if (bottomLeft)  bottomLeft->SetCamera(Cameras[2], 2);
+    if (bottomRight) bottomRight->SetCamera(Cameras[3], 3); 
     // 원랜 0,1,2,3순서이지만 카메라 마지막 부분만 마우스 조작되는 관계로 0132로 해놓음
     // TODO : 위에서 아래로 내려다보는 카메라 FIX
     // TODO : Hover 후 키입력 시 카메라 모드 변경하도록
 
-    FEditorManager::Get().SetCamera(CamPerspective);
+    //FEditorManager::Get().SetCamera(CamPerspective);
 
 #pragma endregion
 }
