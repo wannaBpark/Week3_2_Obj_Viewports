@@ -8,6 +8,8 @@
 #include "Object/USceneComponent.h"
 #include "Object/PrimitiveComponent/UPrimitiveComponent.h"
 #include "Object/ObjectMacro.h"
+#include "Serialization/Archive.h"
+#include "ActorInfo.h"
 
 class UWorld;
 class UBoxCollider;
@@ -38,7 +40,7 @@ public:
 	
 	virtual void Destroyed();
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
-	TSet<UActorComponent*>& GetComponents() { return Components; }
+	TArray<UActorComponent*>& GetComponents() { return Components; }
 
 	UWorld* GetWorld() const { return World; }
 	void SetWorld(UWorld* InWorld) { World = InWorld; }
@@ -112,8 +114,12 @@ protected:
 	bool bIsGizmo = false;
 	UBoxCollider* hitCollider = nullptr;
 
+public:
+	virtual void LoadAndConstruct(const TArray<FActorComponentInfo>& InfoArray);
+	virtual FActorInfo GetActorInfo();
+
 private:
 	UWorld* World = nullptr;
-	TSet<UActorComponent*> Components;
+	TArray<UActorComponent*> Components;
 };
 

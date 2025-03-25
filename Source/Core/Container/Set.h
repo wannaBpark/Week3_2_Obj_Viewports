@@ -1,7 +1,8 @@
-﻿#pragma once
+#pragma once
 #include <unordered_set>
 #include "Array.h"
 #include "ContainerAllocator.h"
+#include "Serialization/Archive.h"
 
 
 template <typename T, typename Allocator = FDefaultAllocator<T>>
@@ -62,4 +63,13 @@ public:
 
     // IsEmpty
     bool IsEmpty() const { return PrivateSet.empty(); }
+
+    inline void Serialize(FArchive& ar) const
+    {
+		ar << PrivateSet;
+    }
+    inline void Deserialize(FArchive& ar)
+    {
+        ar >> PrivateSet;
+    }
 };

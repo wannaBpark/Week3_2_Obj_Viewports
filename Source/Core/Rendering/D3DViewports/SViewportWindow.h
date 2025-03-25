@@ -46,6 +46,8 @@ public:
             UEngine::Get().GetRenderer()->SetViewport(DXViewport);
             UEngine::Get().GetWorld()->Render();
             bRenderable = false;
+            // TickPlayerInput
+            //UEngine::Get().
         }
     }
 
@@ -59,6 +61,7 @@ public:
         if (!bHovered) { return; }
 
         if (Key == EKeyCode::F) {
+            if (!bFullScreen && bIsAnyFullScreen) { return; }
             ToggleFullScreen();
         }
         else if (Key == EKeyCode::_1) {

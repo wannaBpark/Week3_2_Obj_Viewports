@@ -77,6 +77,19 @@ void USceneComponent::SetupAttachment(USceneComponent* InParent, bool bUpdateChi
 	}
 }
 
+void USceneComponent::LoadAndConstruct(const FActorComponentInfo Info)
+{
+	RelativeTransform = Info.Transform;
+}
+
+FActorComponentInfo USceneComponent::GetActorComponentInfo()
+{
+	FActorComponentInfo Info;
+	Info.Name = "USceneComponent";
+	Info.Transform = RelativeTransform;
+	return Info;
+}
+
 /*
 void USceneComponent::ApplyParentWorldTransform(const FTransform& ParentWorldTransform)
 {

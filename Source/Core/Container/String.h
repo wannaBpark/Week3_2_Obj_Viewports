@@ -4,6 +4,7 @@
 #include "ContainerAllocator.h"
 #include "CString.h"
 #include "Core/HAL/PlatformType.h"
+#include "Serialization/Archive.h"
 
 /*
  *	Unreal Engine의 Core/Public/Containers/UnrealString.h를 구현하는 것을 목표로 함
@@ -232,6 +233,11 @@ public:
 	FORCEINLINE const TCHAR& operator[](const size_t Index) const;
 
 
+	// 직렬화 및 역직렬화
+	void Serialize(FArchive& Ar) const;
+	void Deserialize(FArchive& Ar);
+
+
 };
 
 
@@ -301,6 +307,19 @@ FORCEINLINE TCHAR& FString::operator[](const size_t Index)
 FORCEINLINE const TCHAR& FString::operator[](const size_t Index) const
 {
 	return PrivateString[Index];
+}
+
+inline void FString::Serialize(FArchive& Ar) const
+{
+	std::string Str(c_char());
+	Ar << Str;
+}
+
+inline void FString::Deserialize(FArchive& Ar)
+{
+	std::string Str;
+	Ar >> Str;
+	PrivateString = Str;
 }
 
 FORCEINLINE const char* FString::c_char() const

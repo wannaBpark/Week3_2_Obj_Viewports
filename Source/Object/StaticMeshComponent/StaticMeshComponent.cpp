@@ -1,11 +1,7 @@
 #include "StaticMeshComponent.h"
 #include "Object/Mesh/ObjManager.h"
 #include "Object/Mesh/UStaticMesh.h"
-
-void UStaticMeshComponent::BeginPlay()
-{
-	Super::BeginPlay();
-}
+#include "Object/Material/Material.h"
 
 void UStaticMeshComponent::Tick(float DeltaTime)
 {
@@ -81,4 +77,39 @@ void UStaticMeshComponent::SetMaterial(uint32 Index, UMaterial* InMaterial)
 		return;
 	}
 	Materials[Index] = InMaterial;
+}
+
+void UStaticMeshComponent::LoadAndConstruct(const FActorComponentInfo Info)
+{
+	Super::LoadAndConstruct(Info);
+	
+	// Info의 Args의 0번은 StaticMeshPath
+	// 이후의 Arg들은 적용되어있는 머티리얼들의 이름
+	// 1번 arg는 0번째 머티리얼, 2번 arg는 1번째 머티리얼, ...
+
+	SetStaticMesh(Info.Args[0]);
+	for (int i = 1; i < Info.Args.Num(); ++i)
+	{
+		auto Material = FObjManager::LoadMaterial(FName(Info.Args[i]));
+		SetMaterial(i - 1, Material);
+	}
+}
+
+FActorComponentInfo UStaticMeshComponent::GetActorComponentInfo()
+{
+	FActorComponentInfo Info = Super::GetActorComponentInfo();
+
+	Info.Name = "UStaticMeshComponent";
+
+	// Info의 Args의 0번은 StaticMeshPath
+	// 이후의 Arg들은 적용되어있는 머티리얼들의 이름
+	// 1번 arg는 0번째 머티리얼, 2번 arg는 1번째 머티리얼, ...
+
+	Info.Args.Add(StaticMesh->GetStaticMeshAsset()->PathFileName);
+	for (int i = 0; i < Materials.Num(); ++i)
+	{
+		Info.Args.Add(Materials[i]->GetMaterialName().ToString());
+	}
+
+	return Info;
 }
