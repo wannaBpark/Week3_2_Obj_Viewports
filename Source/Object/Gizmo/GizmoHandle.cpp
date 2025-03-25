@@ -82,6 +82,12 @@ void AGizmoHandle::Tick(float DeltaTime)
 
 	SetPickGizmo((int32)SelectedAxis);
 
+	if (APlayerInput::Get().IsMouseReleased(false))
+	{
+		SelectedAxis = ESelectedAxis::None;
+		CachedRayResult = FVector::ZeroVector;
+	}
+
 	if (SelectedAxis != ESelectedAxis::None)
 	{
 		if (AActor* Actor = FEditorManager::Get().GetSelectedActor())
@@ -126,11 +132,25 @@ void AGizmoHandle::Tick(float DeltaTime)
 			// Ray 방향으로 Distance만큼 재계산
 			FVector Result = RayOrigin + RayDir * Distance;
 
+			if (CachedRayResult == FVector::ZeroVector)
+			{
+				CachedRayResult = Result;
+				return;
+			}
+			
+			FVector Delta = Result - CachedRayResult;
+			CachedRayResult = Result;
+
 			FTransform AT = Actor->GetActorTransform();
 
-			DoTransform(AT, Result, Actor);
+			DoTransform(AT, Delta, Actor);
+			//DoTransform(AT, Result, Actor);
 
 		}
+	}
+	else
+	{
+		CachedRayResult = FVector::ZeroVector;
 	}
 
 	if (APlayerInput::Get().GetKeyDown(EKeyCode::Space))

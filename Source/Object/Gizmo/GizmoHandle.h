@@ -30,5 +30,6 @@ private:
 
 private:
 	void DoTransform(FTransform& AT, FVector Result, AActor* Actor);
+	FVector CachedRayResult = FVector::ZeroVector;
 };
 

@@ -27,6 +27,9 @@ void HandleMouseInput(HWND hWnd, LPARAM lParam, bool isDown, bool isRight)
 
 APlayerInput::APlayerInput()
 {
+    Keyboard = std::make_unique<DirectX::Keyboard>();
+    Mouse = std::make_unique<DirectX::Mouse>();
+    GamePad = std::make_unique<DirectX::GamePad>();
     for (bool& key : _keys)
     {
         key = false;
@@ -46,6 +49,30 @@ APlayerInput::APlayerInput()
     {
         om=false;
     }
+}
+
+void APlayerInput::UpdateInput()
+{
+    auto Kb = Keyboard->GetState();
+    KeyboardTracker.Update(Kb);
+
+    // 마우스 상태 가져오기
+    auto MouseState = Mouse->GetState();
+    MouseTracker.Update(MouseState);
+
+    PrevMouseState = CurrentMouseState;
+
+    CurrentMouseState.LeftDown = MouseState.leftButton;
+    CurrentMouseState.RightDown = MouseState.rightButton;
+    CurrentMouseState.MiddleDown = MouseState.middleButton;
+    CurrentMouseState.Wheel = MouseState.scrollWheelValue;
+    CurrentMouseState.X = MouseState.x; // 윈도우에 상대적
+    CurrentMouseState.Y = MouseState.y; // 윈도우에 상대적
+
+    POINT p;
+    GetCursorPos(&p);
+    CurrentMouseState.ScreenX = p.x;
+    CurrentMouseState.ScreenY = p.y;
 }
 
 bool APlayerInput::IsPressedKey(EKeyCode key) const
