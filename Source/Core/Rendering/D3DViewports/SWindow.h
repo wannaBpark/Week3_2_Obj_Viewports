@@ -35,6 +35,7 @@ protected:
 	FRect Rect;
 	bool bIsDragging = false;
 	bool bRenderable = true;
+	bool bHovered = false;		// 마우스 Hover 여부
 public:
 	SWindow() = default;
 	virtual ~SWindow() = default;
@@ -54,18 +55,12 @@ public:
 	{
 		if (bRenderable) 
 		{
-			//UE_LOG("Base Window Render");
 			bRenderable = false;
 		}
 	}
 
 	// 기본 마우스 이벤트
-	virtual void OnMouseMove(const FPoint& MousePos)
-	{
-		if (IsHover(MousePos)) { 
-			//UE_LOG("SWindow: Mouse Hover"); 
-		}
-	}
+	virtual void OnMouseMove(const FPoint& MousePos) { }
 	virtual void OnMouseDown(const FPoint& MousePos) {
 		if (IsHover(MousePos)) { bIsDragging = true; }
 	}

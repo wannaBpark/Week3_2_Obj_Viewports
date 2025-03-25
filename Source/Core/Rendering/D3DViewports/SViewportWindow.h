@@ -14,7 +14,6 @@ private:
     D3D11_VIEWPORT DXViewport;
     std::shared_ptr<ACamera> Camera;
     uint32 CameraIdx = 0;
-    bool bHovered = false;          // 마우스 Hover 여부
     bool bFullScreen = false;
     FRect OriginalRect;
 public:
@@ -37,11 +36,6 @@ public:
     {
         // 사촌들 중 하나가 fullscreen인데 내가 아닌 경우엔 렌더하지 않음
         if (bRenderable && (!bIsAnyFullScreen || bFullScreen)) {
-            if (bFullScreen)
-            {
-                UE_LOG("My Fullscreen Rect : %d %d %d %d",
-                    Rect.X, Rect.Y, Rect.W, Rect.H);
-            }
             UpdateViewport();
             if (Camera)
             {
@@ -57,11 +51,7 @@ public:
 
     virtual void OnMouseMove(const FPoint& MousePos) override
     {
-        bHovered = IsInRect(MousePos, Rect);
-        if (bHovered)
-        {
-            //UE_LOG("Hovered Window %d %d", Rect.X, Rect.Y);
-        }
+        bHovered = IsHover(MousePos);
     }
 
     virtual void OnKeyDown(EKeyCode Key) override
@@ -78,7 +68,7 @@ public:
 
     void ToggleFullScreen()
     {
-        if (!bFullScreen)
+        if (!bFullScreen) // 자기 자신을 전체화면으로 바꿉니다
         {
             uint32 FullWidth = static_cast<uint32>(UEngine::Get().GetScreenWidth());
             uint32 FullHeight = static_cast<uint32>(UEngine::Get().GetScreenHeight());
@@ -87,18 +77,17 @@ public:
             SetRect({ 0, 0, FullWidth, FullHeight });
             bIsAnyFullScreen = true;
         }
-        else
+        else               // 이미 전체화면인 경우 사촌 viewport에 FullScreen변수에 false를 전달합니다
         {
-            bIsAnyFullScreen = false;
+            bIsAnyFullScreen = false; 
         }
         bFullScreen = !bFullScreen;
         SetNeedsRender();
     }
 
-    void CycleCamera()
+    void CycleCamera()  // Get Next Camera
     {
-        Camera = UEngine::Get().GetCameraByIdx(++CameraIdx);
-        //UE_LOG("SViewportWindow : CycleCamera triggered");
+        Camera = UEngine::Get().GetCameraByIdx(++CameraIdx); 
     }
 
     virtual void SetRect(const FRect& InRect) override

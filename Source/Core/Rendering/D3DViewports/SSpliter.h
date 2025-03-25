@@ -41,7 +41,8 @@ public:
         }
     }
 
-    virtual void OnMouseMove(const FPoint& MousePos)
+    // 마우스 움직임, 키 입력이 자식들에게 전달되며 알맞은 행동을 취합니다
+    virtual void OnMouseMove(const FPoint& MousePos) override
     {
         if (SideLT) SideLT->OnMouseMove(MousePos);
         if (SideRB) SideRB->OnMouseMove(MousePos);
@@ -56,7 +57,8 @@ public:
         //UE_LOG("SSplitterH: Mouse Up, stop dragging");
     }
 
-    virtual void OnKeyDown(EKeyCode Key) override {
+    virtual void OnKeyDown(EKeyCode Key) override 
+    {
         Super::OnKeyDown(Key);
         if (SideLT) SideLT->OnKeyDown(Key);
         if (SideRB) SideRB->OnKeyDown(Key);
@@ -94,7 +96,6 @@ public:
         {
             bIsDragging = true;
             LastMousePos = MousePos;
-            //UE_LOG("SSplitterV: Border Mouse Down, start dragging");
         }
     }
 
@@ -211,13 +212,11 @@ public:
         {
             bIsVerticalDrag = bIsDragging = true;
             ::SetCursor(LoadCursor(nullptr, IDC_SIZEWE));  // 좌우 아이콘
-            //UE_LOG("SSplitterH: Vertical Border Mouse Down, ONLY Start Dragging Vertical");
         }
         else if (IsOverBorder(MousePos))
         {
             bIsDragging = true;
             ::SetCursor(LoadCursor(nullptr, IDC_SIZENS));
-            //UE_LOG("SSplitterH: Border Mouse Down, General Mouse Drag");
         }
         LastMousePos = MousePos;
 
