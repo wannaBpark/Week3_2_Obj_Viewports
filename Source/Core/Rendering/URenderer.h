@@ -13,7 +13,7 @@
 #include "Core/Math/Matrix.h"
 #include "Core/Engine.h"
 #include "Primitive/PrimitiveVertices.h"
-#include "Core/Math/Plane.h"
+#include "Core/Math/Quat.h"
 #include "Core/Rendering/ShaderParameterMacros.h" // InputlayoutType
 #include "../EEnum.h"
 

@@ -19,6 +19,10 @@ public:
 	virtual class AActor* GetOwner() const;
 	virtual void SetOwner(class AActor* InOwner) { Owner = InOwner; }
 
+	FVector GetActorPosition() const;
+
+	virtual void Destroyed();
+
 protected:
 	bool bCanEverTick = true;
 	class AActor* Owner = nullptr;
