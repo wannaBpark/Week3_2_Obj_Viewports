@@ -178,47 +178,4 @@ struct FMath
     {
         return static_cast<int32_t>(std::round(2.0f * F + 0.5f)) / 2;
     }
-
-    template <typename T>
-    [[nodiscard]] static FORCEINLINE int32 CeilToInt(T Value)
-    {
-        return static_cast<int32>(ceil(Value));
-    }
-
-    /** float 타입을 위한 특수화된 버전 */
-    [[nodiscard]] static FORCEINLINE int32 CeilToInt(float Value)
-    {
-        return static_cast<int32>(ceilf(Value));
-    }
-
-    /** double 타입을 위한 특수화된 버전 */
-    [[nodiscard]] static FORCEINLINE int32 CeilToInt(double Value)
-    {
-        return static_cast<int32>(ceil(Value));
-    }
-
-    static FORCEINLINE void SinCos(float* ScalarSin, float* ScalarCos, float Value)
-    {
-        *ScalarSin = sinf(Value);
-        *ScalarCos = cosf(Value);
-    }
-
-    static FORCEINLINE void SinCos(double* ScalarSin, double* ScalarCos, double Value)
-    {
-        *ScalarSin = sin(Value);
-        *ScalarCos = cos(Value);
-    }
-
-    [[nodiscard]] static FORCEINLINE float UnwindDegrees(float A)
-    {
-        while (A > 180.0f)
-        {
-            A -= 360.0f;
-        }
-        while (A < -180.0f)
-        {
-            A += 360.0f;
-        }
-        return A;
-    }
 };

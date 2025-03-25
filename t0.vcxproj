@@ -161,7 +161,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Core\Math\Rotator.cpp" />
     <ClCompile Include="Source\Core\Math\Transform.cpp" />
     <ClCompile Include="Source\Core\Rendering\Widget\Reply.cpp" />
     <ClCompile Include="Source\Core\Math\IntPoint.cpp" />
@@ -185,7 +184,7 @@
     <ClCompile Include="Source\Object\Actor\WorldGrid.cpp" />
     <ClCompile Include="Source\Object\Actor\BillBoard.cpp" />
     <ClCompile Include="Source\Core\HAL\StackAllocator.cpp" />
-    <ClCompile Include="Source\Core\Math\Quat.cpp" />
+    <ClCompile Include="Source\Core\Math\Plane.cpp" />
     <ClCompile Include="Source\Object\ActorComponent\ActorComponent.cpp" />
     <ClCompile Include="Source\Object\ActorComponent\Colliders\UBoxCollider.cpp" />
     <ClCompile Include="Source\Object\ActorComponent\Colliders\ICollider.cpp" />
@@ -328,7 +327,6 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Core\Math\Rotator.h" />
     <ClInclude Include="Source\Core\Rendering\Widget\Reply.h" />
     <ClInclude Include="Source\Core\Math\IntPoint.h" />
     <ClInclude Include="Source\Core\Rendering\Widget\ArrangedWidget.h" />
@@ -386,7 +384,7 @@
     <ClInclude Include="Source\Core\HAL\PlatformType.h" />
     <ClInclude Include="Source\Core\Math\MathUtility.h" />
     <ClInclude Include="Source\Core\Math\Matrix.h" />
-    <ClInclude Include="Source\Core\Math\Quat.h" />
+    <ClInclude Include="Source\Core\Math\Plane.h" />
     <ClInclude Include="Source\Core\Math\Vector.h" />
     <ClInclude Include="Source\JsonSaveHelper.h" />
     <ClInclude Include="Source\Core\Math\Transform.h" />

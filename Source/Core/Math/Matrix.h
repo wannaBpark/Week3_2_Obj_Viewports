@@ -1,31 +1,17 @@
 #pragma once
-#include "Vector.h"
 
 struct FVector4;
 struct FVector;
+struct FVector2D;
 struct FQuat;
-struct FRotator;
-struct FTransform;
+struct FQuat2;
 
 struct alignas(16) FMatrix
 {
-	union {
-
-		float M[4][4];
-		//FVector4[4];
-
-		struct
-		{
-			FVector4 X;
-			FVector4 Y;
-			FVector4 Z;
-			FVector4 W;
-		};
-	};
+	float M[4][4];
 
 	FMatrix();
 	FMatrix(const FVector4& InX, const FVector4& InY, const FVector4& InZ, const FVector4& InW);
-	FMatrix(const FRotator& Rotation);
 
 	static FMatrix Identity();
 	static FMatrix Transpose(const FMatrix& Matrix);
@@ -34,22 +20,10 @@ struct alignas(16) FMatrix
 	static FMatrix GetScaleMatrix(float X, float Y, float Z);
 	static FMatrix GetScaleMatrix(const FVector& InScale);
 	static FMatrix GetRotateMatrix(const FQuat& Q);
-	static FMatrix GetQuatToRotationMatrixScaleMatrix(const FQuat& Q, const FVector& Scale);
-
-	/**
-	 * 뷰 변환 행렬을 생성합니다.
-	 *
-	 * @param EyePosition 카메라의 포지션입니다.
-	 * @param FocusPoint 카메라가 바라보는 곳의 포지션입니다.
-	 * @param WorldUp 카메라의 위쪽 방향입니다.
-	 * @return 뷰 변환 행렬을 반환합니다.
-	 */
 	static FMatrix LookAtLH(const FVector& EyePosition, const FVector& FocusPoint, const FVector& WorldUp);
 	static FMatrix PerspectiveFovLH(float FieldOfView, float AspectRatio, float NearPlane, float FarPlane);
-	static FMatrix OrthographicLH(float ViewWidth, float ViewHeight, float NearPlane, float FarPlane);
 	static FMatrix OrthoForLH(float ViewWidth, float VeiwHeight, float NearPlane, float FarPlane);
-
-	static FMatrix InverseGaussJordan(FMatrix& mat);
+	
 
 	FMatrix operator+(const FMatrix& Other) const;
 	FMatrix operator+=(const FMatrix& Other);
@@ -69,34 +43,15 @@ struct alignas(16) FMatrix
 	FVector GetTranslation() const;
 	FVector GetScale() const;
 	FVector GetRotation() const;
+	FVector TransformVector(const FVector& Vector)const;
+	FVector4 TransformVector(const FVector4& Vector)const;
+	
 
-	FVector TransformVector(const FVector& Vector) const;
-	FVector4 TransformVector(const FVector4& Vector) const;
+
 	FVector4 TransformVector4(const FVector4& Vector) const;
 
-	FTransform GetTransform() const;
-
-	static FMatrix RotateRoll(float Angle);
-
-	static FMatrix RotatePitch(float Angle);
-
-	static FMatrix RotateYaw(float Angle);
-
-	static FMatrix RotateToMatrix(float X, float Y, float Z);
-
-	FVector ExtractScale(float Tolerance = 1e-8f);
-
-	void RemoveScaling(float Tolerance = 1e-8f);
-
-	FTransform ConstructTransformFromMatrixWithDesiredScale(const FMatrix& AMatrix, const FMatrix& BMatrix, FVector DesiredScale) const;
-
-	void SetAxis(int32 i, const FVector& Axis);
-
-	FVector GetAxis(int32 i) const;
+	class FTransform GetTransform() const;
 };
-
-
-
 
 struct FMatrix2x2
 {
