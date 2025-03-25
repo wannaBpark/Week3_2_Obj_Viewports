@@ -2,6 +2,7 @@
 #include "Core/Rendering/D3DViewports/SWidget.h"
 #include "Core/Math/Vector.h"
 #include "Debug/DebugConsole.h"
+#include "Core/Input/PlayerInput.h" // EKeyCode
 #include <d3d11.h>
 #include <iostream>
 #include <algorithm>
@@ -39,7 +40,7 @@ public:
 	virtual ~SWindow() = default;
 
 	void SetNeedsRender() { bRenderable = true; }
-	void SetRect(const FRect& InRect) { Rect = InRect; SetNeedsRender(); }
+	virtual void SetRect(const FRect& InRect) { Rect = InRect; SetNeedsRender(); }
 	FRect GetRect() const { return Rect; }
 
 	bool IsHover(FPoint coord) const
@@ -69,5 +70,7 @@ public:
 		if (IsHover(MousePos)) { bIsDragging = true; }
 	}
 	virtual void OnMouseUp(const FPoint& MousePos) { bIsDragging = false; }
+	virtual void OnKeyDown(EKeyCode Key) {}
+    
 };
 

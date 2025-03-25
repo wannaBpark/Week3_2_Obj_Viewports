@@ -121,6 +121,7 @@ private:
     class FEngineConfig* EngineConfig;
 public:
 	FEngineConfig* GetEngineConfig() const { return EngineConfig; }
+    std::shared_ptr<ACamera> GetCameraByIdx(uint32 idx) { return Cameras[idx % Cameras.Num()]; }
 };
 
 template <typename ObjectType> requires std::derived_from<ObjectType, UObject>
