@@ -15,6 +15,7 @@
 
 #include "Object/ObjectMacro.h"
 #include "Serialization/Archive.h"
+#include "Core/Container/Set.h"
 
 enum class EViewModeIndex : uint32
 {

@@ -6,7 +6,7 @@
 
 
 template <typename T, typename Allocator = FDefaultAllocator<T>>
-class TArray
+class TSet
 {
 private:
     using SetType = std::unordered_set<T, std::hash<T>, std::equal_to<T>, Allocator>;
@@ -18,7 +18,7 @@ public:
     using ConstIterator = typename SetType::const_iterator;
 
     // 기본 생성자
-    TArray() = default;
+    TSet() = default;
 
     // Iterator 관련 메서드
     Iterator begin() noexcept { return PrivateSet.begin(); }
