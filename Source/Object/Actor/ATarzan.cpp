@@ -13,7 +13,9 @@ ATarzan::ATarzan()
 
 
 	FTransform Tr = GetActorTransform();
-	Tr.Rotate(FVector(-90, 0, 0));
+	//Tr.Rotate(FVector(-90, 0, 0));
+	//Tr.SetScale(FVector(0.3f, 0.3f, 0.3f));
+
 
 	MeshComponent->SetRelativeTransform(Tr);
 

@@ -214,7 +214,7 @@ void UPrimitiveComponent::UpdateLineConstantData(URenderer*& Renderer)
 		.Views = {ViewMatrices[0],ViewMatrices[1],ViewMatrices[2],ViewMatrices[3]},
 		.Projection = FMatrix::Transpose(Renderer->GetProjectionMatrix()),
 		.bIsPicked = (uint32)this->IsPicked(),
-		.Padding1 = FVector(0.0f, 0.0f, 0.0f),
+		.Padding1 = FEditorManager::Get().GetCamera()->GetActorTransform().GetPosition(),
 		.CustomColor = this->GetCustomColor(),
 		.bUseVertexColor = this->IsUseVertexColor(),
 		.Padding2 = FVector(0.0f, 0.0f, 0.0f),
