@@ -163,10 +163,13 @@ void URenderer::CreateShader()
     }
 
     SAFE_RELEASE(VertexShaderCSO);  SAFE_RELEASE(PixelShaderCSO);
-    D3DCompileFromFile(L"Shaders/GridVertexShader.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", 0, 0, &GridVertexShaderCSO, &ErrorMsg);
+    DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+    shaderFlags |= D3DCOMPILE_DEBUG;
+    shaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+    D3DCompileFromFile(L"Shaders/GridVertexShader.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", shaderFlags, 0, &GridVertexShaderCSO, &ErrorMsg);
     Device->CreateVertexShader(GridVertexShaderCSO->GetBufferPointer(), GridVertexShaderCSO->GetBufferSize(), nullptr, &GridVertexShader);
 
-    D3DCompileFromFile(L"Shaders/GridPixelShader.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", 0, 0, &GridPixelShaderCSO, &ErrorMsg);
+    D3DCompileFromFile(L"Shaders/GridPixelShader.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", shaderFlags, 0, &GridPixelShaderCSO, &ErrorMsg);
     Device->CreatePixelShader(GridPixelShaderCSO->GetBufferPointer(), GridPixelShaderCSO->GetBufferSize(), nullptr, &GridPixelShader);
 
     SAFE_RELEASE(VertexShaderCSO);  SAFE_RELEASE(PixelShaderCSO);
@@ -177,16 +180,13 @@ void URenderer::CreateShader()
     Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &LightPosTexPixelShader);
 
     SAFE_RELEASE(VertexShaderCSO);  SAFE_RELEASE(PixelShaderCSO);
-    DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-    shaderFlags |= D3DCOMPILE_DEBUG;
-    shaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
-    HRESULT result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", shaderFlags, 0, &VertexShaderCSO, &ErrorMsg);
+    HRESULT result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", 0, 0, &VertexShaderCSO, &ErrorMsg);
     Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &MeshVertexShader);
 
 	it = InputLayouts.find(InputLayoutType::POSNORMALTANGENTCOLORTEX);
 	Device->CreateInputLayout(it->second.data(), it->second.size(), VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), &MeshInputLayout);
 
-    result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", shaderFlags, 0, &PixelShaderCSO, &ErrorMsg);
+    result = D3DCompileFromFile(L"Shaders/ShaderMesh.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", 0, 0, &PixelShaderCSO, &ErrorMsg);
     Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &MeshPixelShader);
 
     ShaderMapVS.insert({ 0, SimpleVertexShader});                               // 여기서 Vertex Shader, Pixel Shader, InputLayout 추가
@@ -940,18 +940,19 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
     //DeviceContext->PSSetConstantBuffers(0, 1, ConstantBufferMap[PC].GetAddressOf());
 
     ID3D11Buffer* psConstantBuffers[] = {
+    ConstantBufferMap[VC].Get(),
     ConstantBufferMap[7].Get(), // GlobalLightConstant
+    ConstantBufferMap[9].Get(),  // CameraPositionConstant
     ConstantBufferMap[8].Get(), // MaterialConstant
-    ConstantBufferMap[9].Get()  // CameraPositionConstant
     };
     DeviceContext->PSSetConstantBuffers(0, _countof(psConstantBuffers), psConstantBuffers);
 
     FMatrix m = MeshComp->GetComponentTransform().GetMatrix();
 
     FMatrix modelWorld = m;
-    modelWorld.M[3][0] = modelWorld.M[3][1] = modelWorld.M[3][2] = 0;
+    //modelWorld.M[3][0] = modelWorld.M[3][1] = modelWorld.M[3][2] = 0;
     modelWorld = modelWorld.Inverse();
-    FMatrix InvTranspose = FMatrix::Transpose(FMatrix::Transpose(modelWorld));
+    FMatrix InvTranspose = modelWorld;
 
     FStaticMeshVertexConstant vc = {
         .InverseTranspose = InvTranspose,
@@ -996,7 +997,7 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
                 .Diffuse = Mat->Diffuse,
                 .Specular = Mat->Specular,
                 .Emissive = Mat->Emissive,
-                .Roughness = 1 - Mat->Shininess,
+                .Roughness = 250 - Mat->Shininess,
             };
 
             UpdateBuffer(matConstant, 8);

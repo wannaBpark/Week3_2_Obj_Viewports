@@ -37,15 +37,15 @@ cbuffer LightBuffer : register(b1)
     LightDesc GlobalLight;
 };
 
-cbuffer MaterialBuffer : register(b2)
-{
-    MaterialDesc Material;
-};
-
-cbuffer CameraPositionBuffer : register(b3)
+cbuffer CameraPositionBuffer : register(b2)
 {
     float3 CameraPosition;
     float Padding;
+};
+
+cbuffer MaterialBuffer : register(b3)
+{
+    MaterialDesc Material;
 };
 
 struct VS_INPUT
@@ -78,6 +78,8 @@ PS_INPUT mainVS(VS_INPUT input)
     PS_INPUT output;
     
     float4 position = float4(input.position.xyz, 1.0f);
+    
+    input.normal = input.position.xyz;
 
     position = mul(position, Model);
     output.worldPos = position.xyz;
@@ -87,13 +89,14 @@ PS_INPUT mainVS(VS_INPUT input)
     output.color = input.color;
     output.texcoord = input.texcoord;
     
-    // input.normal = float3(0, 0, 0);
-
     if (length(input.normal) < 0.001f)
         output.normal = input.normal;
     else
-        output.normal = normalize(mul(float4(input.normal, 0.f), InverseTranspose).xyz);
-
+    {
+        output.normal = mul(float4(input.normal, 0.f), InverseTranspose).xyz;
+        output.normal = normalize(output.normal);
+    }
+    
     output.tangent = input.tangent;
     
     return output;
@@ -123,7 +126,7 @@ float4 ComputeLight(float3 normal, float2 uv, float3 worldPosition)
     // Specular 처리
     {
         // 반사 벡터
-        float3 reflectionLight = GlobalLight.Direction - (2 * normal * dot(-GlobalLight.Direction, normal));
+        float3 reflectionLight = GlobalLight.Direction - (2 * normal * dot(GlobalLight.Direction, normal));
         reflectionLight = normalize(reflectionLight);
         
         // 카메라 위치에서 세계 좌표까지의 방향 벡터
@@ -133,12 +136,14 @@ float4 ComputeLight(float3 normal, float2 uv, float3 worldPosition)
         float value = saturate(dot(reflectionLight, cameraPosition));
         float shininess = pow(1.f - Material.Roughness, 4.f) * 128.f;
         float specular = pow(value, shininess);
+        specular = smoothstep(0.0f, 1.0f, specular);
+        //float specular = pow(value, Material.Roughness);
         
         
         specularColor = GlobalLight.Specular * Material.Specular * specular;
     }
     
-    // Emissive 처리
+    //Emissive 처리
     {
         float3 cameraPosition = normalize(CameraPosition - worldPosition);
         
@@ -162,12 +167,34 @@ PS_OUTPUT mainPS(PS_INPUT input)
     if (length(input.normal) <= 0.1f)
         color = float4(g_DiffuseMap.Sample(g_sampler0, float2(input.texcoord.x, input.texcoord.y)).xyz, 1.0f);
     else
-        color = ComputeLight(-input.normal, input.texcoord, input.worldPos);
+        color = ComputeLight(input.normal, input.texcoord, input.worldPos);
     
-    
-    output.color = float4(color.xyz, 1.0f);
+    output.color = float4(color.xyz, 1.f);
     output.UUID = float4(0.0f, 0.0f, 0.0f, 0.0f); // UUID 초기화
     
     return output;
 }
+
+//float4 PS(VertexOutput input) : SV_TARGET
+//{
+//    float3 normal = normalize(input.WorldNormal);
+//    float3 lightDir = normalize(LightPosition - input.WorldPos);
+    
+//    // Diffuse Lighting
+//    float diffuseIntensity = saturate(dot(normal, lightDir));
+//    float3 diffuse = diffuseIntensity * DiffuseColor;
+
+//    // Specular Lighting (옵션)
+//    float3 viewDir = normalize(CameraPosition - input.WorldPos);
+//    float3 reflectDir = reflect(-lightDir, normal);
+//    float specularIntensity = pow(saturate(dot(viewDir, reflectDir)), SpecularPower);
+//    float3 specular = specularIntensity * SpecularColor;
+
+//    // Texture
+//    float4 texColor = DiffuseTexture.Sample(Sampler, input.TexCoord);
+
+//    float3 finalColor = (diffuse + specular) * texColor.rgb;
+
+//    return float4(finalColor, texColor.a);
+//}
 
