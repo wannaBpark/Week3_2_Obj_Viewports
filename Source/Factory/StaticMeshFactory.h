@@ -1,6 +1,7 @@
 #pragma once
 #include "Factory.h"
 #include "Core/Container/Array.h"
+#include "Object/Mesh/StaticMesh.h"
 
 class FStaticMeshFactory : public FFactory
 {
@@ -9,7 +10,10 @@ public:
 
 private:
 	bool ProcessObjFile(const FString& FilePath);
-	bool ProcessMtlFile(const FString& FilePath);
-	void CopyTextureFiles(const TArray<FString>& TexturePaths);
+	bool ProcessMtlFile(const TArray<FObjMaterialInfo>& BuiltMaterials);
+	void CopyTextureFile(const FString& TexturePaths);
+
+	// FFactory을(를) 통해 상속됨
+	bool SaveAsTAsset(const FString& SavePath) override;
 };
 

@@ -58,4 +58,13 @@ public:
 
         return NewObject.get();
     }
+
+    template<typename T>
+		requires std::derived_from<T, UObject>
+    static T* LoadAndConstruct()
+    {
+        T* Object = ConstructObject<T>();
+        // !TODO : Object에 데이터를 입혀줘야 함
+
+    }
 };

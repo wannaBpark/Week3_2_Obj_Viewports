@@ -1,5 +1,6 @@
 #pragma once
 #include "MathUtility.h"
+#include "Serialization/Archive.h"
 
 
 struct FVector
@@ -54,6 +55,16 @@ public:
 
     bool operator==(const FVector& Other) const;
     bool operator!=(const FVector& Other) const;
+
+    void Serialize(FArchive& ar) const
+    {
+		ar << X << Y << Z;
+    }
+
+    void Deserialize(FArchive& ar)
+    {
+        ar >> X >> Y >> Z;
+    }
 };
 
 inline float FVector::DotProduct(const FVector& A, const FVector& B)
@@ -226,6 +237,16 @@ struct FVector4 : public FVector
     FVector4& operator/=(float Scalar);
     FVector4& operator*(const FVector& V3);
     FVector4& operator*(const FVector4& V4);
+
+	void Serialize(FArchive& ar) const
+	{
+		ar << X << Y << Z << W;
+	}
+
+	void Deserialize(FArchive& ar)
+	{
+		ar >> X >> Y >> Z >> W;
+	}
 };
 
 inline FVector4& FVector4::operator/=(float Scalar)
@@ -243,4 +264,17 @@ struct FVector2D
 
 	static const FVector2D ZeroVector;
 	static const FVector2D OneVector;
+
+    // Serialize
+	void Serialize(FArchive& ar) const
+	{
+		ar << X << Y;
+	}
+	// Deserialize
+	void Deserialize(FArchive& ar)
+	{
+		ar >> X >> Y;
+	}
+	// Operator Overload
+
 };

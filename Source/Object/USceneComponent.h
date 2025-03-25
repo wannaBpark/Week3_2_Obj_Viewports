@@ -41,7 +41,7 @@ public:
 
 //protected:
 	USceneComponent* Parent = nullptr;
-	TSet<USceneComponent*> Children;
+	TArray<USceneComponent*> Children;
 	// 이건 내 로컬 트랜스폼
 	FTransform RelativeTransform = FTransform();
 	bool bCanEverTick = true;
@@ -49,4 +49,9 @@ public:
 	// debug
 protected:
 	bool bIsPicked = false;
+
+public:
+	// UActorComponent을(를) 통해 상속됨
+	void LoadAndConstruct(const FActorComponentInfo Info) override;
+	FActorComponentInfo GetActorComponentInfo() override;
 };

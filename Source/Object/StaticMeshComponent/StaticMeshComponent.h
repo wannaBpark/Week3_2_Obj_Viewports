@@ -8,18 +8,19 @@
 * @UStaticMesh : 에셋 참조 - FObjManager를 통해 에셋 로드
 */
 
+class UMaterial;
+
 class UStaticMeshComponent :
     public UMeshComponent
 {
 	DECLARE_CLASS(UStaticMeshComponent, UMeshComponent)
 
-	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void Render() override;
 	virtual EPrimitiveType GetType() override;
 
 public:
-	void SetStaicMesh(const FString& staticMeshPath);
+	void SetStaticMesh(const FString& staticMeshPath);
 private:
 	void CreateVertexBuffer();
 	void CreateIndexBuffer();
@@ -33,7 +34,11 @@ public:
 	const UMaterial* GetMaterial(uint32 Index);
 	void SetMaterial(uint32 Index, UMaterial* InMaterial);
 
+public:
+	void LoadAndConstruct(const FActorComponentInfo Info) override;
+	FActorComponentInfo GetActorComponentInfo() override;
+
 private:
-	TArray<class UMaterial*> Materials;
+	TArray<UMaterial*> Materials;
 };
 

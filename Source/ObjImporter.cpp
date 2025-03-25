@@ -192,6 +192,7 @@ bool FObjImporter::LoadMTL(const FString& filename)
 			{
 				fullPath = mtlPath / fullPath;
 			}
+			MaterialsPerGroup[CurrentMaterialName].TexturePath = FString(fullPath.string());
 			MaterialsPerGroup[CurrentMaterialName].TextureName = FString(texturePath);
 		}
 	}

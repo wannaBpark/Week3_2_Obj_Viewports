@@ -29,7 +29,10 @@ protected:
 	// 공용 유틸리티 함수
 	static FString GetFileExtension(const FString& FilePath);
 	static FString CreateOutputFilePath(const FString& OriginalPath, const FString& SubFolder);
-	static bool SaveAsTAsset(); // .TAsset파일로 저장. 이건 FArchive에서 한다
+	static FString CreateHeader(const FString& OriginalFIlePath, const FString& FileType);
+	static bool ParseHeader(const FString& FilePath, FString& OutFileType, FString& OutSourceFile);
+
+	virtual bool SaveAsTAsset(const FString& SavePath) = 0; // 
 
 private:
 	static TMap<FString, std::function<std::unique_ptr<FFactory>()>>& GetFactoryMap()

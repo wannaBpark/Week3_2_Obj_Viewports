@@ -3,6 +3,7 @@
 #include "Matrix.h"
 #include "Core/Engine.h"
 #include "Core/Math/Plane.h"
+#include "Serialization/Archive.h"
 
 #define TORAD 0.0174532925199432957f
 
@@ -193,7 +194,13 @@ public:
 		Position += WorldDelta;
 	}
 
-
-
+	void Serialize(FArchive& ar) const
+	{
+		ar << Position << Rotation << Scale;
+	}
+	void Deserialize(FArchive& ar)
+	{
+		ar >> Position >> Rotation >> Scale;
+	}
 
 };

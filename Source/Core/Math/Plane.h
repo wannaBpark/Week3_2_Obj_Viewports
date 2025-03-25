@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Vector.h"
 
 #define PIDIV2 3.141592654/2
@@ -30,6 +30,7 @@ struct alignas(16) FQuat : public FVector4{
     FVector GetEuler() const { return QuaternionToEuler(*this); }
 
     FQuat& operator*(const FQuat& q);
+    // serialize는 FVector4에서 한다
 };
 
 inline FQuat& FQuat::operator*(const FQuat& q) {

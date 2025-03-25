@@ -1,12 +1,14 @@
 #include "Factory.h"
 #include <filesystem>
+#include <sstream>
+#include <fstream>
 #include <Debug/DebugConsole.h>
 
 namespace fs = std::filesystem;
 
-std::unique_ptr<FFactory> FFactory::CreateFactory(const FString& FactoryName)
+std::unique_ptr<FFactory> FFactory::CreateFactory(const FString& InExtenstion)
 {
-	FString Extension = GetFileExtension(FactoryName);
+	FString Extension = GetFileExtension(InExtenstion);
 
 	auto& FactoryMap = GetFactoryMap();
 
@@ -38,15 +40,52 @@ FString FFactory::CreateOutputFilePath(const FString& OriginalPath, const FStrin
 	return FString(OutputPath.string());
 }
 
-bool FFactory::SaveAsTAsset()
+FString FFactory::CreateHeader(const FString& OriginalFIlePath, const FString& FileType)
 {
-	// !TODO : FArchive에서 구현해야 함
-	try 
+	FString Header;
+
+	Header += TEXT("TASSET FILE\n");
+	Header += TEXT("FileType: ") + FileType + TEXT("\n");
+	Header += TEXT("SourceFile: ") + OriginalFIlePath + TEXT("\n");
+	Header += TEXT("Header End\n");
+
+	return Header;
+}
+
+bool FFactory::ParseHeader(const FString& FilePath, FString& OutFileType, FString& OutSourceFile)
+{
+	if (!fs::exists(FilePath.c_char()))
 	{
-		return true;
-	}
-	catch (const std::exception& e)
-	{
+		UE_LOG("File %s is not exist", *FilePath);
 		return false;
 	}
+
+	std::ifstream File(FilePath.c_char());
+
+	bool HasFileType = false;
+	bool HasSourceFile = false;
+	bool HasHeaderEnd = false;
+
+
+	std::string Line;
+	while (std::getline(File, Line))
+	{
+		if (Line.starts_with("FileType: "))
+		{
+			OutFileType = Line.substr(10);
+			HasFileType = true;
+		}
+		else if (Line.starts_with("SourceFile: "))
+		{
+			OutSourceFile = Line.substr(12);
+			HasSourceFile = true;
+		}
+		else if (Line.starts_with("Header End"))
+		{
+			HasHeaderEnd = true;
+			break;
+		}
+	}
+
+	return HasFileType && HasSourceFile && HasHeaderEnd;
 }

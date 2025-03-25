@@ -9,7 +9,7 @@
 TMap<FName, FStaticMesh*> FObjManager::ObjStaticMeshMap;
 TMap<FName, FObjMaterialInfo> FObjManager::MaterialMap;
 
-FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
+FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName, TArray<FObjMaterialInfo>* OutMaterials)
 {
     FStaticMesh** MeshDataPtr = ObjStaticMeshMap.Find(PathFileName);
 
@@ -32,6 +32,10 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
 	{
 		// 실제 생성된 MeshData의 머티리얼 정보를 가리키도록
 		MaterialMap.Add(Kvp.first, Kvp.second);
+		if (OutMaterials)
+		{
+			OutMaterials->Add(Kvp.second);
+		}
 	}
 
 	ObjStaticMeshMap.Add(PathFileName, MeshData);
@@ -48,7 +52,6 @@ UStaticMesh* FObjManager::LoadObjStaticMesh(const FString& PathFileName)
 		if (Mesh && Mesh->GetAssetPathFileName() == PathFileName)
 			return Mesh;
     }
-
 	FStaticMesh* MeshAsset = LoadObjStaticMeshAsset(PathFileName);
 	UStaticMesh* StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>();
 	StaticMesh->SetStaticMeshAsset(MeshAsset);
