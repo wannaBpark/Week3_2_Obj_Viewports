@@ -82,8 +82,7 @@ void FEditorManager::SetStringComp(UStringComponent* InStringComp)
 
 void FEditorManager::SelectComponent(USceneComponent* NewSceneComponent)
 {
-    if (NewSceneComponent != nullptr)
-        SelectedComponent = NewSceneComponent;
+    SelectedComponent = NewSceneComponent;
 }
 
 
