@@ -35,6 +35,6 @@ public:
     UStringComponent* GetStringComponent() { return StringComponent; }
 
 private:
-    UBoundingBoxComp* BoundingBoxComp;
+    UBoundingBoxComp* BoundingBoxComp = nullptr;
     UStringComponent* StringComponent;
 };
