@@ -23,15 +23,13 @@ public:
 
     
     FString ToString() const;
-	uint32 GetDisplayIndex() const { DisplayIndex; }
-	uint32 GetComparisonIndex() const {	ComparisonIndex; }
+	uint32 GetDisplayIndex() const { return DisplayIndex; }
+	uint32 GetComparisonIndex() const {	return ComparisonIndex; }
 
     FORCEINLINE bool operator==(const FName& Other) const
     {
 		return ComparisonIndex == Other.ComparisonIndex;
     }
-
-	FORCEINLINE bool operator==(const FName& Other) const;
 };
 
 // FName의 해시 함수

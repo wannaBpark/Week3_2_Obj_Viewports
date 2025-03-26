@@ -3,7 +3,6 @@
 #include "Core/EngineStatics.h"
 #include "Core/HAL/PlatformMemory.h"
 #include "Debug/DebugConsole.h"
-#include "Core/HAL//StackAllocator.h"
 #include "Object/UClass.h"
 #include "Core/Container/String.h"
 #include "Core/Container/ObjectHash.h"
@@ -56,7 +55,7 @@ public:
         // Object 제거시 Index가 달라지기 때문에 임시 주석처리 <- RemoveSwap으로 해결 가능
         // NewObject->InternalIndex = UEngine::Get().GObjects.Add(NewObject);
         UEngine::Get().GObjects.Add(NewObject->GetUUID(), NewObject);
-        AddToHashMap(NewObject.get());
+        AddToClassMap(NewObject.get());  // TODO: 등록 위치를 UClass에서 하도록 변경하기
 
         return NewObject.get();
     }

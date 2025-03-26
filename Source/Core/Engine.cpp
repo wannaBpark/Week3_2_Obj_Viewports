@@ -8,18 +8,17 @@
 #include "Core/Input/PlayerInput.h"
 #include "Core/Input/PlayerController.h"
 #include "Object/Actor/Camera.h"
-#include "Object/Actor/Sphere.h"
 #include "Object/Actor/WorldGrid.h"
 #include "Static/FEditorManager.h"
 #include "Object/Gizmo/WorldGizmo.h"
 #include "Core/FSceneManager.h"
 #include "EngineConfig.h"
-#include "Core/Container/ObjectIterator.h"
+#include "Object/UObjectIterator.h"
 #include "Object/Mesh/ObjManager.h"
-#include "Object/Actor/ATarzan.h"
 
 
 #include "Core/Rendering/D3DViewports/SViewportWindow.h"
+#include <Object/StaticMeshComponent/StaticMeshComponent.h>
 
 class AArrow;
 class APicker;
@@ -192,13 +191,6 @@ void UEngine::Run()
 		// Renderer Update
         Renderer->Prepare();          
         //Renderer->PrepareShader();    // 각 rendercomponent에서 호출
-
-        for (TObjectIterator<UPrimitiveComponent> It(UEngine::Get().GObjects.begin(), UEngine::Get().GObjects.end());
-            It;
-            ++It)
-        {
-            UPrimitiveComponent* prim = *It;
-        }
 
 		// World Update
 		if (World)

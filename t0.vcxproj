@@ -243,7 +243,6 @@
     <ClCompile Include="Source\Serialization\Archive.cpp" />
     <ClCompile Include="Source\Object\Material\Material.cpp" />
     <ClCompile Include="Source\Object\Actor\ATarzan.cpp" />
-    <ClCompile Include="Source\Core\Container\ObjectIterator.cpp" />
     <ClCompile Include="Source\Object\Mesh\ObjManager.cpp" />
     <ClCompile Include="Source\Core\EngineConfig.cpp" />
     <ClCompile Include="Source\Core\FSceneManager.cpp" />
@@ -308,7 +307,7 @@
     <ClCompile Include="Source\Core\Rendering\UI\StaticMeshInspector.cpp" />
     <ClCompile Include="Source\Factory\StaticMeshFactory.cpp" />
     <ClCompile Include="Source\Core\Container\StringView.cpp" />
-    <ClCompile Include="Source\Object\UObejctIterator.cpp" />
+    <ClCompile Include="Source\Object\UObjectIterator.cpp" />
     <ClCompile Include="URaycastSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -409,7 +408,6 @@
     <ClInclude Include="Source\Serialization\Archive.h" />
     <ClInclude Include="Source\Object\Material\Material.h" />
     <ClInclude Include="Source\Object\Actor\ATarzan.h" />
-    <ClInclude Include="Source\Core\Container\ObjectIterator.h" />
     <ClInclude Include="Source\Object\Mesh\ObjManager.h" />
     <ClInclude Include="Source\Core\EngineConfig.h" />
     <ClInclude Include="Source\Core\Container\IteratorAdapter.h" />
@@ -511,7 +509,7 @@
     <ClInclude Include="Source\Factory\StaticMeshFactory.h" />
     <ClInclude Include="Source\Core\Container\StringView.h" />
     <ClInclude Include="UColliders.h" />
-    <ClInclude Include="Source\Object\UObejctIterator.h" />
+    <ClInclude Include="Source\Object\UObjectIterator.h" />
     <ClInclude Include="URaycastSystem.h" />
   </ItemGroup>
   <ItemGroup>
@@ -519,6 +517,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="t0.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
