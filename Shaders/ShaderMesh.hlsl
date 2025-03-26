@@ -48,6 +48,12 @@ cbuffer MaterialBuffer : register(b3)
     MaterialDesc Material;
 };
 
+cbuffer PickingBuffer : register(b4)
+{
+    float4 indexColor;
+    uint bIsPicked;
+}
+
 struct VS_INPUT
 {
     float3 position : POSITION; // Input position from vertex buffer
@@ -169,8 +175,18 @@ PS_OUTPUT mainPS(PS_INPUT input)
     else
         color = ComputeLight(input.normal, input.texcoord, input.worldPos);
     
+    if (bIsPicked)
+    {
+        float3 toEye = normalize(CameraPosition - input.worldPos.xyz);
+        float rim = (1.0 - max(0.0, dot(normalize(input.normal), toEye)));
+        rim = smoothstep(0.0, 1.0, rim);
+        rim = pow(abs(rim), 10.0f);
+        color += rim * float4(1.0f, 1.0f, 1.0f, 0.5f) * 0.3f;
+        //color *= 0.5;
+    }
+    
     output.color = float4(color.xyz, 1.f);
-    output.UUID = float4(0.0f, 0.0f, 0.0f, 0.0f); // UUID 초기화
+    output.UUID = indexColor; // UUID 초기화
     
     return output;
 }

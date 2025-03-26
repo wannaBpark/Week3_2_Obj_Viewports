@@ -10,6 +10,7 @@ void UStaticMeshComponent::Tick(float DeltaTime)
 
 void UStaticMeshComponent::Render()
 {
+	
 	UEngine::Get().GetRenderer()->RenderMesh(this);
 }
 

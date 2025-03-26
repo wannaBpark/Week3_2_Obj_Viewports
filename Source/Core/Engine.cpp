@@ -332,9 +332,16 @@ void UEngine::InitWorld()
 #pragma endregion
 #pragma region Get SplitRatio Camera Transfrom From INI
     using enum EEngineConfigValueType;
-    RootWindow->SetSplitRatio(EngineConfig->GetEngineConfigValue<float>(EEC_HorizontalSplitRatio));
-    RootWindow->GetSideLT()->SetSplitRatio(EngineConfig->GetEngineConfigValue<float>(EEC_TopVerticalSplitRatio));
-    RootWindow->GetSideRB()->SetSplitRatio(EngineConfig->GetEngineConfigValue<float>(EEC_BottomVerticalSplitRatio));
+    float HorizontalRatio = EngineConfig->GetEngineConfigValue<float>(EEC_HorizontalSplitRatio);
+    float TopRatio = EngineConfig->GetEngineConfigValue<float>(EEC_TopVerticalSplitRatio);
+    float BottomRatio = EngineConfig->GetEngineConfigValue<float>(EEC_BottomVerticalSplitRatio);
+    HorizontalRatio = max(HorizontalRatio, 0.1f);
+    TopRatio = max(TopRatio, 0.1f);
+    BottomRatio = max(BottomRatio, 0.1f);
+    RootWindow->SetSplitRatio(HorizontalRatio);
+    RootWindow->GetSideLT()->SetSplitRatio(TopRatio);
+    RootWindow->GetSideRB()->SetSplitRatio(BottomRatio);
+    
     RootWindow->SaveSplitterInfo();
     RootWindow->UpdateLayout();
 
