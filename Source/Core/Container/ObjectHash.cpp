@@ -353,7 +353,7 @@ public:
 		Hash.Compact();
 		for (auto& Pair : Hash)
 		{
-			Pair.Value.Shrink();
+			Pair.second.Shrink();
 		}
 
 		// case 1
@@ -363,21 +363,21 @@ public:
 		ObjectOuterMap.Compact();
 		for (auto& Pair : ObjectOuterMap)
 		{
-			Pair.Value.Shrink();
+			Pair.second.Shrink();
 		}
 
 		// case 3
 		ClassToObjectListMap.Compact();
 		for (auto& Pair : ClassToObjectListMap)
 		{
-			Pair.Value.Shrink();
+			Pair.second.Shrink();
 		}
 
 		// case 4
 		ClassToChildListMap.Compact();
 		for (auto& Pair : ClassToChildListMap)
 		{
-			Pair.Value.Shrink();
+			Pair.second.Shrink();
 		}
 
 		// // case 5
