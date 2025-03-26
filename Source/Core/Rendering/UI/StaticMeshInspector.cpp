@@ -69,6 +69,8 @@ void FStaticMeshInspector::UpdateStaticMeshCombo()
 	{
 		for (int i = 0; i < StaticMeshes.Num(); i++)
 		{
+			if(StaticMeshes[i] == nullptr)
+				continue;
 			bool IsSelected = StaticMeshIndex == i;
 			if (ImGui::Selectable(StaticMeshes[i]->Name.c_char(), IsSelected))
 			{
@@ -90,6 +92,8 @@ void FStaticMeshInspector::UpdateMaterialCombo()
 {
 	for (int i = 0; i < ComponentMaterials.Num(); i++)
 	{
+		if (ComponentMaterials[i] == nullptr)
+			continue;
 		MaterialNameStr = ComponentMaterials[i]->GetMaterialName().ToString();
 		const char* MaterialName = MaterialNameStr.c_char();
 		if (ImGui::BeginCombo(("Material" + std::to_string(i)).c_str(), MaterialName))
