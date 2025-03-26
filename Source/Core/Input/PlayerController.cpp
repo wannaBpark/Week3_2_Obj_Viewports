@@ -16,14 +16,17 @@ APlayerController::APlayerController() {
 void APlayerController::HandleCameraMovement(float DeltaTime) {
 
     FVector NewVelocity(0, 0, 0);
+    ACamera* Camera = FEditorManager::Get().GetInputCamera(); 
+    float CamSpeed = Camera->CameraSpeed;
 
+    // 입력이 안 들어올 경우 
     if (APlayerInput::Get().IsPressedMouse(true) == false)
     {
-        // Camera->SetVelocity(NewVelocity);
-        return;
+        Camera->SetOrthoPivot(FVector::ZeroVector);
+        return; 
     }
 
-    ACamera* Camera = FEditorManager::Get().GetCamera();
+    // 현재 input대상이 되는 카메라를 가져옴
     
     //전프레임이랑 비교
     //x좌표 받아와서 x만큼 x축회전
@@ -34,28 +37,38 @@ void APlayerController::HandleCameraMovement(float DeltaTime) {
     //FQuat CameraRot = FEditorManager::Get().GetCamera()->GetActorTransform().GetRotation();
 
     FTransform CameraTransform = Camera->GetActorTransform();
-
     FVector TargetRotation = CameraTransform.GetRotation().GetEuler();
-    TargetRotation.Y += Camera->CameraSpeed * DeltaPos.Y * DeltaTime;
-    TargetRotation.Z += Camera->CameraSpeed * DeltaPos.X * DeltaTime;
+    // 원근 투영의 경우 회전 허용
+    if (Camera->GetProjectionMode() == ECameraProjectionMode::Perspective) 
+    {
+        TargetRotation.Y += Camera->CameraSpeed * DeltaPos.Y * DeltaTime;
+        TargetRotation.Z += Camera->CameraSpeed * DeltaPos.X * DeltaTime;
+        TargetRotation.Y = FMath::Clamp(TargetRotation.Y, -Camera->MaxYDegree, Camera->MaxYDegree);
+        CameraTransform.SetRotation(TargetRotation);
+    }
+    // Orthogonal 카메라는 이동만 허용 
+    else if (Camera->GetProjectionMode() == ECameraProjectionMode::Orthographic)
+    {
+        FVector Delta = Camera->GetRight() * (DeltaPos.X * Camera->CameraSpeed * DeltaTime) + Camera->GetUp() * (-DeltaPos.Y * Camera->CameraSpeed * DeltaTime);
+        FVector MoveDir = Camera->GetOrthoPivot() - Delta;
+        Camera->SetOrthoPivot(-Delta);              // Orthogonal 카메라가 움직일 delta 벡터
+        CameraTransform.Translate(MoveDir * DeltaTime * CamSpeed * 10.f);
+        Camera->SetActorTransform(CameraTransform); 
+        return;
+    }
     
-    TargetRotation.Y = FMath::Clamp(TargetRotation.Y, -Camera->MaxYDegree, Camera->MaxYDegree);
-    CameraTransform.SetRotation(TargetRotation);
 
     
     //CameraTransform.Rotate({0, Camera->CameraSpeed * DeltaPos.Y * DeltaTime, Camera->CameraSpeed * DeltaPos.X * DeltaTime});
-
     /*FQuat xDelta = FQuat(FVector(0, 0, 1), DeltaPos.X * DeltaTime);
 	FQuat yDelta = FQuat(FVector(0, 1, 0), DeltaPos.Y * DeltaTime);
 	FQuat newRot = FQuat::MultiplyQuaternions(CameraRot, xDelta);
 	newRot = FQuat::MultiplyQuaternions(newRot, yDelta);*/
 
-
     //FTransform NewTransf = Camera->GetActorTransform();
     //NewTransf.SetRotation(FQuat::AddQuaternions(CameraRot, DeltaQuaternion));
     //Camera->SetActorTransform(NewTransf);
     
-    float CamSpeed = Camera->CameraSpeed;
 
     if (APlayerInput::Get().IsPressedKey(EKeyCode::A)) {
         NewVelocity -= Camera->GetRight();
@@ -117,7 +130,6 @@ void APlayerController::HandleGizmoMovement(float DeltaTime)
 }
 
 void APlayerController::ProcessPlayerInput(float DeltaTime) {
-
     HandleGizmoMovement(DeltaTime);
     HandleCameraMovement(DeltaTime);
 }

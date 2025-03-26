@@ -25,8 +25,9 @@ class ACamera : public AActor
 public:
     ACamera();
     ACamera(FVector Position, FVector Rotation, ECameraProjectionMode::Type ProjMode); // Constructor : Set Orthographic Camera
-
-private:    
+    virtual void Tick(float DeltaTime) override;
+private:
+    inline static FVector Pivot = FVector::ZeroVector; // 모든 Orthogonal 카메라가 공유할 Pivot
     float Near;
     float Far;
     // 화면각  
@@ -55,7 +56,8 @@ public:
     void SetNear(float Near);
     void SetProjectionMode(ECameraProjectionMode::Type InMode);
     void SetAspectRatio(float InAspectRatio) { AspectRatio = InAspectRatio; }
-    
+    void SetOrthoPivot(FVector Delta) { Pivot = Delta; }
+
     float GetFieldOfView() const;
     float GetViewportSize() const;
     float GetNear() const;
@@ -63,6 +65,7 @@ public:
     float GetAspectRatio() const;
     float GetWidth() const;
     float GetHeight() const;
+    FVector GetOrthoPivot() const { return Pivot; }
     ECameraProjectionMode::Type GetProjectionMode() const;
 
         

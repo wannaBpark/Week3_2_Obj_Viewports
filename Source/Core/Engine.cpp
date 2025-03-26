@@ -8,18 +8,17 @@
 #include "Core/Input/PlayerInput.h"
 #include "Core/Input/PlayerController.h"
 #include "Object/Actor/Camera.h"
-#include "Object/Actor/Sphere.h"
 #include "Object/Actor/WorldGrid.h"
 #include "Static/FEditorManager.h"
 #include "Object/Gizmo/WorldGizmo.h"
 #include "Core/FSceneManager.h"
 #include "EngineConfig.h"
-#include "Core/Container/ObjectIterator.h"
+#include "Object/UObjectIterator.h"
 #include "Object/Mesh/ObjManager.h"
-#include "Object/Actor/ATarzan.h"
 
 
 #include "Core/Rendering/D3DViewports/SViewportWindow.h"
+#include <Object/StaticMeshComponent/StaticMeshComponent.h>
 
 class AArrow;
 class APicker;
@@ -93,11 +92,25 @@ LRESULT UEngine::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         break;
     }
     case WM_RBUTTONDOWN:
+    {
         APlayerInput::Get().HandleMouseInput(hWnd, lParam, true, true);
+        int x = GET_X_LPARAM(lParam);
+        int y = GET_Y_LPARAM(lParam);
+        FPoint mousePos(static_cast<uint32>(x), static_cast<uint32>(y));
+        if (EngineInstance.RootWindow)
+            EngineInstance.RootWindow->OnMouseDown(mousePos);
         break;
+    }
     case WM_RBUTTONUP:
+    {
         APlayerInput::Get().HandleMouseInput(hWnd, lParam, false, true);
+        int x = GET_X_LPARAM(lParam);
+        int y = GET_Y_LPARAM(lParam);
+        FPoint mousePos(static_cast<uint32>(x), static_cast<uint32>(y));
+        if (EngineInstance.RootWindow)
+            EngineInstance.RootWindow->OnMouseUp(mousePos);
         break;
+    }
     case WM_SIZE:
 		EngineInstance.UpdateWindowSize(LOWORD(lParam), HIWORD(lParam));
 		break;
@@ -168,6 +181,7 @@ void UEngine::Run()
 
         const float DeltaTime =
             static_cast<float>(StartTime.QuadPart - EndTime.QuadPart) / static_cast<float>(Frequency.QuadPart);
+        curDeltaTime = DeltaTime;  // 각 viewport마다 렌더링을 따로 해줄때 input도 따로 받게하기 위함
 
         APlayerInput::Get().PreProcessInput();
         
@@ -193,13 +207,6 @@ void UEngine::Run()
         Renderer->Prepare();          
         //Renderer->PrepareShader();    // 각 rendercomponent에서 호출
 
-        for (TObjectIterator<UPrimitiveComponent> It(UEngine::Get().GObjects.begin(), UEngine::Get().GObjects.end());
-            It;
-            ++It)
-        {
-            UPrimitiveComponent* prim = *It;
-        }
-
 		// World Update
 		if (World)
 		{
@@ -214,8 +221,8 @@ void UEngine::Run()
 
         //각 Actor에서 TickActor() -> PlayerTick() -> TickPlayerInput() 호출하는데 지금은 Message에서 처리하고 있다.
         APlayerInput::Get().TickPlayerInput(); //잘못된 위치. 위에 달린 주석대로 처리해야 정상 플레이어 액터 내에서만 처리해야할것같다.
-        
-        // TickPlayerInput
+        //
+        //// TickPlayerInput
         APlayerController::Get().ProcessPlayerInput(DeltaTime);
         
 		// ui Update
@@ -323,23 +330,37 @@ void UEngine::InitWorld()
 #pragma region Viewport and Camera Settings
     SetViewportCameras();
 #pragma endregion
-	ACamera* Camera = Cameras[2].get();
+#pragma region Get SplitRatio Camera Transfrom From INI
+    using enum EEngineConfigValueType;
+    RootWindow->SetSplitRatio(EngineConfig->GetEngineConfigValue<float>(EEC_HorizontalSplitRatio));
+    RootWindow->GetSideLT()->SetSplitRatio(EngineConfig->GetEngineConfigValue<float>(EEC_TopVerticalSplitRatio));
+    RootWindow->GetSideRB()->SetSplitRatio(EngineConfig->GetEngineConfigValue<float>(EEC_BottomVerticalSplitRatio));
+    RootWindow->SaveSplitterInfo();
+    RootWindow->UpdateLayout();
+
+
+    UE_LOG("Load Split Ratio Value : %.2f %.2f %.2f", 
+        RootWindow->GetSplitRatio(), EngineConfig->GetEngineConfigValue<float>(EEC_TopVerticalSplitRatio),
+        EngineConfig->GetEngineConfigValue<float>(EEC_BottomVerticalSplitRatio)
+    );
+
+	ACamera* Camera = Cameras[2].get(); // 원근 카메라
     FEditorManager::Get().SetCamera(Camera);
 	FTransform CameraTransform = Camera->GetActorTransform();
     // Camera ini 세팅
-    float CamPosX = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraPosX);
-	float CamPosY = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraPosY);
-	float CamPosZ = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraPosZ);
+    float CamPosX = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraPosX);
+	float CamPosY = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraPosY);
+	float CamPosZ = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraPosZ);
 	CameraTransform.SetPosition(FVector(CamPosX, CamPosY, CamPosZ));
     
-	float CamRotX = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotX);
-	float CamRotY = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotY);
-	float CamRotZ = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotZ);
-	float CamRotW = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotW);
+	float CamRotX = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraRotX);
+	float CamRotY = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraRotY);
+	float CamRotZ = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraRotZ);
+	float CamRotW = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraRotW);
     CameraTransform.SetRotation(FQuat(CamRotX, CamRotY, CamRotZ, CamRotW));
 
 	Camera->SetActorTransform(CameraTransform);
-
+#pragma endregion
 
     World->SpawnActor<AAxis>();
     APicker* Picker = World->SpawnActor<APicker>();
@@ -368,6 +389,7 @@ void UEngine::ShutdownWindow()
 
 	ui.Shutdown();
 
+    RootWindow->SaveSplitterInfo();
     EngineConfig->SaveAllConfig();
 	delete EngineConfig;
 
@@ -437,7 +459,7 @@ UObject* UEngine::GetObjectByUUID(uint32 InUUID) const
 
 void UEngine::SetViewportCameras()
 {
-#pragma region Multi Viewports               // 
+#pragma region Multi Viewports               
     auto topLeft = std::make_shared<SViewportWindow>();
     auto topRight = std::make_shared<SViewportWindow>();
     auto bottomLeft = std::make_shared<SViewportWindow>();
@@ -455,14 +477,13 @@ void UEngine::SetViewportCameras()
         static_cast<uint32>(ScreenHeight) // Height
         });
     RootWindow->UpdateLayout();
-    //UE_LOG("InScreen Resolution : %d %d", static_cast<uint32>(ScreenWidth), static_cast<uint32>(ScreenHeight));
 #pragma endregion
 
 #pragma region Multi Camera Initialization
-    FTransform ZY = FTransform(FVector(-5, 0, 1), FVector(0, 0, 0), FVector(1, 1, 1));
-    FTransform ZX = FTransform(FVector(0, 10, 1), FVector(0, 0, -90), FVector(1, 1, 1));
-    FTransform XY = FTransform(FVector(0, 0, 5), FVector(0,89.9,-89.9), FVector(1, 1, 1));
-    FTransform YX = FTransform(FVector(0, 0, -10), FVector(0, -89.9, -89.9), FVector(1, 1, 1));
+    FTransform ZY = FTransform(FVector(-5, 0, 1), FVector(0, 0,     0),   FVector(1, 1, 1));
+    FTransform ZX = FTransform(FVector(0, 10, 1), FVector(0, 0,   -90),   FVector(1, 1, 1));
+    FTransform XY = FTransform(FVector(0, 0, 5),  FVector(0, 89.9,-89.9), FVector(1, 1, 1));
+    FTransform YX = FTransform(FVector(0, 0, -10),FVector(0,-89.9,-89.9), FVector(1, 1, 1));
 
     ACamera* CamZY = World->SpawnActor<ACamera>(); CamZY->SetActorTransform(ZY); CamZY->SetProjectionMode(ECameraProjectionMode::Orthographic);
     ACamera* CamZX = World->SpawnActor<ACamera>(); CamZX->SetActorTransform(ZX); CamZX->SetProjectionMode(ECameraProjectionMode::Orthographic);
@@ -476,15 +497,8 @@ void UEngine::SetViewportCameras()
     Cameras.Add(std::make_shared<ACamera>(*CamXY));
     Cameras.Add(std::make_shared<ACamera>(*CamYX));
 
-    if (topLeft)     topLeft->SetCamera(Cameras[0], 0);
-    if (topRight)    topRight->SetCamera(Cameras[1] , 1);
-    if (bottomLeft)  bottomLeft->SetCamera(Cameras[2], 2);
-    if (bottomRight) bottomRight->SetCamera(Cameras[3], 3); 
-    // 원랜 0,1,2,3순서이지만 카메라 마지막 부분만 마우스 조작되는 관계로 0132로 해놓음
-    // TODO : 위에서 아래로 내려다보는 카메라 FIX
-    // TODO : Hover 후 키입력 시 카메라 모드 변경하도록
-
-    //FEditorManager::Get().SetCamera(CamPerspective);
+    topLeft->SetCamera(Cameras[0], 0);    topRight->SetCamera(Cameras[1], 1);
+    bottomLeft->SetCamera(Cameras[2], 2); bottomRight->SetCamera(Cameras[3], 3); 
 
 #pragma endregion
 }

@@ -1,7 +1,8 @@
 #include "ObjManager.h"
+#include "MeshBuilder.h"
 #include "UStaticMesh.h"
-#include "Core/Container/ObjectIterator.h"
 #include "Core/Engine.h"
+#include "Object/UObjectIterator.h"
 #include "Object/ObjectFactory.h"
 #include "Object/Material/Material.h"
 #include <filesystem>
@@ -95,10 +96,8 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
 
 UStaticMesh* FObjManager::LoadObjStaticMesh(const FString& PathFileName)
 {
-    for (TObjectIterator<UStaticMesh> It(UEngine::Get().GObjects.begin(), UEngine::Get().GObjects.end()); It; ++It)
+    for (UStaticMesh* Mesh : TObjectRange<UStaticMesh>())
     {
-        UStaticMesh* Mesh = *It;
-
 		if (Mesh && Mesh->GetAssetPathFileName() == PathFileName)
 			return Mesh;
     }
@@ -115,10 +114,8 @@ UStaticMesh* FObjManager::LoadObjStaticMesh(const FString& PathFileName)
 
 class UMaterial* FObjManager::LoadMaterial(const FName& MaterialName)
 {
-	for (TObjectIterator<UMaterial> It(UEngine::Get().GObjects.begin(), UEngine::Get().GObjects.end()); It; ++It)
+	for (UMaterial* Material : TObjectRange<UMaterial>())
 	{
-		UMaterial* Material = *It;
-
 		if (Material && Material->GetMaterialName() == MaterialName)
 			return Material;
 	}

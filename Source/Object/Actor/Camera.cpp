@@ -38,6 +38,18 @@ ACamera::ACamera(FVector Position, FVector Rotation, ECameraProjectionMode::Type
     SetActorTransform(Transform);
 }
 
+void ACamera::Tick(float DeltaTime)
+{
+    if (this->ProjectionMode == ECameraProjectionMode::Orthographic)
+    {
+        FTransform CamTransform = GetActorTransform();
+        FVector Dir = Pivot/* - CamTransform.GetPosition()*/;
+        // orthogonal 카메라가 너무 안움직여서 하드코딩함
+        CamTransform.Translate (Dir * DeltaTime * CameraSpeed * 10.f); 
+        SetActorTransform(CamTransform);
+    }
+}
+
 
 void ACamera::SetFieldOfVew(float Fov)
 {
