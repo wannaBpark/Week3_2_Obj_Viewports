@@ -24,6 +24,8 @@ void UStaticMeshComponent::SetStaticMesh(const FString& staticMeshPath)
 {
 	StaticMesh = FObjManager::LoadObjStaticMesh(staticMeshPath);
 
+	if (StaticMesh == nullptr)
+		return;
 	// 버텍스 버퍼 생성
 	CreateVertexBuffer();
 	// 인덱스 버퍼 생성 
@@ -49,6 +51,9 @@ void UStaticMeshComponent::SetStaticMesh(const FString& staticMeshPath)
 
 void UStaticMeshComponent::CreateVertexBuffer()
 {
+	if (StaticMesh == nullptr)
+		return;
+
 	auto Vertices = StaticMesh->GetStaticMeshAsset()->Vertices;
 	int Size = Vertices.Num();
 
@@ -78,6 +83,9 @@ void UStaticMeshComponent::CreateVertexBuffer()
 
 void UStaticMeshComponent::CreateIndexBuffer()
 {
+	if (StaticMesh == nullptr)
+		return;
+
 	auto Indices = StaticMesh->GetStaticMeshAsset()->Indices;
 	RenderResource.numVertices = Indices.Num();
 	IndexBuffer = UEngine::Get().GetRenderer()->CreateIndexBuffer(Indices);
@@ -129,7 +137,7 @@ FActorComponentInfo UStaticMeshComponent::GetActorComponentInfo()
 	// 이후의 Arg들은 적용되어있는 머티리얼들의 이름
 	// 1번 arg는 0번째 머티리얼, 2번 arg는 1번째 머티리얼, ...
 
-	Info.Args.Add(StaticMesh->GetStaticMeshAsset()->PathFileName);
+	Info.Args.Add(StaticMesh->GetStaticMeshAsset()->Path);
 	for (int i = 0; i < Materials.Num(); ++i)
 	{
 		Info.Args.Add(Materials[i]->GetMaterialName().ToString());

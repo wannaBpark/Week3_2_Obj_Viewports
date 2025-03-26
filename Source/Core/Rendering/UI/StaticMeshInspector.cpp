@@ -7,7 +7,7 @@
 
 void FStaticMeshInspector::Init(UStaticMeshComponent* Comp)
 {
-	if (Comp == nullptr)
+	if (Comp == nullptr || Comp->StaticMesh == nullptr)
 		return;
 
 	Component = Comp;
@@ -17,12 +17,12 @@ void FStaticMeshInspector::Init(UStaticMeshComponent* Comp)
 
 	int Count = 0;
 
-	TMap<FName, FStaticMesh*> StaticMeshMap = FObjManager::GetObjStaticMeshMap();
+	TMap<FString, FStaticMesh*> StaticMeshMap = FObjManager::GetObjStaticMeshMap();
 	for (auto& kvp : StaticMeshMap)
 	{
 		FStaticMesh* StaticMesh = kvp.second;
 		StaticMeshes.Add(StaticMesh);
-		if (StaticMesh->PathFileName == Comp->StaticMesh->GetAssetPathFileName())
+		if (StaticMesh->Name == Comp->StaticMesh->GetAssetPathFileName())
 		{
 			StaticMeshIndex = Count;
 		}
@@ -49,22 +49,31 @@ void FStaticMeshInspector::Update()
 	ImGui::Begin("Static Mesh Inspector");
 	UpdateStaticMeshCombo();
 	UpdateMaterialCombo();
+	MaterialEditor.Update();
 	ImGui::End();
+}
+
+void FStaticMeshInspector::OnNewStaticMeshImported(FStaticMesh* NewMesh)
+{
+	if (NewMesh == nullptr)
+		return;
+	if(StaticMeshes.Find(NewMesh) == -1)
+		StaticMeshes.Add(NewMesh);
 }
 
 void FStaticMeshInspector::UpdateStaticMeshCombo()
 {
 	if (StaticMeshes.Num() == 0)
 		return;
-	if (ImGui::BeginCombo("Static Mesh", StaticMeshes[StaticMeshIndex]->PathFileName.c_char()))
+	if (ImGui::BeginCombo("Static Mesh", StaticMeshes[StaticMeshIndex]->Name.c_char()))
 	{
 		for (int i = 0; i < StaticMeshes.Num(); i++)
 		{
 			bool IsSelected = StaticMeshIndex == i;
-			if (ImGui::Selectable(StaticMeshes[i]->PathFileName.c_char(), IsSelected))
+			if (ImGui::Selectable(StaticMeshes[i]->Name.c_char(), IsSelected))
 			{
 				StaticMeshIndex = i;
-				Component->SetStaticMesh(StaticMeshes[i]->PathFileName);
+				Component->SetStaticMesh(StaticMeshes[i]->Name);
 				// 메시바뀌면 머티리얼 갱신해줘야 함
 				ComponentMaterials = Component->GetMaterials();
 			}
@@ -96,13 +105,26 @@ void FStaticMeshInspector::UpdateMaterialCombo()
 					Component->SetMaterial(i, MatInstance);
 					// 머티리얼 배열 Refresh
 					ComponentMaterials = Component->GetMaterials();
+
+					if (MaterialEditor.IsOpen() && !IsSelected)
+					{
+						MaterialEditor.Reset();
+						MaterialEditor.Init(ComponentMaterials[i]);
+					}
 				}
 				if (IsSelected)
 				{
 					ImGui::SetItemDefaultFocus();
 				}
+
 			}
 			ImGui::EndCombo();
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button(("Edit##" + std::to_string(i)).c_str()))
+		{
+			MaterialEditor.Open(ComponentMaterials[i]);
 		}
 	}
 }

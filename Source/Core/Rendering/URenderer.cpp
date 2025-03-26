@@ -921,7 +921,7 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
 {
 	DeviceContext->OMSetDepthStencilState(DepthStencilState, 0);                // DepthStencil 상태 설정. StencilRef: 스텐실 테스트 결과의 레퍼런스
 
-    if (MeshComp == nullptr) return;
+    if (MeshComp == nullptr ||  MeshComp->StaticMesh == nullptr) return;
 
     uint32 stride = sizeof(FNormalVertex);
     uint32 offset = 0;
@@ -999,7 +999,7 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
                 .Diffuse = Mat->Diffuse,
                 .Specular = Mat->Specular,
                 .Emissive = Mat->Emissive,
-                .Roughness = 250 - Mat->Shininess,
+                .Roughness = 1.0f - (Mat->Shininess / 250.0f),
             };
 
             UpdateBuffer(matConstant, 8);
