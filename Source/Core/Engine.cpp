@@ -48,7 +48,7 @@ LRESULT UEngine::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         APlayerInput::Get().KeyDown(Key);
         if (EngineInstance.RootWindow) // RootWindow가 존재하고, 중복입력이 아닐때에만 키 이벤트 전달
         {
-            if ((Key == EKeyCode::F || Key == EKeyCode::_1) && !(lParam & 0x40000000))
+            if ((Key == EKeyCode::F || Key == EKeyCode::T) && !(lParam & 0x40000000))
             {
                 EngineInstance.RootWindow->OnKeyDown(Key);
             }
