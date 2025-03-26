@@ -191,6 +191,8 @@ bool SSplitterH::IsOverVerticalBorder(const FPoint& MousePos) const
         BorderThickness,
         this->Rect.H                // [수정] : 아랫 수직축도 드래그 가능하도록 함
     };
+    UE_LOG("Vertical Border : %d %d %d %d",
+        BorderRect.X, BorderRect.Y, BorderRect.W, BorderRect.H);
     return IsInRect(MousePos, BorderRect);
 }
 
@@ -234,7 +236,8 @@ void SSplitterH::OnMouseMove(const FPoint& MousePos)
         if (bIsVerticalDrag) // Vertical 축 드래그 : 좌우 delta만 적용
         {
             TopSplitterV->OnDrag(normalizedDeltaX);
-            BottomSplitterV->OnDrag(normalizedDeltaX);
+            //BottomSplitterV->OnDrag(normalizedDeltaX);
+            BottomSplitterV->SetSplitRatio(TopSplitterV->GetSplitRatio());
         }
         else if (bIsCenterDrag) // 중앙 드래그 시 상하좌우 조절
         {

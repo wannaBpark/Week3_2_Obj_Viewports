@@ -337,7 +337,7 @@ void UEngine::InitWorld()
     float BottomRatio = EngineConfig->GetEngineConfigValue<float>(EEC_BottomVerticalSplitRatio);
     HorizontalRatio = max(HorizontalRatio, 0.1f);
     TopRatio = max(TopRatio, 0.1f);
-    BottomRatio = max(BottomRatio, 0.1f);
+    BottomRatio = TopRatio;
     RootWindow->SetSplitRatio(HorizontalRatio);
     RootWindow->GetSideLT()->SetSplitRatio(TopRatio);
     RootWindow->GetSideRB()->SetSplitRatio(BottomRatio);
