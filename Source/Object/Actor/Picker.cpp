@@ -12,6 +12,7 @@
 #include "Object/UtilComponent/UStringComponent.h"
 
 #include "../URaycastSystem.h"
+#include "Core/Rendering/D3DViewports/SViewportWindow.h"
 
 
 APicker::APicker()
@@ -79,16 +80,37 @@ void APicker::LateTick(float DeltaTime)
     if (APlayerInput::Get().GetMouseDown(false) && !ImGui::GetIO().WantCaptureMouse) {
 
         POINT pt = GetMousePoint();
-        UActorComponent* PickedComponent = GetAcotrByPixelPicking(pt);
-        //UActorComponent* PickedComponent = nullptr; // 테스트용 : 픽셀 피킹 없이 OBB 레이 잘 쏘도록 WIP
+        
+        //UActorComponent* PickedComponent = GetAcotrByPixelPicking(pt);
+        UActorComponent* PickedComponent = nullptr; // 테스트용 : 픽셀  피킹 없이 OBB 레이 잘 쏘도록 WIP
         if (PickedComponent != nullptr)
             if (SetSelectActor(PickedComponent)) return;
 
-        // 검출된 오브젝트가 없을 시 RayTracing으로도 검사
+        // 검출된 오브젝트가 없을 시 RayTracing으로도 검사 : Hover된 Viewport의 카메라 가져오기
         TArray<FHitResult> resultAll;
-        FVector location = FEditorManager::Get().GetCamera()->GetActorTransform().GetPosition();
-        FVector dir = UEngine::Get().GetRenderer()->GetRayDirectionFromClick(FVector(pt.x, pt.y, 0));
+        TArray<std::shared_ptr<SViewportWindow>> Viewports = UEngine::Get().GetViewportWindows();
+        ACamera* PickingCamera = nullptr;
+        D3D11_VIEWPORT CurViewport;
+        for (uint32 i = 0; i < Viewports.Num(); ++i)
+        {
+            SViewportWindow* Viewport = Viewports[i].get();
+            if (Viewport->IsHover({ static_cast<uint32>(pt.x), static_cast<uint32>(pt.y) }))
+            {
+                PickingCamera = Viewport->GetCamera().get();
+                CurViewport = Viewport->GetViewport();
+                break;
+            }
+        }
+        
+        if (PickingCamera == nullptr) { return;  }
+        //FEditorManager::Get().SetCamera(PickingCamera); // Viewport에서 setcamera하는것과 중복
+        FVector location = PickingCamera->GetActorTransform().GetPosition();
+        //FVector location = FEditorManager::Get().GetCamera()->GetActorTransform().GetPosition();
+        FVector dir = UEngine::Get().GetRenderer()->GetRayDirectionFromClick(
+            FVector(pt.x, pt.y, 0), CurViewport, PickingCamera);
         URaycastSystem::RaycastAll(location, dir, 100, resultAll);
+        UE_LOG("ray location : %.2f %.2f %.2f", location.X, location.Y, location.Z);
+        UE_LOG("dir          : %.2f %.2f %.2f", dir.X, dir.Y, dir.Z);
 
         if (resultAll.Len() != 0 && resultAll[0].bBlockingHit) {
             PickedComponent = dynamic_cast<UActorComponent*>(resultAll[0].hitObject);

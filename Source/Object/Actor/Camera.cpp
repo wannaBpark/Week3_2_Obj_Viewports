@@ -121,3 +121,18 @@ ECameraProjectionMode::Type ACamera::GetProjectionMode() const
 {
     return this->ProjectionMode;
 }
+
+FMatrix ACamera::GetProjectionMatrix() const
+{
+    FMatrix ProjectionMatrix;
+    if (ProjectionMode == ECameraProjectionMode::Perspective)
+    {
+        ProjectionMatrix = FMatrix::PerspectiveFovLH(FieldOfView, AspectRatio, Near, Far);
+    }
+    else if (ProjectionMode == ECameraProjectionMode::Orthographic)
+    {
+        ProjectionMatrix = FMatrix::OrthoForLH(Width / 100.f, Height / 100.f, Near, Far);
+    }
+    
+    return ProjectionMatrix;
+}

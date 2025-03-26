@@ -88,4 +88,6 @@ public:
     {
         return GetActorTransform().GetViewMatrix();
     }
+
+    FMatrix GetProjectionMatrix() const;
 };

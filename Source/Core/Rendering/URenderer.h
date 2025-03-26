@@ -395,7 +395,7 @@ public:
     void UpdateConstantDepth(int Depth) const;
     void PrepareMain();
 
-    FVector GetRayDirectionFromClick(FVector MPos);
+    FVector GetRayDirectionFromClick(FVector MPos, D3D11_VIEWPORT CurViewport, ACamera* CurrentCamera);
 	FVector4 GetPixel(FVector MPos);
 
 	void RenderPickingTexture();

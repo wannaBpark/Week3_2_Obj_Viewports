@@ -748,16 +748,25 @@ void URenderer::PrepareMain() const
     DeviceContext->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
 }
 
-FVector URenderer::GetRayDirectionFromClick(FVector MPos)
+FVector URenderer::GetRayDirectionFromClick(FVector MPos, D3D11_VIEWPORT CurViewport, ACamera* CurrentCamera)
 {
-    UINT NumViewports = 1;
-    D3D11_VIEWPORT CurrentViewport;
-    DeviceContext->RSGetViewports(&NumViewports, &CurrentViewport);
-    UE_LOG("Ray casting Viewport: %d %d ", CurrentViewport.TopLeftX, CurrentViewport.TopLeftY);
-    // 1. 화면 좌표를 NDC 좌표로 변환 (-1 ~ 1 범위)
-    float ndcX = (2.0f * MPos.X / CurrentViewport.Width) - 1.0f;
-    float ndcY = 1.0f - (2.0f * MPos.Y / CurrentViewport.Height); // 화면 좌표계는 아래로 증가하므로 반전
+    FMatrix ViewMatrix = CurrentCamera->GetViewMatrix();
+    FMatrix ProjectionMatrix = CurrentCamera->GetProjectionMatrix();
 
+    UE_LOG("Ray casting Viewport: %d %d ", CurViewport.TopLeftX, CurViewport.TopLeftY);
+    // 1. 화면 좌표를 NDC 좌표로 변환 (-1 ~ 1 범위) 및 보정
+     // 화면 좌표계는 왼쪽 위가 원점, 아래로 갈수록 Y가 증가하므로 Y는 반전
+    float viewportX = MPos.X - CurViewport.TopLeftX;
+    float viewportY = MPos.Y - CurViewport.TopLeftY;
+
+    // 기본 NDC 계산: x는 [-1,1], y는 [-1,1]
+    float ndcX = (2.0f * viewportX / CurViewport.Width) - 1.0f;
+    float ndcY = 1.0f - (2.0f * viewportY / CurViewport.Height);
+
+    
+    
+
+    UE_LOG("Current NDC %.2f %.2f", ndcX, ndcY);
     // 2. NDC 좌표로 근거리 및 원거리 클립 공간의 점을 생성
     FVector4 nearPoint = FVector4(ndcX, ndcY, 0.0f, 1.0f);
     FVector4 farPoint = FVector4(ndcX, ndcY, 1.0f, 1.0f);

@@ -20,6 +20,8 @@ private:
     bool bFullScreen = false;
     FRect OriginalRect;
 public:
+    std::shared_ptr<ACamera> GetCamera() const { return Camera; }
+    D3D11_VIEWPORT GetViewport() const { return DXViewport; }
     void UpdateViewport() 
     {
         DXViewport.TopLeftX = static_cast<float>(Rect.X);
@@ -63,7 +65,7 @@ public:
         {
             bIsDragging = bIsAnyDragging = true;
             FEditorManager::Get().SetInputCamera(this->Camera.get());
-            UE_LOG("Set Camera By Viewport %d %d", Rect.X, Rect.Y);
+            //UE_LOG("Set Camera By Viewport %d %d", Rect.X, Rect.Y);
         }
     }
 
