@@ -1,7 +1,7 @@
 #include "StaticMeshInspector.h"
 #include "ImGui/imgui.h"
 #include "Object/StaticMeshComponent/StaticMeshComponent.h"
-#include "Core/Container/ObjectIterator.h"
+#include "Object/UObjectIterator.h"
 #include "Object/Material/Material.h"
 #include <Object/Mesh/ObjManager.h>
 

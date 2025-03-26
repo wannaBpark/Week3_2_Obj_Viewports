@@ -26,6 +26,11 @@ public:
     ConstIterator begin() const noexcept { return PrivateSet.begin(); }
     ConstIterator end() const noexcept { return PrivateSet.end(); }
 
+    // CreateIterator 함수: 내부의 begin() iterator를 반환합니다.
+    Iterator CreateIterator() noexcept { return PrivateSet.begin(); }
+    ConstIterator CreateIterator() const noexcept { return PrivateSet.begin(); }
+
+    
     // Add
     void Add(const T& Item) { PrivateSet.insert(Item); }
 
@@ -63,6 +68,38 @@ public:
 
     // IsEmpty
     bool IsEmpty() const { return PrivateSet.empty(); }
+
+    // GetAllocatedSize: 대략적인 할당된 메모리 크기를 반환합니다.
+    size_t GetAllocatedSize() const
+    {
+        size_t Size = sizeof(*this);
+        // 내부의 std::unordered_set이 사용하는 버킷들에 할당된 메모리 (대략적인 추정)
+        Size += PrivateSet.bucket_count() * sizeof(void*);
+        // 요소들이 차지하는 메모리 (실제 객체 저장 공간)
+        Size += PrivateSet.size() * sizeof(T);
+        return Size;
+    }
+
+    // Compact: 불필요한 버킷을 제거하여 메모리 사용을 최적화합니다.
+    // 현재 요소 수에 맞춰 버킷을 재조정합니다.
+    void Compact()
+    {
+        PrivateSet.rehash(PrivateSet.size());
+    }
+
+    // Shrink: 사용 중인 요소만 남기고 메모리 압축
+    void Shrink()
+    {
+        SetType NewSet;
+        NewSet.reserve(PrivateSet.size());
+
+        for (const auto& Item : PrivateSet)
+        {
+            NewSet.insert(Item);
+        }
+
+        PrivateSet.swap(NewSet);
+    }
 
     inline void Serialize(FArchive& ar) const
     {

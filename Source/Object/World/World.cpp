@@ -62,6 +62,7 @@ void UWorld::LateTick(float DeltaTime)
 	{
 		// Engine에서 제거
 		UEngine::Get().GObjects.Remove(PendingActor->GetUUID());
+		RemoveFromClassMap(PendingActor);
 	}
 	PendingDestroyActors.Empty();
 }

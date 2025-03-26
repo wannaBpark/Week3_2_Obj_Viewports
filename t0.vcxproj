@@ -161,13 +161,90 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+
+    <ClCompile Include="Source\Core\Container\ObjectHash.cpp">
+      <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <Optimization>Disabled</Optimization>
+      <SupportJustMyCode>true</SupportJustMyCode>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerListingLocation>C:\Users\Jungle\Desktop\Github\Week3_2_Obj_Viewports\Intermediate\Build\x64\Debug\</AssemblerListingLocation>
+      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+      <BrowseInformation>false</BrowseInformation>
+      <BrowseInformationFile>C:\Users\Jungle\Desktop\Github\Week3_2_Obj_Viewports\Intermediate\Build\x64\Debug\</BrowseInformationFile>
+      <CompileAs>Default</CompileAs>
+      <ConformanceMode>true</ConformanceMode>
+      <DiagnosticsFormat>Column</DiagnosticsFormat>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <ErrorReporting>Prompt</ErrorReporting>
+      <ExpandAttributedSource>false</ExpandAttributedSource>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <EnableASAN>false</EnableASAN>
+      <EnableFuzzer>false</EnableFuzzer>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <GenerateModuleDependencies>false</GenerateModuleDependencies>
+      <GenerateSourceDependencies>false</GenerateSourceDependencies>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ModuleDependenciesFile>C:\Users\Jungle\Desktop\Github\Week3_2_Obj_Viewports\Intermediate\Build\x64\Debug\</ModuleDependenciesFile>
+      <ModuleOutputFile>C:\Users\Jungle\Desktop\Github\Week3_2_Obj_Viewports\Intermediate\Build\x64\Debug\</ModuleOutputFile>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <ObjectFileName>C:\Users\Jungle\Desktop\Github\Week3_2_Obj_Viewports\Intermediate\Build\x64\Debug\</ObjectFileName>
+      <CallingConvention>Cdecl</CallingConvention>
+      <ProgramDataBaseFileName>C:\Users\Jungle\Desktop\Github\Week3_2_Obj_Viewports\Intermediate\Build\x64\Debug\vc143.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>C:\Users\Jungle\Desktop\Github\Week3_2_Obj_Viewports\Intermediate\Build\x64\Debug\t0.pch</PrecompiledHeaderOutputFile>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <ShowIncludes>false</ShowIncludes>
+      <SourceDependenciesFile>C:\Users\Jungle\Desktop\Github\Week3_2_Obj_Viewports\Intermediate\Build\x64\Debug\</SourceDependenciesFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <SpectreMitigation>false</SpectreMitigation>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <TrackerLogDirectory>C:\Users\Jungle\Desktop\Github\Week3_2_Obj_Viewports\Intermediate\Build\x64\Debug\t0.tlog\</TrackerLogDirectory>
+      <TranslateIncludes>false</TranslateIncludes>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <XMLDocumentationFileName>C:\Users\Jungle\Desktop\Github\Week3_2_Obj_Viewports\Intermediate\Build\x64\Debug\</XMLDocumentationFileName>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <IntelJCCErratum>false</IntelJCCErratum>
+      <BuildStlModules>false</BuildStlModules>
+      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+      <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+      <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_UNICODE;UNICODE;</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>C:\Users\Jungle\Desktop\Github\Week3_2_Obj_Viewports\Source;C:\Users\Jungle\Desktop\Github\Week3_2_Obj_Viewports\Source\ThirdParty;;C:\vcpkg-master\installed\x64-windows\include</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 </AdditionalOptions>
+      <LinkCompiled>true</LinkCompiled>
+    </ClCompile>
     <ClCompile Include="Source\Core\Rendering\D3DViewports\SSpliter.cpp" />
     <ClCompile Include="Source\Factory\Factory.cpp" />
     <ClCompile Include="Source\Object\Mesh\StaticMesh.cpp" />
     <ClCompile Include="Source\Serialization\Archive.cpp" />
     <ClCompile Include="Source\Object\Material\Material.cpp" />
     <ClCompile Include="Source\Object\Actor\ATarzan.cpp" />
-    <ClCompile Include="Source\Core\Container\ObjectIterator.cpp" />
     <ClCompile Include="Source\Object\Mesh\ObjManager.cpp" />
     <ClCompile Include="Source\Core\EngineConfig.cpp" />
     <ClCompile Include="Source\Core\FSceneManager.cpp" />
@@ -231,6 +308,8 @@
     <ClCompile Include="Source\Object\StaticMeshComponent\StaticMeshComponent.cpp" />
     <ClCompile Include="Source\Core\Rendering\UI\StaticMeshInspector.cpp" />
     <ClCompile Include="Source\Factory\StaticMeshFactory.cpp" />
+    <ClCompile Include="Source\Core\Container\StringView.cpp" />
+    <ClCompile Include="Source\Object\UObjectIterator.cpp" />
     <ClCompile Include="URaycastSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -331,10 +410,14 @@
     <ClInclude Include="Source\Serialization\Archive.h" />
     <ClInclude Include="Source\Object\Material\Material.h" />
     <ClInclude Include="Source\Object\Actor\ATarzan.h" />
-    <ClInclude Include="Source\Core\Container\ObjectIterator.h" />
     <ClInclude Include="Source\Object\Mesh\ObjManager.h" />
     <ClInclude Include="Source\Core\EngineConfig.h" />
+    <ClInclude Include="Source\Core\Container\IteratorAdapter.h" />
+    <ClInclude Include="Source\Core\Container\ObjectHash.h" />
     <ClInclude Include="Source\Core\FSceneManager.h" />
+    <ClInclude Include="Source\Core\HAL\EnumClassFlags.h" />
+    <ClInclude Include="Source\Core\Internationalization\BreakIterator.h" />
+    <ClInclude Include="Source\Core\Internationalization\IBreakIterator.h" />
     <ClInclude Include="Source\Core\Rendering\SubUVManager.h" />
     <ClInclude Include="Source\Core\Rendering\TextAtlasManager.h" />
     <ClInclude Include="Source\Core\Template\RemoveReference.h" />
@@ -426,7 +509,9 @@
     <ClInclude Include="Source\Object\StaticMeshComponent\StaticMeshComponent.h" />
     <ClInclude Include="Source\Core\Rendering\UI\StaticMeshInspector.h" />
     <ClInclude Include="Source\Factory\StaticMeshFactory.h" />
+    <ClInclude Include="Source\Core\Container\StringView.h" />
     <ClInclude Include="UColliders.h" />
+    <ClInclude Include="Source\Object\UObjectIterator.h" />
     <ClInclude Include="URaycastSystem.h" />
   </ItemGroup>
   <ItemGroup>
@@ -434,6 +519,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="t0.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -64,6 +64,7 @@ void AActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 			FEditorManager::Get().SelectActor(nullptr);
 		}
 		UEngine::Get().GObjects.Remove(Component->GetUUID());
+		RemoveFromClassMap(Component);
 	}
 	Components.Empty();
 }
