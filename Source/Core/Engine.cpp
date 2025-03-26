@@ -447,8 +447,8 @@ void UEngine::UpdateWindowSize(UINT InScreenWidth, UINT InScreenHeight)
 void UEngine::PreloadResources()
 {
     FObjManager::LoadObjStaticMesh(TEXT("Assets/Meshes/Dice.tsmesh"));
-    FObjManager::LoadObjStaticMesh(TEXT("Assets/Meshes/2PX7U16XARLGHIM3W48FS86MJ.tsmesh"));
-    FObjManager::LoadObjStaticMesh(TEXT("Assets/Meshes/Earth.tsmesh"));
+    FObjManager::LoadObjStaticMesh(TEXT("Assets/Meshes/FinalTarzan.tsmesh"));
+    FObjManager::LoadObjStaticMesh(TEXT("Assets/Meshes/SiuSphere.tsmesh"));
 }
 
 UObject* UEngine::GetObjectByUUID(uint32 InUUID) const

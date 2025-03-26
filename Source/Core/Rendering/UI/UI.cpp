@@ -189,7 +189,7 @@ void UI::RenderMemoryUsage()
 
 void UI::RenderPrimitiveSelection()
 {
-    const char* items[] = { "Sphere", "Cube", "Cylinder", "Cone","Triangle","Circle", "BillBoard", "WorldText", "SubUV", "SubUV2", "Tarzan"};
+    const char* items[] = { /*"Sphere", "Cube", "Cylinder", "Cone","Triangle","Circle", "BillBoard", "WorldText", "SubUV", "SubUV2", */"Tarzan"};
 
     ImGui::Combo("Primitive", &currentItem, items, IM_ARRAYSIZE(items));
 

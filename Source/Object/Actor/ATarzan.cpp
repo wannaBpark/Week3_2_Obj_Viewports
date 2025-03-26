@@ -9,7 +9,7 @@ ATarzan::ATarzan()
 	UStaticMeshComponent* MeshComponent = AddComponent<UStaticMeshComponent>();
 	RootComponent = MeshComponent;
 
-	MeshComponent->SetStaticMesh(TEXT("Assets/Meshes/2PX7U16XARLGHIM3W48FS86MJ.tsmesh"));
+	MeshComponent->SetStaticMesh(TEXT("Assets/Meshes/FinalTarzan.tsmesh"));
 
 
 	FTransform Tr = GetActorTransform();
