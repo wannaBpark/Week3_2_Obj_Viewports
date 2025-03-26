@@ -112,6 +112,7 @@ private:
     std::unique_ptr<SSplitterH> RootWindow;
     TArray<std::shared_ptr<SViewportWindow>> SViewportWindows;
     TArray<std::shared_ptr<ACamera>> Cameras;
+    TArray<std::shared_ptr<SViewportWindow>> ViewportWindows;
 
 public:
     // TArray<std::shared_ptr<UObject>> GObjects;
@@ -122,7 +123,8 @@ private:
     class FEngineConfig* EngineConfig;
 public:
 	FEngineConfig* GetEngineConfig() const { return EngineConfig; }
-    std::shared_ptr<ACamera> GetCameraByIdx(uint32 idx) { return Cameras[idx % Cameras.Num()]; }
+    std::shared_ptr<ACamera> GetCameraByIdx(uint32 idx) const { return Cameras[idx % Cameras.Num()]; }
+    TArray<std::shared_ptr<SViewportWindow>> GetViewportWindows() const { return ViewportWindows; }
     float GetDeltaTime() const { return curDeltaTime; }
 };
 

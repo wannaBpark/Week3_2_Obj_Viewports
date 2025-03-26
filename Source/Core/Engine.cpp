@@ -507,5 +507,8 @@ void UEngine::SetViewportCameras()
     topLeft->SetCamera(Cameras[0], 0);    topRight->SetCamera(Cameras[1], 1);
     bottomLeft->SetCamera(Cameras[2], 2); bottomRight->SetCamera(Cameras[3], 3); 
 
+    ViewportWindows.Add(topLeft);    ViewportWindows.Add(topRight);
+    ViewportWindows.Add(bottomLeft); ViewportWindows.Add(bottomRight);
+
 #pragma endregion
 }

@@ -63,7 +63,7 @@ public:
         {
             bIsDragging = bIsAnyDragging = true;
             FEditorManager::Get().SetInputCamera(this->Camera.get());
-            //UE_LOG("Set Camera By Viewport %d %d", Rect.X, Rect.Y);
+            UE_LOG("Set Camera By Viewport %d %d", Rect.X, Rect.Y);
         }
     }
 

@@ -750,12 +750,13 @@ void URenderer::PrepareMain() const
 
 FVector URenderer::GetRayDirectionFromClick(FVector MPos)
 {
-    /*UINT NumViewports = 1;
-    D3D11_VIEWPORT ViewportInfo;
-    DeviceContext->RSGetViewports(&NumViewports, &ViewportInfo);*/
+    UINT NumViewports = 1;
+    D3D11_VIEWPORT CurrentViewport;
+    DeviceContext->RSGetViewports(&NumViewports, &CurrentViewport);
+    UE_LOG("Ray casting Viewport: %d %d ", CurrentViewport.TopLeftX, CurrentViewport.TopLeftY);
     // 1. 화면 좌표를 NDC 좌표로 변환 (-1 ~ 1 범위)
-    float ndcX = (2.0f * MPos.X / ViewportInfo.Width) - 1.0f;
-    float ndcY = 1.0f - (2.0f * MPos.Y / ViewportInfo.Height); // 화면 좌표계는 아래로 증가하므로 반전
+    float ndcX = (2.0f * MPos.X / CurrentViewport.Width) - 1.0f;
+    float ndcY = 1.0f - (2.0f * MPos.Y / CurrentViewport.Height); // 화면 좌표계는 아래로 증가하므로 반전
 
     // 2. NDC 좌표로 근거리 및 원거리 클립 공간의 점을 생성
     FVector4 nearPoint = FVector4(ndcX, ndcY, 0.0f, 1.0f);
