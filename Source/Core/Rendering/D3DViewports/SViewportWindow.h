@@ -58,12 +58,12 @@ public:
 
     virtual void OnMouseDown(const FPoint& MousePos) override
     {
-        UE_LOG("MOUSE Down By Viewport %d %d", Rect.X, Rect.Y);
+        //UE_LOG("MOUSE Down By Viewport %d %d", Rect.X, Rect.Y);
         if (IsHover(MousePos) /*&& !bIsAnyDragging*/)
         {
             bIsDragging = bIsAnyDragging = true;
             FEditorManager::Get().SetInputCamera(this->Camera.get());
-            UE_LOG("Set Camera By Viewport %d %d", Rect.X, Rect.Y);
+            //UE_LOG("Set Camera By Viewport %d %d", Rect.X, Rect.Y);
         }
     }
 
@@ -77,7 +77,7 @@ public:
         if (bIsDragging && bIsAnyDragging)  // 드래깅되고 있고, 점유된 화면만이 false로 변경
         {
             bIsAnyDragging = false;
-            UE_LOG("UNSET Camera By Viewport %d %d", Rect.X, Rect.Y);
+            //UE_LOG("UNSET Camera By Viewport %d %d", Rect.X, Rect.Y);
         }
         bIsDragging = false;
     }
