@@ -43,10 +43,16 @@ void UStaticMeshComponent::SetStaticMesh(const FString& staticMeshPath)
 
 	// 머티리얼 로드
 	Materials.Empty();
-	for (auto& Kvp : StaticMesh->GetStaticMeshAsset()->SubMeshes)
+	TMap<FName, FSubMesh>& SubMeshes = StaticMesh->GetStaticMeshAsset()->SubMeshes;
+
+	int Count = SubMeshes.Num();
+	Materials.Resize(Count);
+
+
+	for (auto& Kvp : SubMeshes)
 	{
 		auto Material = FObjManager::LoadMaterial(Kvp.second.MaterialName);
-		Materials.Add(Material);
+		Materials[Kvp.second.Index] = Material;
 	};
 }
 

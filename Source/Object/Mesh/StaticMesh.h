@@ -6,6 +6,7 @@
 #include "Core/Container/String.h"
 #include "Object/NameTypes.h"
 #include "Serialization/Archive.h"
+#include "Debug/DebugConsole.h"
 
 struct FNormalVertex
 {
@@ -44,6 +45,7 @@ struct FSubMesh
 
 	void Serialize(FArchive& Ar) const
 	{
+		UE_LOG("Serializing Submesh : %s, MaterialName : %s", *GroupName.ToString(), *MaterialName.ToString());
 		FString MaterialNameDebug = MaterialName.ToString();
 
 		Ar << GroupName << Index << StartIndex << NumIndices << MaterialName;
@@ -51,6 +53,7 @@ struct FSubMesh
 	void Deserialize(FArchive& Ar)
 	{
 		Ar >> GroupName >> Index >> StartIndex >> NumIndices >> MaterialName;
+		UE_LOG("DeSerializing Submesh : %s, MaterialName : %s", *GroupName.ToString(), *MaterialName.ToString());
 	}
 };
 /*

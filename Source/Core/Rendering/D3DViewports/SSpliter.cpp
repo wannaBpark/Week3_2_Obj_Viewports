@@ -191,8 +191,8 @@ bool SSplitterH::IsOverVerticalBorder(const FPoint& MousePos) const
         BorderThickness,
         this->Rect.H                // [수정] : 아랫 수직축도 드래그 가능하도록 함
     };
-    UE_LOG("Vertical Border : %d %d %d %d",
-        BorderRect.X, BorderRect.Y, BorderRect.W, BorderRect.H);
+    //UE_LOG("Vertical Border : %d %d %d %d",
+    //    BorderRect.X, BorderRect.Y, BorderRect.W, BorderRect.H);
     return IsInRect(MousePos, BorderRect);
 }
 

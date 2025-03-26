@@ -56,7 +56,6 @@ bool FStaticMeshFactory::ProcessObjFile(const FString& FilePath)
 
 bool FStaticMeshFactory::ProcessMtlFile(TArray<FObjMaterialInfo>& BuiltMaterials)
 {
-
 	// 1. FObjMaterialInfo::TexturePath에 Texture가 존재한다면 복사해서 Assets/Textures에 넣는다
     for (FObjMaterialInfo& MaterialInfo : BuiltMaterials)
     {

@@ -57,6 +57,7 @@ public:
     SizeType Remove(const T& Item);
     bool RemoveSingle(const T& Item);
     void RemoveAt(SizeType Index);
+    void Resize(SizeType Number);
     template <typename Predicate>
         requires std::is_invocable_r_v<bool, Predicate, const T&>
     SizeType RemoveAll(const Predicate& Pred);
@@ -269,6 +270,12 @@ template <typename T, typename Allocator>
 void TArray<T, Allocator>::Reserve(SizeType Number)
 {
     PrivateVector.reserve(Number);
+}
+
+template <typename T, typename Allocator>
+void TArray<T, Allocator>::Resize(SizeType Number)
+{
+	PrivateVector.resize(Number);
 }
 
 template <typename T, typename Allocator>
