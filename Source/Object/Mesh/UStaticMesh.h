@@ -18,7 +18,7 @@ private:
 public:
     const FString& GetAssetPathFileName()
     {
-        return StaticMeshAsset->PathFileName;
+        return StaticMeshAsset->Name;
     }
 
     FStaticMesh* GetStaticMeshAsset() { return StaticMeshAsset; }

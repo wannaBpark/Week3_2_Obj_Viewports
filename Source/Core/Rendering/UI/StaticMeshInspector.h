@@ -12,6 +12,7 @@ public:
 
 	void Init(UStaticMeshComponent* Comp);
 	void Update();
+	void OnNewStaticMeshImported(FStaticMesh* NewMesh);
 
 	UStaticMeshComponent* GetCurrentStaticMeshComponent() const { return Component; }
 
