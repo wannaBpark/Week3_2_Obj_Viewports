@@ -26,45 +26,34 @@ void SEditorViewport::Construct()
     Client->Viewport = SceneViewport.get();
 }
 
-FReply SEditorViewport::OnKeyDown(const FGeometry& MyGeometry, const EKeyCode& InKeyCode)
+FReply SEditorViewport::OnKeyDown(const EKeyCode& InKeyCode)
 {
-    return FReply();
-    //FReply Reply = FReply::Unhandled();
-    //if (CommandList->ProcessCommandBindings(InKeyEvent))
-    //{
-    //    Reply = FReply::Handled();
-    //    Client->Invalidate();
-    //}
-
-    //return Reply;
+    return Super::OnKeyDown(InKeyCode);
 }
 
-bool SEditorViewport::SupportsKeyboardFocus() const
+SLevelViewport::SLevelViewport()
 {
-    return true;
 }
 
-FReply SEditorViewport::OnFocusReceived(const FGeometry& MyGeometry)
+SLevelViewport::~SLevelViewport()
+{
+}
+
+FReply SEditorViewport::OnFocusReceived()
 {
     //TODO : forward focus to the viewport
     return FReply();
     //return FReply::Handled().SetUserFocus(ViewportWidget.ToSharedRef(), InFocusEvent.GetCause());
 }
 
-void SEditorViewport::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+void SEditorViewport::Tick(const FGeometry& AllottedGeometry, const float InDeltaTime)
 {
-    // LastTickTime = FPlatformTime::Seconds();
-}
-
-bool SEditorViewport::IsRealtime() const
-{
-    return true;
-    //return Client->IsRealtime();
+    Super::Tick(AllottedGeometry, InDeltaTime);
 }
 
 bool SEditorViewport::IsVisible() const
 {
-    return false;
+    return true;
 }
 
 void SEditorViewport::SetRenderDirectlyToWindow(const bool bInRenderDirectlyToWindow)
@@ -82,8 +71,84 @@ UWorld* SEditorViewport::GetWorld() const
     return Client->GetWorld();
 }
 
-SViewport::SViewport()
-    : ViewportSize(FVector2D(0,0))
+void SLevelViewport::Tick(const FGeometry& ParentGeometry, float DeltaTime)
+{
+    Super::Tick(ParentGeometry, DeltaTime);
+}
+
+FReply SLevelViewport::OnKeyDown(const EKeyCode& InKeyCode)
+{
+    FReply result = Super::OnKeyDown(InKeyCode);
+
+    return result;
+}
+
+FReply SLevelViewport::OnFocusReceived()
+{
+    FReply result = Super::OnFocusReceived();
+
+    return result;
+}
+
+void SLevelViewport::OnFocusLost()
+{
+    Super::OnFocusLost();
+}
+
+FReply SLevelViewport::OnMouseButtonDown(EMouseButton InMouseButton, const FPointer& InPointer)
+{
+    FReply result = Super::OnMouseButtonDown(InMouseButton, InPointer);
+    if (bIsMouseCaptured)
+    {
+        SceneViewport->OnMouseButtonDown(InMouseButton, InPointer);
+    }
+    return result;
+}
+
+FReply SLevelViewport::OnMouseButtonUp(EMouseButton InMouseButton, const FPointer& InPointer)
+{
+    FReply result = Super::OnMouseButtonUp(InMouseButton, InPointer);
+
+    if (bIsMouseCaptured)
+    {
+        SceneViewport->OnMouseButtonUp(InMouseButton, InPointer);
+    }
+    
+    return result;
+}
+
+FReply SLevelViewport::OnMouseMove(const FPointer& InPointer)
+{
+    FReply result = Super::OnMouseMove(InPointer);
+
+    if (bIsMouseCaptured)
+    {
+        Client->MouseMove(InPointer);
+        SceneViewport->OnMouseMove(InPointer);
+    }
+    
+    return result;
+}
+
+void SLevelViewport::OnMouseEnter(const FPointer& InPointer)
+{
+    SceneViewport->OnMouseEnter(InPointer);
+}
+
+void SLevelViewport::OnMouseLeave(const FPointer& InPointer)
+{
+    SceneViewport->OnMouseLeave(InPointer);
+}
+
+FReply SLevelViewport::OnMouseWheel(const FPointer& InPointer)
+{
+    FReply result = Super::OnMouseWheel(InPointer);
+
+    return result;
+}
+
+SViewport::SViewport(FVector2D InViewportSize)
+    : ViewportSize(InViewportSize)
     , bRenderDirectlyToWindow(false)
 {
 }
@@ -92,8 +157,13 @@ SViewport::~SViewport()
 {
 }
 
-void SViewport::Construct()
+void SViewport::UpdateViewportSize(const FVector2D& NewSize)
 {
+}
+
+bool SViewport::HasMouseCapture() const
+{
+    return IsMouseCaptured();
 }
 
 void SViewport::SetViewportInterface(std::shared_ptr<ISlateViewport> InViewportInterface)
@@ -101,7 +171,6 @@ void SViewport::SetViewportInterface(std::shared_ptr<ISlateViewport> InViewportI
     if (ViewportInterface.lock() != InViewportInterface)
     {
         ViewportInterface = InViewportInterface;
-        Invalidate(EInvalidateWidgetReason::Paint);
     }
 }
 
@@ -122,7 +191,6 @@ void SViewport::SetRenderDirectlyToWindow(const bool bInRenderDirectlyToWindow)
     if (bRenderDirectlyToWindow != bInRenderDirectlyToWindow)
     {
         bRenderDirectlyToWindow = bInRenderDirectlyToWindow;
-        Invalidate(EInvalidateWidgetReason::Paint);
     }
 }
 
@@ -130,17 +198,18 @@ void SViewport::SetActive(bool bActive)
 {
 }
 
-void SViewport::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+void SViewport::Tick(const FGeometry& AllottedGeometry, const float InDeltaTime)
 {
+    Super::Tick(AllottedGeometry, InDeltaTime);
     if (ViewportInterface.lock() != nullptr)
     {
-        ViewportInterface.lock()->Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
+        ViewportInterface.lock()->Tick(AllottedGeometry, InDeltaTime);
     }
 }
 
-FCursorReply SViewport::OnCursorQuery(const FGeometry& MyGeometry, const FPointer& InPointer) const
+FCursorReply SViewport::OnCursorQuery(const FPointer& InPointer) const
 {
-    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnCursorQuery(MyGeometry) : FCursorReply::Cursor(EMouseCursor::Default);
+    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnCursorQuery(InPointer) : FCursorReply::Cursor(EMouseCursor::Default);
 }
 
 std::optional<std::shared_ptr<SWidget>> SViewport::OnMapCursor(const FCursorReply& CursorReply) const
@@ -148,23 +217,23 @@ std::optional<std::shared_ptr<SWidget>> SViewport::OnMapCursor(const FCursorRepl
     return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnMapCursor(CursorReply) : std::optional< std::shared_ptr<SWidget>>();
 }
 
-FReply SViewport::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointer& InPointer)
+FReply SViewport::OnMouseButtonDown(EMouseButton InMouseButton, const FPointer& InPointer)
 {
-    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnMouseButtonDown(MyGeometry) : FReply();
+    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnMouseButtonDown(InMouseButton, InPointer) : FReply();
 }
 
-FReply SViewport::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointer& InPointer)
+FReply SViewport::OnMouseButtonUp(EMouseButton InMouseButton, const FPointer& InPointer)
 {
-    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnMouseButtonUp(MyGeometry) : FReply();
+    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnMouseButtonUp(InMouseButton, InPointer) : FReply();
 }
 
-void SViewport::OnMouseEnter(const FGeometry& MyGeometry, const FPointer& InPointer)
+void SViewport::OnMouseEnter(const FPointer& InPointer)
 {
-    SWidget::OnMouseEnter(MyGeometry, InPointer);
+    SWidget::OnMouseEnter(InPointer);
 
     if (ViewportInterface.lock() != nullptr)
     {
-        ViewportInterface.lock()->OnMouseEnter(MyGeometry);
+        ViewportInterface.lock()->OnMouseEnter(InPointer);
     }
 }
 
@@ -178,43 +247,43 @@ void SViewport::OnMouseLeave(const FPointer& InPointer)
     }
 }
 
-FReply SViewport::OnMouseMove(const FGeometry& MyGeometry, const FPointer& InPointer)
+FReply SViewport::OnMouseMove(const FPointer& InPointer)
 {
-    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnMouseMove(MyGeometry) : FReply();
+    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnMouseMove(InPointer) : FReply();
 
 }
 
-FReply SViewport::OnMouseWheel(const FGeometry& MyGeometry, const FPointer& InPointer)
+FReply SViewport::OnMouseWheel(const FPointer& InPointer)
 {
-    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnMouseWheel(MyGeometry) : FReply();
+    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnMouseWheel(InPointer) : FReply();
 
 }
 
-FReply SViewport::OnMouseButtonDoubleClick(const FGeometry& MyGeometry, const FPointer& InPointer)
+FReply SViewport::OnMouseButtonDoubleClick(const FPointer& InPointer)
 {
-    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnMouseButtonDoubleClick(MyGeometry) : FReply();
+    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnMouseButtonDoubleClick(InPointer) : FReply();
 
 }
 
-FReply SViewport::OnKeyDown(const FGeometry& MyGeometry, const EKeyCode& InKeyCode)
+FReply SViewport::OnKeyDown(const EKeyCode& InKeyCode)
 {
-    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnKeyDown(MyGeometry) : FReply();
+    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnKeyDown(InKeyCodeInKeyCode) : FReply();
 
 }
 
-FReply SViewport::OnKeyUp(const FGeometry& MyGeometry, const EKeyCode& InKeyCode)
+FReply SViewport::OnKeyUp(const EKeyCode& InKeyCode)
 {
-    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnKeyUp(MyGeometry) : FReply();
+    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnKeyUp(InKeyCode) : FReply();
 
 }
 
-FReply SViewport::OnKeyChar(const FGeometry& MyGeometry, const EKeyCode& InKeyCode)
+FReply SViewport::OnKeyChar(const EKeyCode& InKeyCode)
 {
-    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnKeyChar(MyGeometry) : FReply();
+    return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnKeyChar(InKeyCode) : FReply();
 
 }
 
-FReply SViewport::OnFocusReceived(const FGeometry& MyGeometry)
+FReply SViewport::OnFocusReceived()
 {
     return ViewportInterface.lock() != nullptr ? ViewportInterface.lock()->OnFocusReceived() : FReply();
 
@@ -239,8 +308,5 @@ void SViewport::OnFinishedPointerInput()
 
 void SViewport::OnArrangeChildren(const FGeometry& AllottedGeometry, TArray<FArrangedWidget>& ArrangedChildren) const
 {
-    //if (ArrangedChildren.Allows3DWidgets() && CustomHitTestPath.IsValid())
-    //{
-    //    CustomHitTestPath->ArrangeCustomHitTestChildren(ArrangedChildren);
-    //}
+    SWidget::ArrangeSingleChild(AllottedGeometry, ArrangedChildren, std::const_pointer_cast<SWidget>(shared_from_this()), FVector2D(1.0f,1.0f));
 }

@@ -9,127 +9,121 @@ class SWindow;
 class FReply
 {
 public:
+    // 마우스 캡처를 요청합니다.
+    FReply& CaptureMouse(std::shared_ptr<SWidget> InMouseCaptor)
+    {
+        this->MouseCaptor = InMouseCaptor;
+        return *this;
+    }
 
-	FReply& CaptureMouse(std::shared_ptr<SWidget> InMouseCaptor)
-	{
-		this->MouseCaptor = InMouseCaptor;
-		return *this;
-	}
+    // 마우스 위치를 설정합니다.
+    FReply& SetMousePos(const FIntPoint& NewMousePos);
 
-	FReply& SetMousePos(const FIntPoint& NewMousePos);
+    // 사용자 포커스를 요청합니다.
+    FReply& SetUserFocus(const std::shared_ptr<SWidget>& GiveMeFocus);
 
-	FReply& SetUserFocus(std::shared_ptr<SWidget> GiveMeFocus);
+    // 사용자 포커스를 해제합니다.
+    FReply& ClearUserFocus();
 
-	FReply& ClearUserFocus();
+    // 포커스 요청을 취소합니다.
+    FReply& CancelFocusRequest();
 
-	FReply& CancelFocusRequest();
+    // 위젯에 대해 마우스 캡처를 요청한 상태로 마우스를 고정합니다.
+    FReply& LockMouseToWidget(std::shared_ptr<SWidget> InWidget)
+    {
+        this->MouseLockWidget = InWidget;
+        this->bShouldReleaseMouseLock = false;
+        return *this;
+    }
 
-	FReply& LockMouseToWidget(std::shared_ptr<SWidget> InWidget)
-	{
-		this->MouseLockWidget = InWidget;
-		this->bShouldReleaseMouseLock = false;
-		return  *this;
-	}
+    // 마우스 고정을 해제합니다.
+    FReply& ReleaseMouseLock()
+    {
+        this->bShouldReleaseMouseLock = true;
+        MouseLockWidget.reset();
+        return *this;
+    }
 
-	FReply& ReleaseMouseLock()
-	{
-		this->bShouldReleaseMouseLock = true;
-		MouseLockWidget.reset();
-		return *this;
-	}
+    // 이벤트 처리 결과로 마우스 캡처를 해제하도록 요청합니다.
+    FReply& ReleaseMouseCapture()
+    {
+        this->MouseCaptor.reset();
+        this->bReleaseMouseCapture = true;
+        return *this;
+    }
 
-	FReply& ReleaseMouseCapture()
-	{
-		this->MouseCaptor.reset();
-		this->bReleaseMouseCapture = true;
-		return *this;
-	}
+    /**
+     * 위젯에서 사용자가 드래그를 시작했는지 감지하도록 요청합니다.
+     * 드래그가 감지되면, Slate는 OnDragDetected 이벤트를 보냅니다.
+     *
+     * @param DetectDragInMe  이 위젯에서 드래그 감지를 수행합니다.
+     * @param MouseButton     드래그 감지를 위해 눌러야 하는 마우스 버튼입니다.
+     */
+    FReply& DetectDrag(const std::shared_ptr<SWidget>& DetectDragInMe, EMouseButton MouseButton)
+    {
+        this->DetectDragForWidget = DetectDragInMe;
+        this->DetectDragForMouseButton = MouseButton;
+        return *this;
+    }
 
-	/**
-	 * Ask Slate to detect if a user started dragging in this widget.
-	 * If a drag is detected, Slate will send an OnDragDetected event.
-	 *
-	 * @param DetectDragInMe  Detect dragging in this widget
-	 * @param MouseButton     This button should be pressed to detect the drag
-	 */
-	FReply& DetectDrag(const std::shared_ptr<SWidget>& DetectDragInMe, EMouseButton MouseButton)
-	{
-		this->DetectDragForWidget = DetectDragInMe;
-		this->DetectDragForMouseButton = MouseButton;
-		return *this;
-	}
+    /**
+     * 드래그 앤 드롭 이벤트에서, 이 함수는 현재 진행 중인 드래그/드롭 작업을 종료하도록 요청합니다.
+     *
+     * @return 체이닝을 위한 FReply 참조.
+     */
+    FReply& EndDragDrop()
+    {
+        this->bEndDragDrop = true;
+        return *this;
+    }
 
-	/**
-	 * An event should return FReply::Handled().BeginDragDrop( Content ) to initiate a drag and drop operation.
-	 *
-	 * @param InDragDropContent  The content that is being dragged. This could be a widget, or some arbitrary data
-	 *
-	 * @return reference back to the FReply so that this call can be chained.
-	 */
-	 //FReply& BeginDragDrop(TSharedRef<FDragDropOperation> InDragDropContent)
-	 //{
-	 //	this->DragDropContent = InDragDropContent;
-	 //	return Me();
-	 //}
+    /** 이 FReply가 이벤트 처리 결과로 마우스 캡처 해제를 요청했는지 여부를 반환합니다. */
+    bool ShouldReleaseMouse() const { return bReleaseMouseCapture; }
 
-	 /** An event should return FReply::Handled().EndDragDrop() to request that the current drag/drop operation be terminated. */
-	FReply& EndDragDrop()
-	{
-		this->bEndDragDrop = true;
-		return *this;
-	}
+    /** 이 FReply가 이벤트 처리 결과로 사용자 포커스 설정을 요청했는지 여부를 반환합니다. */
+    bool ShouldSetUserFocus() const { return bSetUserFocus; }
 
-	/** True if this reply indicated that we should release mouse capture as a result of the event being handled */
-	bool ShouldReleaseMouse() const { return bReleaseMouseCapture; }
+    /** 이 FReply가 이벤트 처리 결과로 포커스 해제를 요청했는지 여부를 반환합니다. */
+    bool ShouldReleaseUserFocus() const { return bReleaseUserFocus; }
 
-	/** true if this reply indicated that we should set focus as a result of the event being handled */
-	bool ShouldSetUserFocus() const { return bSetUserFocus; }
+    /** 이 FReply가 마우스 고정 해제를 요청했는지 여부를 반환합니다. */
+    bool ShouldReleaseMouseLock() const { return bShouldReleaseMouseLock; }
 
-	/** true if this reply indicated that we should release focus as a result of the event being handled */
-	bool ShouldReleaseUserFocus() const { return bReleaseUserFocus; }
+    /** 마우스가 고정되어야 할 위젯(있는 경우)을 반환합니다. */
+    std::shared_ptr<SWidget> GetMouseLockWidget() const { return MouseLockWidget.lock(); }
 
-	/** True if the reply indicated that we should release mouse lock */
-	bool ShouldReleaseMouseLock() const { return bShouldReleaseMouseLock; }
+    /** FocusRecipient가 nullptr가 아니라면, 해당 위젯에 사용자 포커스 설정 요청이 된 상태입니다. */
+    std::shared_ptr<SWidget> GetUserFocusRecepient() const { return FocusRecipient.lock(); }
 
-	/** Returns the widget that the mouse should be locked to (if any) */
-	std::shared_ptr<SWidget> GetMouseLockWidget() const { return MouseLockWidget.lock(); }
+    /** 이벤트 처리 결과로 마우스 캡처 요청이 있었다면, 해당 위젯을 반환합니다. (없으면 유효하지 않은 포인터 반환) */
+    std::shared_ptr<SWidget> GetMouseCaptor() const { return MouseCaptor.lock(); }
 
-	/** When not nullptr, user focus has been requested to be set on the FocusRecipient. */
-	std::shared_ptr<SWidget> GetUserFocusRecepient() const { return FocusRecipient.lock(); }
+    /** 드래그/드롭 작업을 종료하도록 요청했는지 여부를 반환합니다. */
+    bool ShouldEndDragDrop() const { return bEndDragDrop; }
 
-	/** If the event replied with a request to capture the mouse, this returns the desired mouse captor. Otherwise returns an invalid pointer. */
-	std::shared_ptr<SWidget> GetMouseCaptor() const { return MouseCaptor.lock(); }
+    /** 드래그 감지 요청이 있는 위젯을 반환합니다. (요청이 없으면 Invalid SharedPtr 반환) */
+    std::shared_ptr<SWidget> GetDetectDragRequest() const { return DetectDragForWidget.lock(); }
 
-	///** @return the Content that we should use for the Drag and Drop operation; Invalid SharedPtr if a drag and drop operation is not requested*/
-	//const std::shared_ptr<FDragDropOperation>& GetDragDropContent() const { return DragDropContent; }
-
-	/** @return true if the user has asked us to terminate the ongoing drag/drop operation */
-	bool ShouldEndDragDrop() const { return bEndDragDrop; }
-
-	/** @return a widget for which to detect a drag; Invalid SharedPtr if no drag detection requested */
-	std::shared_ptr<SWidget> GetDetectDragRequest() const { return DetectDragForWidget.lock(); }
-
-	/** @return The coordinates of the requested mouse position */
-	const FIntPoint& GetRequestedMousePos() const { return RequestedMousePos; }
-
+    /** 요청된 마우스 위치 좌표를 반환합니다. */
+    const FIntPoint& GetRequestedMousePos() const { return RequestedMousePos; }
 
 private:
-	std::weak_ptr<SWidget> EventHandler;
-	std::weak_ptr<SWidget> MouseCaptor;
-	std::weak_ptr<SWidget> FocusRecipient;
-	std::weak_ptr<SWidget> MouseLockWidget;
-	std::weak_ptr<SWidget> DetectDragForWidget;
-	EKeyCode KeyCode;
-	EMouseButton MouseButton;
-	EMouseButton DetectDragForMouseButton;
-	//FDragDropOperation??
-	FIntPoint RequestedMousePos;
-	bool bReleaseMouseCapture;
-	bool bSetUserFocus;
-	bool bReleaseUserFocus;
-	bool bShouldReleaseMouseLock;
-	bool bEndDragDrop;
+    std::weak_ptr<SWidget> EventHandler;
+    std::weak_ptr<SWidget> MouseCaptor;
+    std::weak_ptr<SWidget> FocusRecipient;
+    std::weak_ptr<SWidget> MouseLockWidget;
+    std::weak_ptr<SWidget> DetectDragForWidget;
+    EKeyCode KeyCode = EKeyCode::None;
+    EMouseButton MouseButton = EMouseButton::Max;
+    EMouseButton DetectDragForMouseButton = EMouseButton::Max;
+    FIntPoint RequestedMousePos = FIntPoint(0, 0);
+    bool bReleaseMouseCapture = false;
+    bool bSetUserFocus = false;
+    bool bReleaseUserFocus = false;
+    bool bShouldReleaseMouseLock = false;
+    bool bEndDragDrop = false;
 };
+
 
 class FCursorReply
 {

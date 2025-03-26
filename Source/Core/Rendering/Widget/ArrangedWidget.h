@@ -7,8 +7,9 @@
 class SWidget;
 
 /**
- * A pair: Widget and its Geometry. Widgets populate an list of WidgetGeometries
- * when they arrange their children. See SWidget::ArrangeChildren.
+ * 한 쌍: 위젯과 그에 해당하는 Geometry.
+ * 위젯은 자식 위젯을 배치할 때, WidgetGeometries 리스트를 채웁니다.
+ * 자세한 내용은 SWidget::ArrangeChildren을 참조하십시오.
  */
 class FArrangedWidget
 {
@@ -24,26 +25,26 @@ public:
 
 public:
 
-	/** The widget that is being arranged. */
+	/** 배치되는 위젯입니다. */
 	SWidget* GetWidgetPtr() const
 	{
 		return Widget.get();
 	}
 
 	///**
-	// * Gets the string representation of the Widget and corresponding Geometry.
+	// * 위젯과 해당 Geometry의 문자열 표현을 가져옵니다.
 	// *
-	// * @return String representation.
+	// * @return 문자열 표현.
 	// */
 	//FString ToString() const;
 
 public:
 
 	/**
-	 * Compares this widget arrangement with another for equality.
+	 * 이 위젯 배치를 다른 배치와 비교하여 동일한지 여부를 반환합니다.
 	 *
-	 * @param Other The other arrangement to compare with.
-	 * @return true if the two arrangements are equal, false otherwise.
+	 * @param Other 비교할 다른 배치.
+	 * @return 두 배치가 동일하면 true, 그렇지 않으면 false.
 	 */
 	bool operator==(const FArrangedWidget& Other) const
 	{
@@ -52,9 +53,9 @@ public:
 
 public:
 
-	/** The widget's geometry. */
+	/** 위젯의 Geometry입니다. */
 	FGeometry Geometry;
 
-	/** The widget that is being arranged. */
+	/** 배치되는 위젯입니다. */
 	std::shared_ptr<SWidget> Widget;
 };

@@ -22,6 +22,11 @@ FGeometry& FGeometry::operator=(const FGeometry& Other)
 	return *this;
 }
 
+FGeometry FGeometry::MakeRoot(const FVector2D& InLocalSize, const FSlateLayoutTransform& InLayoutTransform)
+{
+	return FGeometry(InLocalSize, InLayoutTransform, FSlateLayoutTransform(), FSlateRenderTransform(), false);
+}
+
 FArrangedWidget FGeometry::MakeChild(const std::shared_ptr<SWidget>& ChildWidget, const FLayoutGeometry& LayoutGeometry) const
 {
 	return MakeChild(ChildWidget, LayoutGeometry.GetSizeInLocalSpace(), LayoutGeometry.GetLocalToParentTransform());

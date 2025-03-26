@@ -112,7 +112,7 @@ FIntRect FViewport::CalculateViewExtents(float AspectRatio, float DesiredAspectR
 	const float CurrentSizeY = ViewRect.Height();
 
 	// the viewport's SizeX/SizeY may not always match the DesiredAspectRatio, so adjust the requested AspectRatio to compensate
-	const float AdjustedAspectRatio = AspectRatio / (DesiredAspectRatio / ((float)DestSize.X / (float)DestSize.Y));
+	const float AdjustedAspectRatio = AspectRatio / (DesiredAspectRatio / (static_cast<float>(DestSize.X) / static_cast<float>(DestSize.Y)));
 
 	// If desired, enforce a particular aspect ratio for the render of the scene. 
 	// Results in black bars at top/bottom etc.
@@ -175,22 +175,6 @@ void FViewport::InitRHI()
 	//	// Initialize the hit proxy map.
 	//	HitProxyMap.Init(SizeX, SizeY);
 	//}
-}
-
-void FViewportClient::RedrawRequested(FViewport* Viewport)
-{
-	Viewport->Draw();
-}
-
-void FViewportClient::RequestInvalidateHitProxy(FViewport* Viewport)
-{
-	//Viewport->InvalidateHitProxy();
-}
-
-bool FViewportClient::InputKey()
-{
-	return true;
-	//return InputKey(EventArgs.Viewport, EventArgs.ControllerId, EventArgs.Key, EventArgs.Event, EventArgs.AmountDepressed, EventArgs.Key.IsGamepadKey());
 }
 
 FViewport::FViewport(FViewportClient* InViewportClient) :
@@ -266,8 +250,7 @@ bool FSceneViewport::HasMouseCapture() const
 
 bool FSceneViewport::HasFocus() const
 {
-	return true;
-	//return FSlateApplication::Get().GetUserFocusedWidget(0) == ViewportWidget.Pin();
+	return ViewportWidget.lock()->IsMouseCaptured();
 }
 
 bool FSceneViewport::IsForegroundWindow() const
@@ -305,8 +288,10 @@ void FSceneViewport::ShowCursor(bool bVisible)
 	{
 		if (bIsSoftwareCursorVisible)
 		{
-			const int32 ClampedMouseX = FMath::Clamp<int32>(SoftwareCursorPosition.X / CachedGeometry.GetAbsoluteScale(), 0, SizeX);
-			const int32 ClampedMouseY = FMath::Clamp<int32>(SoftwareCursorPosition.Y / CachedGeometry.GetAbsoluteScale(), 0, SizeY);
+			const int32 ClampedMouseX = FMath::Clamp<int32>(
+				SoftwareCursorPosition.X / CachedGeometry.GetAbsoluteScale(), 0, SizeX);
+			const int32 ClampedMouseY = FMath::Clamp<int32>(
+				SoftwareCursorPosition.Y / CachedGeometry.GetAbsoluteScale(), 0, SizeY);
 			
 			const FVector2D localToAbsolute = CachedGeometry.LocalToAbsolute(FVector2D(ClampedMouseX, ClampedMouseY));
 			FIntPoint mousePos = FIntPoint(localToAbsolute.X, localToAbsolute.Y);
@@ -329,12 +314,6 @@ void FSceneViewport::ShowCursor(bool bVisible)
 	}
 }
 
-void FSceneViewport::SetPreCaptureMousePosFromSlateCursor()
-{
-	// TODO : 마우스 위치 읽어오기
-	//PreCaptureCursorPos = FSlateApplication::Get().GetCursorPos().IntPoint();
-}
-
 void FSceneViewport::EnqueueEndRenderFrame(const bool bLockToVsync, const bool bShouldPresent)
 {
 	FViewport::EnqueueEndRenderFrame(bLockToVsync, bShouldPresent);
@@ -344,11 +323,6 @@ void FSceneViewport::EnqueueEndRenderFrame(const bool bLockToVsync, const bool b
 	//	DebugCanvas.Pin()->Invalidate(EInvalidateWidget::Paint);
 	//}
 }
-
-//bool FSceneViewport::KeyState(FKey Key) const
-//{
-//	//return KeyStateMap.FindRef(Key);
-//}
 
 int32 FSceneViewport::GetMouseX() const
 {
@@ -368,7 +342,9 @@ void FSceneViewport::GetMousePos(FIntPoint& MousePosition, const bool bLocalPosi
 	}
 	else
 	{
-		const FVector2D AbsoluteMousePos = CachedGeometry.LocalToAbsolute(FVector2D(CachedCursorPos.X / CachedGeometry.GetAbsoluteScale(), CachedCursorPos.Y / CachedGeometry.GetAbsoluteScale()));
+		const FVector2D AbsoluteMousePos = CachedGeometry.LocalToAbsolute(FVector2D(
+			CachedCursorPos.X / CachedGeometry.GetAbsoluteScale(),
+			CachedCursorPos.Y / CachedGeometry.GetAbsoluteScale()));
 		MousePosition.X = AbsoluteMousePos.X;
 		MousePosition.Y = AbsoluteMousePos.Y;
 	}
@@ -377,8 +353,9 @@ void FSceneViewport::GetMousePos(FIntPoint& MousePosition, const bool bLocalPosi
 void FSceneViewport::SetMouse(int32 X, int32 Y)
 {
 	const FVector2D NormalizedLocalMousePosition = FVector2D(X / GetSizeXY().X, Y / GetSizeXY().Y) ;
-	FVector2D AbsolutePos = CachedGeometry.LocalToAbsolute(FVector2D(NormalizedLocalMousePosition.X * CachedGeometry.GetLocalSize().X, NormalizedLocalMousePosition.Y * CachedGeometry.GetLocalSize().Y));
-	//FSlateApplication::Get().SetCursorPos(AbsolutePos.RoundToVector());
+	FVector2D AbsolutePos = CachedGeometry.LocalToAbsolute(FVector2D(
+		NormalizedLocalMousePosition.X * CachedGeometry.GetLocalSize().X,
+		NormalizedLocalMousePosition.Y * CachedGeometry.GetLocalSize().Y));
 	CachedCursorPos = FIntPoint(X, Y);
 }
 
@@ -424,7 +401,7 @@ void FSceneViewport::EnqueueBeginRenderFrame(const bool bShouldPresent)
 	//FViewport::EnqueueBeginRenderFrame(bShouldPresent);
 }
 
-void FSceneViewport::Tick(const FGeometry& AllottedGeometry, double InCurrentTime, float InDeltaTime)
+void FSceneViewport::Tick(const FGeometry& AllottedGeometry, float InDeltaTime)
 {
 	UpdateCachedGeometry(AllottedGeometry);
 	ProcessInput(InDeltaTime);
@@ -582,7 +559,7 @@ void FSceneViewport::OnDrawViewport(const FGeometry& AllottedGeometry, const FSl
 	}
 }
 
-FCursorReply FSceneViewport::OnCursorQuery(const FGeometry& MyGeometry/*, const FPointerEvent& CursorEvent*/)
+FCursorReply FSceneViewport::OnCursorQuery(const FPointer& InPointer)
 {
 	EMouseCursor MouseCursorToUse = EMouseCursor::Default;
 	if (ViewportClient && GetSizeXY() != FIntPoint::ZeroValue)
@@ -604,48 +581,41 @@ std::optional<std::shared_ptr<SWidget>> FSceneViewport::OnMapCursor(const FCurso
 	return ISlateViewport::OnMapCursor(CursorReply);
 }
 
-FReply FSceneViewport::OnMouseButtonDown(const FGeometry& InGeometry/*, const FPointerEvent& MouseEvent*/)
+FReply FSceneViewport::OnMouseButtonDown(EMouseButton InMouseButton, const FPointer& InPointer)
 {
-	UpdateCachedGeometry(InGeometry);
-	UpdateCachedCursorPos(InGeometry);
+	UpdateCachedGeometry(CachedGeometry);
+	UpdateCachedCursorPos(CachedGeometry, FIntPoint(InPointer.ScreenSpacePosition.X, InPointer.ScreenSpacePosition.Y));
 
 	if (ViewportClient && GetSizeXY() != FIntPoint::ZeroValue)
 	{
-		if (!HasFocus())
+		if (HasFocus())
 		{
-			// TODO : 
-			/*FModifierKeysState KeysState = FSlateApplication::Get().GetModifierKeys();
-			ApplyModifierKeys(KeysState);*/
 		}
-
+		
 		
 	}
 
 	return FReply();
 }
 
-FReply FSceneViewport::OnMouseButtonUp(const FGeometry& InGeometry/*, const FPointerEvent& MouseEvent*/)
+FReply FSceneViewport::OnMouseButtonUp(EMouseButton InMouseButton, const FPointer& InPointer)
 {
-	UpdateCachedGeometry(InGeometry);
-	UpdateCachedCursorPos(InGeometry);
+	UpdateCachedGeometry(CachedGeometry);
+	UpdateCachedCursorPos(CachedGeometry, FIntPoint(InPointer.ScreenSpacePosition.X, InPointer.ScreenSpacePosition.Y));
 
 	if (ViewportClient && GetSizeXY() != FIntPoint::ZeroValue)
 	{
-		// TODO : 
-		//bCursorVisible = ViewportClient->GetCursor(this, GetMouseX(), GetMouseY()) != EMouseCursor::None;
-		
-	
 	}
 	return FReply();
 }
 
-void FSceneViewport::OnMouseEnter(const FGeometry& MyGeometry/*, const FPointerEvent& MouseEvent*/)
+void FSceneViewport::OnMouseEnter(const FPointer& InPointer)
 {
-	UpdateCachedCursorPos(MyGeometry);
+	UpdateCachedCursorPos(CachedGeometry, FIntPoint(InPointer.ScreenSpacePosition.X, InPointer.ScreenSpacePosition.Y));
 	ViewportClient->MouseEnter(this, GetMouseX(), GetMouseY());
 }
 
-void FSceneViewport::OnMouseLeave(/*const FPointerEvent& MouseEvent*/)
+void FSceneViewport::OnMouseLeave(const FPointer& InPointer)
 {
 	if (ViewportClient)
 	{
@@ -658,10 +628,10 @@ void FSceneViewport::OnMouseLeave(/*const FPointerEvent& MouseEvent*/)
 	}
 }
 
-FReply FSceneViewport::OnMouseMove(const FGeometry& InGeometry/*, const FPointerEvent& MouseEvent*/)
+FReply FSceneViewport::OnMouseMove(const FPointer& InPointer)
 {
-	UpdateCachedGeometry(InGeometry);
-	UpdateCachedCursorPos(InGeometry);
+	UpdateCachedGeometry(CachedGeometry);
+	UpdateCachedCursorPos(CachedGeometry, FIntPoint(InPointer.ScreenSpacePosition.X, InPointer.ScreenSpacePosition.Y));
 
 	const bool bViewportHasCapture = ViewportWidget.lock() != nullptr && ViewportWidget.lock()->HasMouseCapture();
 	if (ViewportClient && GetSizeXY() != FIntPoint::ZeroValue)
@@ -692,10 +662,10 @@ FReply FSceneViewport::OnMouseMove(const FGeometry& InGeometry/*, const FPointer
 	return FReply();
 }
 
-FReply FSceneViewport::OnMouseWheel(const FGeometry& InGeometry/*, const FPointerEvent& MouseEvent*/)
+FReply FSceneViewport::OnMouseWheel(const FPointer& InPointer)
 {
-	UpdateCachedGeometry(InGeometry);
-	UpdateCachedCursorPos(InGeometry);
+	UpdateCachedGeometry(CachedGeometry);
+	UpdateCachedCursorPos(CachedGeometry, FIntPoint(InPointer.ScreenSpacePosition.X, InPointer.ScreenSpacePosition.Y));
 
 	if (ViewportClient && GetSizeXY() != FIntPoint::ZeroValue)
 	{
@@ -714,7 +684,7 @@ FReply FSceneViewport::OnMouseWheel(const FGeometry& InGeometry/*, const FPointe
 	return CurrentReplyState;
 }
 
-FReply FSceneViewport::OnMouseButtonDoubleClick(const FGeometry& InGeometry/*, const FPointerEvent& InMouseEvent*/)
+FReply FSceneViewport::OnMouseButtonDoubleClick(const FPointer& InPointer)
 {
 	// TODO : 
 	// Start a new reply state
@@ -727,8 +697,8 @@ FReply FSceneViewport::OnMouseButtonDoubleClick(const FGeometry& InGeometry/*, c
 	//	WM_*BUTTONUP
 	//KeyStateMap.Add(InMouseEvent.GetEffectingButton(), true);
 
-	UpdateCachedGeometry(InGeometry);
-	UpdateCachedCursorPos(InGeometry);
+	UpdateCachedGeometry(CachedGeometry);
+	UpdateCachedCursorPos(CachedGeometry, FIntPoint(InPointer.ScreenSpacePosition.X, InPointer.ScreenSpacePosition.Y));
 
 	if (ViewportClient && GetSizeXY() != FIntPoint::ZeroValue)
 	{
@@ -744,7 +714,7 @@ FReply FSceneViewport::OnMouseButtonDoubleClick(const FGeometry& InGeometry/*, c
 	return CurrentReplyState;
 }
 
-FReply FSceneViewport::OnKeyDown(const FGeometry& InGeometry/*, const FKeyEvent& InKeyEvent*/)
+FReply FSceneViewport::OnKeyDown(const EKeyCode& InKeyCode)
 {
 	// TODO : 
 	//// Start a new reply state
@@ -775,7 +745,7 @@ FReply FSceneViewport::OnKeyDown(const FGeometry& InGeometry/*, const FKeyEvent&
 	return FReply();
 }
 
-FReply FSceneViewport::OnKeyUp(const FGeometry& InGeometry/*, const FKeyEvent& InKeyEvent*/)
+FReply FSceneViewport::OnKeyUp(const EKeyCode& InKeyCode)
 {
 	// TODO : 
 	//// Start a new reply state
@@ -807,7 +777,7 @@ FReply FSceneViewport::OnKeyUp(const FGeometry& InGeometry/*, const FKeyEvent& I
 	return FReply();
 }
 
-FReply FSceneViewport::OnKeyChar(const FGeometry& InGeometry/*, const FCharacterEvent& InCharacterEvent*/)
+FReply FSceneViewport::OnKeyChar(const EKeyCode& InKeyCode)
 {
 	// TODO : 
 	//// Start a new reply state
@@ -1027,14 +997,14 @@ void FSceneViewport::ResizeViewport(uint32 NewSizeX, uint32 NewSizeY)
 	// TODO : ResizeVeiwport
 }
 
-void FSceneViewport::UpdateCachedCursorPos(const FGeometry& InGeometry)
+void FSceneViewport::UpdateCachedCursorPos(const FGeometry& InGeometry, const FIntPoint& InPosition)
 {
 	// TODO : UpdateCursorPos
-	//FVector2D LocalPixelMousePos = InGeometry.AbsoluteToLocal(GetScreenSpacePosition());
-	//LocalPixelMousePos.X = FMath::Clamp(LocalPixelMousePos.X * CachedGeometry.Scale, (double)TNumericLimits<int32>::Min(), (double)TNumericLimits<int32>::Max());
-	//LocalPixelMousePos.Y = FMath::Clamp(LocalPixelMousePos.Y * CachedGeometry.Scale, (double)TNumericLimits<int32>::Min(), (double)TNumericLimits<int32>::Max());
+	FVector2D LocalPixelMousePos = InGeometry.AbsoluteToLocal(FVector2D(InPosition.X, InPosition.Y));
+	LocalPixelMousePos.X = LocalPixelMousePos.X * CachedGeometry.AbsoluteScale;
+	LocalPixelMousePos.Y = LocalPixelMousePos.Y * CachedGeometry.AbsoluteScale;
 
-	//CachedCursorPos = LocalPixelMousePos.IntPoint();
+	CachedCursorPos = FIntPoint(LocalPixelMousePos.X, LocalPixelMousePos.Y);
 }
 
 void FSceneViewport::UpdateCachedGeometry(const FGeometry& InGeometry)
@@ -1062,8 +1032,10 @@ void FSceneViewport::OnPostResizeWindowBackbuffer(void* Backbuffer)
 	// TODO : Get ViewportResource
 }
 
-FEditorViewportClient::FEditorViewportClient(const std::weak_ptr<SEditorViewport>& InEditorViewportWidget)
+FEditorViewportClient::FEditorViewportClient(const std::weak_ptr<SEditorViewport>& InEditorViewportWidget,
+	bool bInCameraPerspective)
 	: bAllowCinematicControl(false)
+	, bCameraPerspective(true)
 	, CameraSpeedSetting(4)
 	, CameraSpeedScalar(1.0f)
 	, Viewport(nullptr)
@@ -1093,7 +1065,7 @@ FEditorViewportClient::FEditorViewportClient(const std::weak_ptr<SEditorViewport
 
 void FEditorViewportClient::SetCameraSetup(const FVector& LocationForOrbiting, const FQuat& InOrbitRotation, const FVector& InOrbitZoom, const FVector& InOrbitLookAt, const FVector& InViewLocation, const FQuat& InViewRotation)
 {
-	if (bUsingOrbitCamera = false)
+	if (bUsingOrbitCamera == false)
 	{
 		SetViewRotation(InOrbitRotation);
 		SetViewLocation(InViewLocation + InOrbitZoom);
@@ -1134,7 +1106,7 @@ void FEditorViewportClient::SetShowCollision()
 {
 }
 
-bool FEditorViewportClient::InputAxis(FViewport* Viewport, float Delta, float DeltaTime, int32 NumSamples, bool bGamepad)
+bool FEditorViewportClient::InputAxis(FViewport* Viewport, const EKeyCode& InKeyCode, float Delta, float DeltaTime, int32 NumSamples = 1, bool bGamepad = false)
 {
 	//IPlatformInputDeviceMapper::Get().RemapControllerIdToPlatformUserAndDevice(ControllerId, UserId, DeviceID);
 
@@ -1153,6 +1125,7 @@ void FEditorViewportClient::MouseEnter(FViewport* Viewport, int32 x, int32 y)
 
 void FEditorViewportClient::MouseMove(FViewport* Viewport, int32 x, int32 y)
 {
+	Viewport->SetMouse(x, y);
 	CurrentMousePos = FIntPoint(x, y);
 	CachedLastMouseX = x;
 	CachedLastMouseY = y;
@@ -1160,6 +1133,7 @@ void FEditorViewportClient::MouseMove(FViewport* Viewport, int32 x, int32 y)
 
 void FEditorViewportClient::MouseLeave(FViewport* Viewport)
 {
+	Viewport->SetMouse(-1, -1);
 	CurrentMousePos = FIntPoint(-1, -1);
 }
 
@@ -1185,10 +1159,10 @@ bool FEditorViewportClient::IsOrtho() const
 
 void FEditorViewportClient::LostFocus(FViewport* Viewport)
 {
-	//StopTracking();
+
 }
 
-bool FEditorViewportClient::Internal_InputKey()
+bool FEditorViewportClient::Internal_InputKey(const EKeyCode& InKeyCode)
 {
 	if (bDisableInput)
 	{
@@ -1200,7 +1174,7 @@ bool FEditorViewportClient::Internal_InputKey()
 	return true;
 }
 
-bool FEditorViewportClient::Internal_InputAxis(FViewport* Viewport, float Delta, float DeltaTime, int32 NumSamples, bool bGamepad)
+bool FEditorViewportClient::Internal_InputAxis(FViewport* Viewport, const EKeyCode& InKeyCode, float Delta, float DeltaTime, int32 NumSamples, bool bGamepad)
 {
 	if (bDisableInput)
 	{
@@ -1275,23 +1249,10 @@ UWorld* FEditorViewportClient::GetWorld() const
 	}
 	return OutWorldPtr;
 }
-//
-//bool FEditorViewportClient::IsVisible() const
-//{
-//	bool bIsVisible = false;
-//
-//	//if (VisibilityDelegate.IsBound())
-//	//{
-//	//	// Call the visibility delegate to see if our parent viewport and layout configuration says we arevisible
-//	//	bIsVisible = VisibilityDelegate.Execute();
-//	//}
-//	bIsVisible = true;
-//	return bIsVisible;
-//}
 
 bool FEditorViewportClient::IsPerspective() const
 {
-	//TODO : Perspective
+	if (bCameraPerspective) return true;
 	return false;
 }
 

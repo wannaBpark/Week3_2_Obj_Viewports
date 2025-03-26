@@ -1,22 +1,22 @@
 #include "SWidget.h"
 #include "ArrangedWidget.h"
+#include "Margin.h"
 #include "Core/Rendering/Widget/Reply.h"
 
 SWidget::SWidget()
-	: bCanSupportFocus(true)
+	: LocalSize(100.0f, 100.0f)
+	, LocalPosition(0.0f, 0.0f)
+	, LayoutTransform(1.0f, LocalPosition)
+	, bCanSupportFocus(true)
 	, bCanHaveChildren(true)
-	, bNeedsPrepass(true)
-	, bHasRegisteredSlateAttribute(false)
-	, bEnabledAttributesUpdate(true)
 	, bIsHoveredAttributeSet(false)
 	, bDesiredSizeSet(false)
 	, bCanChildrenBeAccessible(true)
 	// Note we are defaulting to tick for backwards compatibility
 	, VisibilityAttribute(EVisibility::Visible)
 	, HoveredAttribute(false)
-	, DesiredSize(FVector2D(0.0f, 0.0f))
-	, RenderTransformPivotAttribute(FVector2D::ZeroVector)
-	, RenderTransformAttribute()
+	,bCanTick(true)
+	,EnabledAttribute(true)
 {
 }
 
@@ -26,55 +26,11 @@ SWidget::~SWidget()
 
 int32 SWidget::Paint(const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, int32 LayerId, bool bParentEnabled)
 {
-	SWidget* MutableThis = const_cast<SWidget*>(this);
-
-	FGeometry DesktopSpaceGeometry = AllottedGeometry;
-	DesktopSpaceGeometry.AppendTransform(FSlateLayoutTransform(/*WindowOffset*/));
-	
-	/*MutableThis->Tick();*/
-
-	PersistentState.LayerId = LayerId;
-	PersistentState.bParentEnabled = bParentEnabled;
-	PersistentState.bDeferredPainting = true;
-	PersistentState.AllottedGeometry = AllottedGeometry;
-	PersistentState.DesktopGeometry = DesktopSpaceGeometry;
-	PersistentState.CullingBounds = MyCullingRect;
-	
-	// TODO : 자신 그리고
-
-	// TODO : 자식들 그림
-	for (std::shared_ptr<SWidget> Child : MutableThis->GetChildren())
-	{
-		if (Child->GetVisibility() == EVisibility::Visible)
-		{
-			Child->Paint(Child->GetCachedGeometry(), MyCullingRect, LayerId, bParentEnabled);
-			const bool bIsChildDeferredPaint = Child->GetPersistentState().bDeferredPainting;
-			if(!bIsChildDeferredPaint && Child->GetVisibility() == EVisibility::Visible)
-			{
-				// 일단 신경 안써도 될 듯
-				//if (NewLayerId < Child->GetPersistentState().OutgoingLayerId)
-				//{
-				//	ensureAlwaysMsgf(false, TEXT("The widget '%s' Outgoing Layer Id is bigger than its parent."), *FReflectionMetaData::GetWidgetPath(DebugChild.Get()));
-				//	CVarSlateEnsureOutgoingLayerId->Set(false, CVarSlateEnsureOutgoingLayerId->GetFlags());
-				//}
-			}
-		}
-	}
-
-	// TODO : 위젯 그리는 거 끝났을 때, Delegate 호출
-
-	if (bCanSupportFocus && SupportsKeyboardFocus())
-	{
-		// bool bShowUserFocus = FSlateApplicationBase::Get().ShowUserFocus(SharedThis(this));
-		// Focus 됬을 때, 하이라이트(?)
-	}
-
-	return int32();
 }
 
-FReply SWidget::OnKeyDown(const FGeometry& MyGeometry, const EKeyCode& InKeyCode)
+FReply SWidget::OnKeyDown(const EKeyCode& InKeyCode)
 {
-	if (bCanSupportFocus && SupportsKeyboardFocus())
+	if (bCanSupportFocus)
 	{
 		//TODO : 입력처리
 		//EUINavigation Direction = FSlateApplicationBase::Get().GetNavigationDirectionFromKey(InKeyEvent);
@@ -88,61 +44,93 @@ FReply SWidget::OnKeyDown(const FGeometry& MyGeometry, const EKeyCode& InKeyCode
 	return FReply();
 }
 
-FReply SWidget::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointer&InPointer)
+FReply SWidget::OnMouseButtonDown(EMouseButton InMouseButton, const FPointer& InPointer)
 {
-	// TODO : 마우스 버튼 눌렀을 때 처리
-	//if (TSharedPtr<FSlateMouseEventsMetaData> Data = GetMetaData<FSlateMouseEventsMetaData>())
-	//{
-	//	if (Data->MouseButtonDownHandle.IsBound())
-	//	{
-	//		return Data->MouseButtonDownHandle.Execute(MyGeometry, MouseEvent);
-	//	}
-	//}
-	return FReply();
+	FReply result = FReply();
+	// 만약 이미 마우스 캡처 상태라면 추가 처리는 하지 않습니다.
+	if (bIsMouseCaptured)
+	{
+		return result;
+	}
+	
+	FVector2D localPos = MyGeometry.AbsoluteToLocal(InPointer.ScreenSpacePosition);
+
+	if (localPos.X >= 0 && localPos.X <= LocalSize.X &&
+		localPos.Y >= 0 && localPos.Y <= LocalSize.Y)
+	{
+		std::cout << "SWidget::OnMouseButtonDown - Button: " 
+				  << static_cast<int>(InMouseButton) << ", Local MousePos: (" 
+				  << localPos.X << ", " << localPos.Y << ")\n";
+		
+		result.CaptureMouse(shared_from_this()).SetUserFocus(shared_from_this());
+		bIsMouseCaptured = true;
+		APlayerInput::Get().SetMouseCaptor(result.GetMouseCaptor());
+	}
+	return result;
 }
 
-FReply SWidget::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointer& InPointer)
+FReply SWidget::OnMouseButtonUp(EMouseButton InMouseButton, const FPointer& InPointer)
 {
-	// TODO : 마우스 버튼 뗐을 때 처리
-	//if (TSharedPtr<FSlateMouseEventsMetaData> Data = GetMetaData<FSlateMouseEventsMetaData>())
-	//{
-	//	if (Data->MouseButtonUpHandle.IsBound())
-	//	{
-	//		return Data->MouseButtonUpHandle.Execute(MyGeometry, MouseEvent);
-	//	}
-	//}
-	return FReply();
+	FReply result = FReply();
+	// 만약 이미 마우스 캡처 상태라면 추가 처리는 하지 않습니다.
+	if (bIsMouseCaptured)
+	{
+		return result;
+	}
+
+	const FVector2D localPos = MyGeometry.AbsoluteToLocal(InPointer.ScreenSpacePosition);
+
+	if (localPos.X >= 0 && localPos.X <= LocalSize.X &&
+		localPos.Y >= 0 && localPos.Y <= LocalSize.Y)
+	{
+		std::cout << "SWidget::OnMouseButtonUp - Button: " 
+				  << static_cast<int>(InMouseButton) << ", Local MousePos: (" 
+				  << localPos.X << ", " << localPos.Y << ")\n";
+		result.ReleaseMouseCapture();
+		bIsMouseCaptured = true;
+		APlayerInput::Get().ClearMouseCaptor();
+	}
+	return result;
 }
 
-FReply SWidget::OnMouseMove(const FGeometry& MyGeometry, const FPointer& InPointer)
+FReply SWidget::OnMouseMove(const FPointer& InPointer)
 {
-	// TODO : 마우스 움직였을 때 처리
-	//if (TSharedPtr<FSlateMouseEventsMetaData> Data = GetMetaData<FSlateMouseEventsMetaData>())
-	//{
-	//	if (Data->MouseMoveHandle.IsBound())
-	//	{
-	//		return Data->MouseMoveHandle.Execute(MyGeometry, MouseEvent);
-	//	}
-	//}
-	return FReply();
+	FReply result = FReply();
+	// 만약 마우스 캡처 상태라면 (즉, 이 위젯이 캡처를 가지고 있다면) 드래그 등 캡처 관련 처리를 수행합니다.
+	if (bIsMouseCaptured)
+	{
+		FVector2D localPos = MyGeometry.AbsoluteToLocal(InPointer.ScreenSpacePosition);
+		// 캡처 상태에서는 추가 드래그 로직 등을 수행할 수 있습니다.
+		return result;
+	}
+	else
+	{
+		// 캡처되지 않은 상태에서는 이전 프레임의 위치와 현재 위치를 비교하여
+		// 위젯 내부로 처음 진입(OnMouseEnter)하거나 벗어날 때(OnMouseLeave)를 감지합니다.
+		const bool bWasInside = IsInsideWidget(InPointer.LastScreenSpacePosition, MyGeometry);
+		const bool bIsInside  = IsInsideWidget(InPointer.ScreenSpacePosition, MyGeometry);
+
+		if (!bWasInside && bIsInside)
+		{
+			// 이전에는 영역 밖이었으나, 현재 영역 내부로 진입한 경우
+			OnMouseEnter(InPointer);
+		}
+		else if (bWasInside && !bIsInside)
+		{
+			// 이전에는 영역 내부였으나, 현재 영역 밖으로 벗어난 경우
+			OnMouseLeave(InPointer);
+		}
+		return result;
+	}
 }
 
-void SWidget::OnMouseEnter(const FGeometry& MyGeometry, const FPointer& InPointer)
+void SWidget::OnMouseEnter(const FPointer& InPointer)
 {
 	if (!bIsHoveredAttributeSet)
 	{
 		HoveredAttribute = true;
+		SetHover(true);
 	}
-
-	// TODO : 마우스가 위젯에 들어왔을 때 처리
-	//if (TSharedPtr<FSlateMouseEventsMetaData> Data = GetMetaData<FSlateMouseEventsMetaData>())
-	//{
-	//	if (Data->MouseEnterHandler.IsBound())
-	//	{
-	//		// A valid handler is assigned; let it handle the event.
-	//		Data->MouseEnterHandler.Execute(MyGeometry, MouseEvent);
-	//	}
-	//}
 }
 
 void SWidget::OnMouseLeave(const FPointer& InPointer)
@@ -150,19 +138,11 @@ void SWidget::OnMouseLeave(const FPointer& InPointer)
 	if (bIsHoveredAttributeSet)
 	{
 		HoveredAttribute = false;
+		SetHover(false);
 	}
-	// TODO : 마우스가 위젯에서 나갔을 때 처리
-	//if (TSharedPtr<FSlateMouseEventsMetaData> Data = GetMetaData<FSlateMouseEventsMetaData>())
-	//{
-	//	if (Data->MouseLeaveHandler.IsBound())
-	//	{
-	//		// A valid handler is assigned; let it handle the event.
-	//		Data->MouseLeaveHandler.Execute(MyGeometry, MouseEvent);
-	//	}
-	//}
 }
 
-FCursorReply SWidget::OnCursorQuery(const FGeometry& MyGeometry, const FPointer& InPointer) const
+FCursorReply SWidget::OnCursorQuery(const FPointer& InPointer) const
 {
 	// TODO : 커서 쿼리 처리
 	//TOptional<EMouseCursor::Type> TheCursor = GetCursor();
@@ -172,7 +152,7 @@ FCursorReply SWidget::OnCursorQuery(const FGeometry& MyGeometry, const FPointer&
 	return FCursorReply::Cursor(EMouseCursor::Default);
 }
 
-FReply SWidget::OnMouseButtonDoubleClick(const FGeometry& MyGeometry, const FPointer& InPointer)
+FReply SWidget::OnMouseButtonDoubleClick(const FPointer& InPointer)
 {
 	// TODO : 마우스 더블클릭 처리
 	//if (TSharedPtr<FSlateMouseEventsMetaData> Data = GetMetaData<FSlateMouseEventsMetaData>())
@@ -185,39 +165,37 @@ FReply SWidget::OnMouseButtonDoubleClick(const FGeometry& MyGeometry, const FPoi
 	return FReply();
 }
 
-void SWidget::Invalidate(EInvalidateWidgetReason InvalidateReason)
+void SWidget::Tick(const FGeometry& InParentGeometry, float DeltaTime)
 {
-	// TODO : 위젯을 무효화 처리
-	//if (InvalidateReason == EInvalidateWidgetReason::None)
-	//{
-	//	return;
-	//}
-	//if (InvalidateReason & EInvalidateWidgetReason::Paint)
-	//{
-	//	// TODO : Paint 무효화 처리
-	//}
-	//if (InvalidateReason & EInvalidateWidgetReason::ChildOrder)
-	//{
-	//	// TODO : ChildOrder 무효화 처리
-	//}
+	// 1. 자신의 LayoutTransform을 로컬 위치(LocalPosition)를 바탕으로 갱신합니다.
+	LayoutTransform = FSlateLayoutTransform(1.0f, LocalPosition);
+
+	// 2. 부모 Geometry(InParentGeometry)를 사용해 자신(현재 위젯)의 Geometry를 계산합니다.
+	//    MakeChild를 사용하더라도, 이 호출 결과는 "현재 위젯(자신)"의 Geometry를 의미합니다.
+	FGeometry NewMyGeometry = InParentGeometry.MakeChild(LocalSize, LayoutTransform, FSlateRenderTransform(), FVector2D(0.5f, 0.5f));
+    
+	// 3. 계산된 자신의 Geometry를 저장합니다.
+	MyGeometry = NewMyGeometry;
+    
+	// 4. 자신의 Geometry(MyGeometry)를 부모 Geometry로 하여 자식 위젯들의 Tick을 호출합니다.
+	for(auto& Child : Children)
+	{
+		Child->Tick(MyGeometry, DeltaTime);
+	}
 }
 
-FVector2D SWidget::GetDesiredSize() const
+void SWidget::SetLocalPosition(const FVector2D& NewPosition)
 {
-	return bDesiredSizeSet ? DesiredSize : FVector2D(0.0f, 0.0f);
+	LocalPosition = NewPosition;
+	LayoutTransform = FSlateLayoutTransform(1.0f, LocalPosition);
 }
 
-void SWidget::AssignParentWidget(std::shared_ptr<SWidget> InParent)
+void SWidget::AssignParentWidget(const std::shared_ptr<SWidget>& InParent)
 {
 	if (InParent)
 	{
 		ParentWidgetPtr = InParent;
-	}
-
-	// TODO : 부모 위젯이 바뀌었을 때 처리
-	if (InParent)
-	{
-		InParent->Invalidate(EInvalidateWidgetReason::ChildOrder);
+		InParent->AddChild(shared_from_this());
 	}
 }
 
@@ -226,56 +204,62 @@ float SWidget::GetRelativeLayoutScale(const int32 ChildIndex, float LayoutScaleM
 	return 1.0f;
 }
 
-void SWidget::ArrangeChildren(const FGeometry& AllottedGeometry, TArray<FArrangedWidget>& ArrangedChildren, bool bUpdateAttributes) const
+void SWidget::ArrangeChildren(const FGeometry& AllottedGeometry, TArray<FArrangedWidget>& ArrangedChildren) const
 {
-	if (bUpdateAttributes)
-	{
-		// TODO : 어트리뷰트 업데이트
-		//FSlateAttributeMetaData::UpdateChildrenOnlyVisibilityAttributes(const_cast<SWidget&>(*this), FSlateAttributeMetaData::EInvalidationPermission::DelayInvalidation, false);
-	}
-
 	OnArrangeChildren(AllottedGeometry, ArrangedChildren);
 }
 
-bool SWidget::SupportsKeyboardFocus() const
+void SWidget::ArrangeSingleChild(const FGeometry& AllottedGeometry, TArray<FArrangedWidget>& ArrangedChildren, std::shared_ptr<SWidget> InChild,
+	const FVector2D& ContentScale)
 {
-	return false;
+	const FMargin SlotPadding = FMargin(5.f);
+	
+	// 할당된 전체 영역에서 패딩을 제외한 영역 크기를 계산하고, ContentScale을 적용합니다.
+	const FVector2D AllottedSize = AllottedGeometry.GetLocalSize();
+	const FVector2D AdjustedSize = FVector2D(
+		(AllottedSize.X - SlotPadding.Left - SlotPadding.Right) * ContentScale.X,
+		(AllottedSize.Y - SlotPadding.Top - SlotPadding.Bottom) * ContentScale.Y
+	);
+    
+	// 자식 위젯의 오프셋은 패딩의 왼쪽, 위쪽 값으로 설정합니다.
+	const FVector2D Offset = FVector2D(SlotPadding.Left, SlotPadding.Top);
+    
+	// 부모의 누적 Geometry와 로컬 변환(오프셋)을 결합하여 자식의 Geometry를 생성합니다.
+	FGeometry ChildGeometry = AllottedGeometry.MakeChild(AdjustedSize, FSlateLayoutTransform(Offset));
+    
+	// 계산된 Geometry와 가시성을 사용하여 ArrangedChildren 배열에 이 위젯을 추가합니다.
+	ArrangedChildren.Add({InChild, ChildGeometry});
 }
 
-bool SWidget::HasKeyboardFocus() const
+bool SWidget::IsChildActive(const std::shared_ptr<SWidget>& Child, const FPointer& InPointer,
+                            const FGeometry& ChildGeometry)
 {
-	return false;
+	// 1. 포인터의 스크린 좌표를 Child의 로컬 좌표로 변환합니다.
+	const FVector2D LocalPos = ChildGeometry.AbsoluteToLocal(InPointer.ScreenSpacePosition);
+	const FVector2D WidgetSize = ChildGeometry.GetLocalSize();
+    
+	// 2. 포인터가 자식 위젯 영역 내에 있는지 체크합니다.
+	bool bIsHovered = (LocalPos.X >= 0 && LocalPos.X <= WidgetSize.X &&
+						 LocalPos.Y >= 0 && LocalPos.Y <= WidgetSize.Y);
+    
+	// 3. 전역 입력 관리자를 통해 현재 마우스 캡처를 받고 있는 위젯을 확인합니다.
+	//    (예를 들어, APlayerInput::Get().GetMouseCaptor()가 현재 캡처된 위젯을 반환한다고 가정)
+	const std::shared_ptr<SWidget> CapturedWidget = APlayerInput::Get().GetMouseCaptor();
+	const bool bIsCaptured = (CapturedWidget == Child);
+    
+	// 4. 둘 다 만족하면 자식 위젯이 활성(호버 및 캡처) 상태임을 반환합니다.
+	return bIsHovered && bIsCaptured;
 }
 
-bool SWidget::HasFocusedDescendants() const
+bool SWidget::HasFocusedDescendants(const FPointer& InPointer) const
 {
-	// TODO : 포커스된 자식 위젯이 있는지 판단
-	//return FSlateApplicationBase::Get().HasFocusedDescendants(SharedThis(this));
-	return false;
-}
-
-bool SWidget::HasMouseCapture() const
-{
-	// TODO : 마우스 캡쳐된 상태인지 판단
-	//return FSlateApplicationBase::Get().DoesWidgetHaveMouseCapture(SharedThis(this));
-	return false;
-}
-
-bool SWidget::IsHovered() const
-{
-	return HoveredAttribute;
-}
-
-bool SWidget::IsDirectlyHovered() const
-{
-	// TODO : 직접적으로 마우스가 위젯에 올라와 있는지 판단
-	//return FSlateApplicationBase::Get().IsWidgetDirectlyHovered(SharedThis(this));
-	return false;
-}
-
-void SWidget::SetVisibility(EVisibility InVisibility)
-{
-	VisibilityAttribute = InVisibility;
+	bool isAnyChildFocus = false;
+	for (auto Child : Children)
+	{
+		isAnyChildFocus = IsChildActive(Child, InPointer, Child->GetGeometry());
+		if (isAnyChildFocus) return true;
+	}
+	return isAnyChildFocus;
 }
 
 bool SWidget::IsAccessible() const
@@ -303,162 +287,24 @@ void SWidget::SetCanChildrenBeAccessible(bool bInCanChildrenBeAccessible)
 	if (bCanChildrenBeAccessible != bInCanChildrenBeAccessible)
 	{
 		bCanChildrenBeAccessible = bInCanChildrenBeAccessible;
-		//FSlateApplicationBase::Get().GetAccessibleMessageHandler()->MarkDirty();
 	}
 }
 
-bool SWidget::IsChildWidgetCulled(const FSlateRect& MyCullingRect, const TArray<FArrangedWidget>& ArrangedChild) const
+int32 SWidget::FindChildUnderMouse(const TArray<FArrangedWidget>& Children, const FPointer& InPointer)
 {
-	return false;
-}
-
-FReply& FReply::SetMousePos(const FIntPoint& NewMousePos)
-{
-	this->bSetUserFocus = true;
-	this->bReleaseUserFocus = false;
-
-	return *this;
-}
-
-FReply& FReply::SetUserFocus(std::shared_ptr<SWidget> GiveMeFocus)
-{
-	this->FocusRecipient = GiveMeFocus;
-
-	return *this;
-}
-
-FReply& FReply::ClearUserFocus()
-{
-	bSetUserFocus = false;
-	return *this;
-}
-
-FReply& FReply::CancelFocusRequest()
-{
-	this->bSetUserFocus = false;
-	this->FocusRecipient.reset();
-	this->bReleaseUserFocus = false;
-
-	return *this;
-}
-
-std::optional<FSlateRenderTransform> SWidget::GetRenderTransformWithRespectToFlowDirection() const
-{
-	return std::optional<FSlateRenderTransform>();
-}
-
-FVector2D SWidget::GetRenderTransformPivotWithRespectToFlowDirection() const
-{
-	return FVector2D(0.5f, 0.5f);
-}
-
-void SWidget::SetCursor(const std::optional<EMouseCursor>& InCursor)
-{
-}
-
-std::optional<EMouseCursor> SWidget::GetCursor() const
-{
-	return std::optional<EMouseCursor>();
-}
-
-const FGeometry& SWidget::GetCachedGeometry() const
-{
-	return PersistentState.DesktopGeometry;
-}
-
-const FGeometry& SWidget::GetPaintSpaceGeometry() const
-{
-	return PersistentState.AllottedGeometry;
-}
-
-void SWidget::SWidgetConstruct(bool InbEnabled, EVisibility InVisibility, std::optional<FSlateRenderTransform> InRenderTransform, FVector2D InRenderTransformPivot, bool InbEnabledAttributesUpdate, std::optional<EMouseCursor> InCursor, bool InbCanChildrenBeAccessible)
-{
-	SetEnabled(InbEnabled);
-	VisibilityAttribute = InVisibility; // SetVisibility is virtual, assign directly to stay backward compatible
-	SetRenderTransform(InRenderTransform);
-	SetRenderTransformPivot(InRenderTransformPivot);
-	bEnabledAttributesUpdate = InbEnabledAttributesUpdate;
-
-	if (InCursor.has_value())
-	{
-		SetCursor(InCursor);
-	}
-
-	SetCanChildrenBeAccessible(InbCanChildrenBeAccessible);
-
-}
-
-bool SWidget::FindChildGeometries(const FGeometry& MyGeometry, const TSet<std::shared_ptr<SWidget>>& WidgetsToFind, TMap<std::shared_ptr<SWidget>, FArrangedWidget>& OutResult) const
-{
-	FindChildGeometries_Helper(MyGeometry, WidgetsToFind, OutResult);
-	return OutResult.Num() == WidgetsToFind.Num();
-}
-
-void SWidget::FindChildGeometries_Helper(const FGeometry& MyGeometry, const TSet<std::shared_ptr<SWidget>>& WidgetsToFind, TMap<std::shared_ptr<SWidget>, FArrangedWidget>& OutResult) const
-{
-	// Perform a breadth first search!
-
-	TArray<FArrangedWidget> ArrangedChildren;
-	this->ArrangeChildren(MyGeometry, ArrangedChildren);
-	const int32 NumChildren = ArrangedChildren.Num();
-
-	// See if we found any of the widgets on this level.
-	for (int32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
-	{
-		const FArrangedWidget& CurChild = ArrangedChildren[ChildIndex];
-
-		if (WidgetsToFind.Find(CurChild.Widget) != WidgetsToFind.end())
-		{
-			// We found one of the widgets for which we need geometry!
-			OutResult.Add(CurChild.Widget, CurChild);
-		}
-	}
-
-	// If we have not found all the widgets that we were looking for, descend.
-	if (OutResult.Num() != WidgetsToFind.Num())
-	{
-		// Look for widgets among the children.
-		for (int32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
-		{
-			const FArrangedWidget& CurChild = ArrangedChildren[ChildIndex];
-			CurChild.Widget->FindChildGeometries_Helper(CurChild.Geometry, WidgetsToFind, OutResult);
-		}
-	}
-}
-
-FGeometry SWidget::FindChildGeometry(const FGeometry& MyGeometry, std::shared_ptr<SWidget> WidgetToFind) const
-{
-	// We just need to find the one WidgetToFind among our descendants.
-	TSet<std::shared_ptr<SWidget>> WidgetsToFind;
-	{
-		WidgetsToFind.Add(WidgetToFind);
-	}
-
-	TMap<std::shared_ptr<SWidget>, FArrangedWidget> Result;
-
-	FindChildGeometries(MyGeometry, WidgetsToFind, Result);
-
-	return Result.Find(WidgetToFind)->Geometry;
-}
-
-int32 SWidget::FindChildUnderMouse(const TArray<FArrangedWidget>& Children)
-{
-	// TODO : MouseEvent
-	//FVector2D AbsoluteCursorLocation = MouseEvent.GetScreenSpacePosition();
-	//return SWidget::FindChildUnderPosition(Children, AbsoluteCursorLocation);
-
-	return 0;
+	const FVector2D AbsoluteCursorLocation = InPointer.ScreenSpacePosition;
+	return SWidget::FindChildUnderPosition( Children, AbsoluteCursorLocation );
 }
 
 int32 SWidget::FindChildUnderPosition(const TArray<FArrangedWidget>& Children, const FVector2D& ArrangedSpacePosition)
 {
 	const int32 NumChildren = Children.Num();
-	for (int32 ChildIndex = NumChildren - 1; ChildIndex >= 0; --ChildIndex)
+	for( int32 ChildIndex = NumChildren - 1; ChildIndex >= 0; --ChildIndex )
 	{
 		const FArrangedWidget& Candidate = Children[ChildIndex];
-		const bool bCandidateUnderCursor =
+		const bool bCandidateUnderCursor = 
 			// Candidate is physically under the cursor
-			Candidate.Geometry.IsUnderLocation(ArrangedSpacePosition);
+			Candidate.Geometry.IsUnderLocation( ArrangedSpacePosition );
 
 		if (bCandidateUnderCursor)
 		{

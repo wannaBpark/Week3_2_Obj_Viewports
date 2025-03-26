@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <vector>
 
 #include "Core/AbstractClass/Singleton.h"
@@ -194,6 +195,8 @@ public:
     FVector2D CursorDelta;
 };
 
+class SWidget;
+
 class APlayerInput : public TSingleton<APlayerInput>
 {
 public:
@@ -253,6 +256,15 @@ public:
     void SetMouseNDCPos(FVector MNP) {MouseNDCPos = MNP;}
 
     void SetPointer(FVector2D position);
+
+    // 캡처된 위젯을 반환하는 함수
+    std::shared_ptr<SWidget> GetMouseCaptor() const { return MouseCaptoredWidget.lock(); }
+
+    // 캡처된 위젯을 설정하는 함수
+    void SetMouseCaptor(const std::shared_ptr<SWidget>& NewCaptor) { MouseCaptoredWidget = NewCaptor; }
+
+    // 캡처 해제 함수
+    void ClearMouseCaptor() { MouseCaptoredWidget.reset(); }
     
 private:
     // std::unordered_map<EKeyCode, std::unordered_set<void()>> InputHandlers; //인풋핸들러 각 오브젝트에서 키에 해당하는 함수를 할당한 다음 업데이트에서 눌린 키에 해당하는 함수 계속 돌려줘서 실행 
@@ -269,4 +281,7 @@ private:
     FVector MouseNDCPos;
 
     FPointer Pointer;
+
+    // 캡처된 위젯을 저장하는 멤버 (weak pointer로 관리하여 소유권 문제 방지)
+    std::weak_ptr<SWidget> MouseCaptoredWidget;
 };

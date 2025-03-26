@@ -162,6 +162,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core\Math\Transform.cpp" />
+    <ClCompile Include="Source\Core\Rendering\D3DViewports\ViewportClient.cpp" />
     <ClCompile Include="Source\Core\Rendering\Widget\Reply.cpp" />
     <ClCompile Include="Source\Core\Math\IntPoint.cpp" />
     <ClCompile Include="Source\Core\Rendering\Widget\ArrangedWidget.cpp" />
@@ -327,6 +328,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Core\Rendering\D3DViewports\ViewportClient.h" />
     <ClInclude Include="Source\Core\Rendering\Widget\Reply.h" />
     <ClInclude Include="Source\Core\Math\IntPoint.h" />
     <ClInclude Include="Source\Core\Rendering\Widget\ArrangedWidget.h" />

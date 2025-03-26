@@ -7,15 +7,20 @@ class FArrangedWidget;
 class SWidget;
 struct FMargin;
 
+/**
+ * FSlateRect
+ * 
+ * Slate 위젯의 레이아웃 또는 클리핑 영역을 나타내는 사각형을 표현합니다.
+ */
 struct FSlateRect
 {
 public:
-	float Left;
-	float Top;
-	float Right;
-	float Bottom;
+	float Left;   // 사각형의 왼쪽 경계
+	float Top;    // 사각형의 위쪽 경계
+	float Right;  // 사각형의 오른쪽 경계
+	float Bottom; // 사각형의 아래쪽 경계
 
-
+	// 생성자: 각 경계를 지정하며 기본값은 -1 입니다.
 	explicit FSlateRect(float InLeft = -1, float InTop = -1, float InRight = -1, float InBottom = -1)
 		: Left(InLeft)
 		, Top(InTop)
@@ -24,6 +29,7 @@ public:
 	{
 	}
 
+	// 생성자: 시작 위치와 끝 위치를 이용하여 사각형을 생성합니다.
 	FSlateRect(const FVector2D& InStartPos, const FVector2D& InEndPos)
 		: Left(InStartPos.X)
 		, Top(InStartPos.Y)
@@ -32,11 +38,17 @@ public:
 	{
 	}
 
+	/**
+	 * TransformRect
+	 * 
+	 * 주어진 레이아웃 변환(Scale+Translate)을 Rect에 적용하여 변환된 사각형을 반환합니다.
+	 */
 	static inline FSlateRect TransformRect(const FSlateLayoutTransform& Transform, const FSlateRect& Rect)
 	{
 		FVector2D TopLeftTransformed = Transform.TransformPoint(FVector2D(Rect.Left, Rect.Top));
 		FVector2D BottomRightTransformed = Transform.TransformPoint(FVector2D(Rect.Right, Rect.Bottom));
 
+		// 변환 후 좌표 순서가 뒤바뀌었으면 스왑합니다.
 		if (TopLeftTransformed.X > BottomRightTransformed.X)
 		{
 			std::swap(TopLeftTransformed.X, BottomRightTransformed.X);
@@ -49,98 +61,112 @@ public:
 		return FSlateRect(TopLeftTransformed, BottomRightTransformed);
 	}
 
-	FSlateRect InsetBy(const struct FMargin& InsetAmount) const;
-
-	FSlateRect ExtendBy(const FMargin& ExtendAmount) const;
+	FSlateRect InsetBy(const struct FMargin& InsetAmount) const; // 지정된 여백만큼 안으로 축소한 사각형을 반환
+	FSlateRect ExtendBy(const FMargin& ExtendAmount) const;       // 지정된 여백만큼 바깥으로 확장한 사각형을 반환
 
 	inline FVector2D GetTopLeft() const
 	{
-		return FVector2D(Left, Top);
+		return FVector2D(Left, Top); // 사각형의 왼쪽 위 모서리 좌표 반환
 	}
 
 	inline FVector2D GetSize() const
 	{
-		return FVector2D(Right - Left, Bottom - Top);
+		return FVector2D(Right - Left, Bottom - Top); // 사각형의 가로, 세로 크기 반환
 	}
 };
 
+
+/**
+ * FSlateRotatedRect
+ * 
+ * 회전된 사각형을 나타냅니다. 이는 정렬된 사각형을 회전시킨 결과로, 회전 후의 왼쪽 위 좌표와 X, Y 방향의 확장(길이)를 저장합니다.
+ */
 struct FSlateRotatedRect
 {
 public:
-	/** Default ctor. */
-	FSlateRotatedRect() {}
+    /** 기본 생성자. */
+    FSlateRotatedRect() {}
 
-	/** Construct a rotated rect from a given aligned rect. */
-	explicit FSlateRotatedRect(const FSlateRect& AlignedRect)
-		: TopLeft(AlignedRect.Left, AlignedRect.Top)
-		, ExtentX(AlignedRect.Right - AlignedRect.Left, 0.0f)
-		, ExtentY(0.0f, AlignedRect.Bottom - AlignedRect.Top)
-	{
-	}
+    /** 주어진 정렬된 사각형(AlignedRect)으로부터 회전된 사각형을 생성합니다. */
+    explicit FSlateRotatedRect(const FSlateRect& AlignedRect)
+        : TopLeft(AlignedRect.Left, AlignedRect.Top)
+        , ExtentX(AlignedRect.Right - AlignedRect.Left, 0.0f)
+        , ExtentY(0.0f, AlignedRect.Bottom - AlignedRect.Top)
+    {
+    }
 
-	/** Per-element constructor. */
-	FSlateRotatedRect(const FVector2D& InTopLeft, const FVector2D& InExtentX, const FVector2D& InExtentY)
-		: TopLeft(InTopLeft)
-		, ExtentX(InExtentX)
-		, ExtentY(InExtentY)
-	{
-	}
-
-public:
-
-	/** transformed Top-left corner. */
-	FVector2D TopLeft;
-	/** transformed X extent (right-left). */
-	FVector2D ExtentX;
-	/** transformed Y extent (bottom-top). */
-	FVector2D ExtentY;
+    /** 각 요소를 개별적으로 지정하는 생성자. */
+    FSlateRotatedRect(const FVector2D& InTopLeft, const FVector2D& InExtentX, const FVector2D& InExtentY)
+        : TopLeft(InTopLeft)
+        , ExtentX(InExtentX)
+        , ExtentY(InExtentY)
+    {
+    }
 
 public:
-	bool operator == (const FSlateRotatedRect& Other) const
-	{
-		return
-			TopLeft == Other.TopLeft &&
-			ExtentX == Other.ExtentX &&
-			ExtentY == Other.ExtentY;
-	}
+    /** 변환된(회전된) 왼쪽 위 모서리 좌표. */
+    FVector2D TopLeft;
+    /** X축 방향(오른쪽-왼쪽)의 확장량. */
+    FVector2D ExtentX;
+    /** Y축 방향(아래-위)의 확장량. */
+    FVector2D ExtentY;
 
 public:
+    bool operator == (const FSlateRotatedRect& Other) const
+    {
+        return
+            TopLeft == Other.TopLeft &&
+            ExtentX == Other.ExtentX &&
+            ExtentY == Other.ExtentY;
+    }
 
-	/** Convert to a bounding, aligned rect. */
-	FSlateRect ToBoundingRect() const;
+public:
+    /** 회전된 사각형을 감싸는 정렬된 사각형(Bounding Rect)으로 변환합니다. */
+    FSlateRect ToBoundingRect() const;
 
-	/** Point-in-rect test. */
-	bool IsUnderLocation(const FVector2D& Location) const;
+    /** 지정된 위치가 이 회전된 사각형 내부에 있는지 여부를 판단합니다. */
+    bool IsUnderLocation(const FVector2D& Location) const;
 
-	static FSlateRotatedRect MakeRotatedRect(const FSlateRect& ClipRectInLayoutWindowSpace, const FSlateLayoutTransform& InverseLayoutTransform, const FSlateRenderTransform& RenderTransform)
-	{
-		return MakeRotatedRect(ClipRectInLayoutWindowSpace, InverseLayoutTransform.Concatenate(RenderTransform));
-	}
+    // 여러 가지 방식으로 회전된 사각형을 만드는 정적 메서드들:
+    static FSlateRotatedRect MakeRotatedRect(const FSlateRect& ClipRectInLayoutWindowSpace, const FSlateLayoutTransform& InverseLayoutTransform, const FSlateRenderTransform& RenderTransform)
+    {
+        return MakeRotatedRect(ClipRectInLayoutWindowSpace, InverseLayoutTransform.Concatenate(RenderTransform));
+    }
 
-	static FSlateRotatedRect MakeRotatedRect(const FSlateRect& ClipRectInLayoutWindowSpace, const FTransform2& LayoutToRenderTransform);
+    static FSlateRotatedRect MakeRotatedRect(const FSlateRect& ClipRectInLayoutWindowSpace, const FTransform2& LayoutToRenderTransform);
 
-	static FSlateRotatedRect MakeSnappedRotatedRect(const FSlateRect& ClipRectInLayoutWindowSpace, const FSlateLayoutTransform& InverseLayoutTransform, const FSlateRenderTransform& RenderTransform)
-	{
-		return MakeSnappedRotatedRect(ClipRectInLayoutWindowSpace, InverseLayoutTransform.Concatenate(RenderTransform));
-	}
+    static FSlateRotatedRect MakeSnappedRotatedRect(const FSlateRect& ClipRectInLayoutWindowSpace, const FSlateLayoutTransform& InverseLayoutTransform, const FSlateRenderTransform& RenderTransform)
+    {
+        return MakeSnappedRotatedRect(ClipRectInLayoutWindowSpace, InverseLayoutTransform.Concatenate(RenderTransform));
+    }
 
-	/**
-	* Used to construct a rotated rect from an aligned clip rect and a set of layout and render transforms from the geometry, snapped to pixel boundaries. Returns a float or float16 version of the rect based on the typedef.
-	*/
-	static  FSlateRotatedRect MakeSnappedRotatedRect(const FSlateRect& ClipRectInLayoutWindowSpace, const FTransform2& LayoutToRenderTransform);
+    /**
+     * 픽셀 경계에 맞게 스냅된(rotated) 사각형을 생성합니다.
+     * 이 함수는 정렬된 클립 사각형과 지오메트리의 레이아웃 및 렌더 변환 집합을 사용합니다.
+     * 반환값은 float 또는 float16 버전의 사각형입니다(typedef에 따라).
+     */
+    static FSlateRotatedRect MakeSnappedRotatedRect(const FSlateRect& ClipRectInLayoutWindowSpace, const FTransform2& LayoutToRenderTransform);
 
-	inline static FSlateRotatedRect TransformRect(const FTransform2& Transform, const FSlateRotatedRect& Rect)
-	{
-		return FSlateRotatedRect
-		(
-			Transform.TransformPoint(Rect.TopLeft),
-			Transform.TransformVector(Rect.ExtentX),
-			Transform.TransformVector(Rect.ExtentY)
-		);
-	}
+    inline static FSlateRotatedRect TransformRect(const FTransform2& Transform, const FSlateRotatedRect& Rect)
+    {
+        return FSlateRotatedRect
+        (
+            Transform.TransformPoint(Rect.TopLeft),
+            Transform.TransformVector(Rect.ExtentX),
+            Transform.TransformVector(Rect.ExtentY)
+        );
+    }
 };
 
 
+
+/**
+ * FLayoutGeometry
+ * 
+ * 위젯의 레이아웃 기하학 정보를 나타냅니다.
+ * 이 구조체는 위젯의 로컬 공간에서의 크기, 부모 좌표계로의 변환(레이아웃 변환)을 저장하며,
+ * 이를 통해 위젯이 부모 내에서 차지하는 영역이나 위치를 계산할 수 있습니다.
+ */
 class FLayoutGeometry
 {
 public:
@@ -149,187 +175,189 @@ public:
 	{
 	}
 
+	// 로컬 크기와 부모에 대한 로컬 변환(레이아웃 변환)을 지정하여 생성
 	explicit FLayoutGeometry(const FSlateLayoutTransform& InLocalToParent, const FVector2D& SizeInLocalSpace)
 		: LocalToParent(InLocalToParent)
 		, LocalSize(SizeInLocalSpace)
 	{
 	}
 
+	/** 부모 좌표계로의 로컬 변환(레이아웃 변환)을 반환합니다. */
 	const FSlateLayoutTransform& GetLocalToParentTransform() const
 	{
 		return LocalToParent;
 	}
 
+	/** 위젯의 로컬 공간에서의 크기를 반환합니다. */
 	FVector2D GetSizeInLocalSpace() const
 	{
 		return LocalSize;
 	}
 
+	/** 부모 좌표계에서의 크기를 반환합니다. */
 	FVector2D GetSizeInParentSpace() const
 	{
 		return LocalToParent.TransformVector(LocalSize);
 	}
 
+	/** 부모 좌표계에서의 오프셋(위젯의 위치)을 반환합니다. */
 	FVector2D GetOffsetInParentSpace() const
 	{
 		return LocalToParent.GetTranslation();
 	}
 
+	/** 로컬 공간에서의 사각형(위젯 영역)을 반환합니다. */
 	FSlateRect GetRectInLocalSpace() const
 	{
 		return FSlateRect(FVector2D(0.0f, 0.0f), LocalSize);
 	}
 
+	/** 부모 좌표계에서의 사각형(위젯 영역)을 반환합니다. */
 	FSlateRect GetRectInParentSpace() const
 	{
 		return FSlateRect::TransformRect(LocalToParent, GetRectInLocalSpace());
 	}
 
 private:
-	FSlateLayoutTransform LocalToParent;
-	FVector2D LocalSize;
+	FSlateLayoutTransform LocalToParent; // 부모로부터의 로컬 변환
+	FVector2D LocalSize;                 // 로컬 공간에서의 크기
 };
 
+
 /**
- * A Paint geometry contains the window-space (draw-space) info to draw an element on the screen.
+ * FPaintGeometry
+ * 
+ * FPaintGeometry는 화면(윈도우) 공간(드로잉 공간)에서 요소를 그리기 위한 기하학적 정보를 포함합니다.
+ * 여기에는 위젯의 로컬 공간에서의 크기와 해당 요소를 윈도우 공간에 배치하기 위해 필요한 변환 정보가 포함됩니다.
  *
- * It contains the size of the element in the element's local space along with the
- * transform needed to position the element in window space.
+ * DrawPosition, DrawSize, DrawScale 등은 과거 유산(legacy)으로 남아있으며, 이제는 사용되지 않아야 합니다.
  *
- * DrawPosition/DrawSize/DrawScale are maintained for legacy reasons, but are deprecated:
+ *    - DrawPosition과 DrawSize는 이미 변환되어 그리기 코드에서 바로 사용될 수 있는 값입니다.
  *
- *		The DrawPosition and DrawSize are already positioned and
- *		scaled for immediate consumption by the draw code.
- *
- *		The DrawScale is only applied to the internal aspects of the draw primitives. e.g. Line thickness, 3x3 grid margins, etc.
+ *    - DrawScale은 내부적으로 개별 그리기 요소(예: 선 두께, 3x3 그리드 여백 등)에만 적용됩니다.
  */
 struct FPaintGeometry
 {
-	/**
-	 * !!! DEPRECATED!!! Drawing should only happen in local space to ensure render transforms work.
-	 *	WARNING: This legacy member represents is LAYOUT space, and does not account for render transforms.
-	 *
-	 * Render-space position at which we will draw.
-	 *
-	 *
-	 */
-	FVector2D DrawPosition;
+    /**
+     * !!! DEPRECATED!!!
+     * 드로잉은 이제 로컬 공간에서만 이루어져야 합니다. (렌더 트랜스폼이 제대로 작동하도록)
+     * WARNING: 이 레거시 멤버는 LAYOUT 공간에 해당하며, 렌더 트랜스폼은 고려하지 않습니다.
+     *
+     * 요소를 그릴 때 사용할 렌더 공간(실제 그리기 공간) 위치입니다.
+     */
+    FVector2D DrawPosition;
 
-	/**
-	 * !!! DEPRECATED!!! Drawing should only happen in local space to ensure render transforms work.
-	 *	WARNING: This legacy member represents is LAYOUT space, and does not account for render transforms.
-	 *
-	 * Only affects the draw aspects of individual draw elements. e.g. line thickness, 3x3 grid margins
-	 */
-	float DrawScale;
+    /**
+     * !!! DEPRECATED!!!
+     * 드로잉은 이제 로컬 공간에서만 이루어져야 합니다. (렌더 트랜스폼이 제대로 작동하도록)
+     * WARNING: 이 레거시 멤버는 LAYOUT 공간에 해당하며, 렌더 트랜스폼은 고려하지 않습니다.
+     *
+     * 개별 그리기 요소의 그리기 관련 속성에만 영향을 줍니다. (예: 선 두께, 3x3 그리드 여백 등)
+     */
+    float DrawScale;
 
-	/** Get the Size of the geometry in local space. Must call CommitTransformsIfUsingLegacyConstructor() first if legacy ctor is used. */
-	FVector2D GetLocalSize() const { return LocalSize; }
+    /** 로컬 공간에서의 기하학적 크기를 반환합니다.
+     *  레거시 생성자가 사용된 경우, 먼저 CommitTransformsIfUsingLegacyConstructor()를 호출해야 합니다.
+     */
+    FVector2D GetLocalSize() const { return LocalSize; }
 
-	/** Access the final render transform. Must call CommitTransformsIfUsingLegacyConstructor() first if legacy ctor is used. */
-	const FSlateRenderTransform& GetAccumulatedRenderTransform() const { return AccumulatedRenderTransform; }
+    /** 최종 렌더 트랜스폼(로컬 공간 → 윈도우 공간)으로 변환된 값을 반환합니다.
+     *  레거시 생성자가 사용된 경우, 먼저 CommitTransformsIfUsingLegacyConstructor()를 호출해야 합니다.
+     */
+    const FSlateRenderTransform& GetAccumulatedRenderTransform() const { return AccumulatedRenderTransform; }
 
-	/**
-	 * Support mutable geometries constructed in window space, and possibly mutated later, as all legacy members are public.
-	 * In these cases we defer creating of the RenderTransform and LocalSize until rendering time to ensure that all member changes have finished.
-	 * WARNING: Legacy usage does NOT support render transforms!
-	 */
-	void CommitTransformsIfUsingLegacyConstructor() const
-	{
-		if (!bUsingLegacyConstructor) return;
+    /**
+     * 레거시 생성자를 사용하여 윈도우 공간에서 생성된 기하학적 정보를 지원합니다.
+     * 이 경우, 모든 멤버 변경이 완료될 때까지 RenderTransform과 LocalSize의 계산을 지연시킵니다.
+     * WARNING: 레거시 방식은 렌더 트랜스폼을 지원하지 않습니다!
+     */
+    void CommitTransformsIfUsingLegacyConstructor() const
+    {
+        if (!bUsingLegacyConstructor) return;
 
-		AccumulatedRenderTransform = FSlateRenderTransform(DrawScale, DrawPosition);
-		FSlateLayoutTransform AccumulatedLayoutTransform = FSlateLayoutTransform(DrawScale, DrawPosition);
-		LocalSize = AccumulatedLayoutTransform.Inverse().TransformVector(DrawSize);
-	}
+        AccumulatedRenderTransform = FSlateRenderTransform(DrawScale, DrawPosition);
+        FSlateLayoutTransform AccumulatedLayoutTransform = FSlateLayoutTransform(DrawScale, DrawPosition);
+        LocalSize = AccumulatedLayoutTransform.Inverse().TransformVector(DrawSize);
+    }
 
-	bool HasRenderTransform() const { return bHasRenderTransform; }
+    bool HasRenderTransform() const { return bHasRenderTransform; }
 
 private:
-	// Mutable to support legacy constructors. Doesn't account for render transforms.
-	mutable FVector2D DrawSize;
-
-	// Mutable to support legacy constructors.
-	mutable FVector2D LocalSize;
-
-	// final render transform for drawing. Transforms from local space to window space for the draw element.
-	// Mutable to support legacy constructors.
-	mutable FSlateRenderTransform AccumulatedRenderTransform;
-
-	// Support legacy constructors.
-	uint8 bUsingLegacyConstructor : 1;
-
-	uint8 bHasRenderTransform : 1;
+    mutable FVector2D DrawSize;  // 레거시 생성자를 지원하기 위해 mutable로 선언 (렌더 트랜스폼 고려하지 않음)
+    mutable FVector2D LocalSize; // 레거시 생성자 지원을 위한 mutable
+    mutable FSlateRenderTransform AccumulatedRenderTransform; // 최종 렌더 트랜스폼 (로컬 → 윈도우)
+    uint8 bUsingLegacyConstructor : 1; // 레거시 생성자 사용 여부
+    uint8 bHasRenderTransform : 1;       // 렌더 트랜스폼이 있는지 여부
 
 public:
-	/** Default ctor. */
-	FPaintGeometry()
-		: DrawPosition(0.0f, 0.0f)
-		, DrawScale(1.0f)
-		, DrawSize(0.0f, 0.0f)
-		, LocalSize(0.0f, 0.0f)
-		, AccumulatedRenderTransform()
-		, bUsingLegacyConstructor(true)
-		, bHasRenderTransform(false)
-	{
-	}
+    /** 기본 생성자. */
+    FPaintGeometry()
+        : DrawPosition(0.0f, 0.0f)
+        , DrawScale(1.0f)
+        , DrawSize(0.0f, 0.0f)
+        , LocalSize(0.0f, 0.0f)
+        , AccumulatedRenderTransform()
+        , bUsingLegacyConstructor(true)
+        , bHasRenderTransform(false)
+    {
+    }
 
-	/**
-	 * Creates and initializes a new instance.
-	 *
-	 * @param InLocalSize					The size in local space
-	 * @param InAccumulatedLayoutTransform	The accumulated layout transform (from an FGeometry)
-	 * @param InAccumulatedRenderTransform	The accumulated render transform (from an FGeometry)
-	 */
-	FPaintGeometry(const FSlateLayoutTransform& InAccumulatedLayoutTransform, const FSlateRenderTransform& InAccumulatedRenderTransform, const FVector2D& InLocalSize, bool bInHasRenderTransform)
-		: DrawPosition(InAccumulatedLayoutTransform.GetTranslation())
-		, DrawScale(InAccumulatedLayoutTransform.GetScale())
-		, DrawSize(0.0f, 0.0f)
-		, LocalSize(InLocalSize)
-		, AccumulatedRenderTransform(InAccumulatedRenderTransform)
-		, bUsingLegacyConstructor(false)
-		, bHasRenderTransform(bInHasRenderTransform)
-	{
-	}
+    /**
+     * 새로운 인스턴스를 생성 및 초기화합니다.
+     *
+     * @param InLocalSize                   로컬 공간에서의 크기
+     * @param InAccumulatedLayoutTransform    누적 레이아웃 변환 (FGeometry에서 가져옴)
+     * @param InAccumulatedRenderTransform    누적 렌더 트랜스폼 (FGeometry에서 가져옴)
+     */
+    FPaintGeometry(const FSlateLayoutTransform& InAccumulatedLayoutTransform, const FSlateRenderTransform& InAccumulatedRenderTransform, const FVector2D& InLocalSize, bool bInHasRenderTransform)
+        : DrawPosition(InAccumulatedLayoutTransform.GetTranslation())
+        , DrawScale(InAccumulatedLayoutTransform.GetScale())
+        , DrawSize(0.0f, 0.0f)
+        , LocalSize(InLocalSize)
+        , AccumulatedRenderTransform(InAccumulatedRenderTransform)
+        , bUsingLegacyConstructor(false)
+        , bHasRenderTransform(bInHasRenderTransform)
+    {
+    }
 
-	// !!! DEPRECATED!!! This is legacy and should be removed!
-	FPaintGeometry(const FVector2D& InDrawPosition, const FVector2D& InDrawSize, float InDrawScale)
-		: DrawPosition(InDrawPosition)
-		, DrawScale(InDrawScale)
-		, DrawSize(InDrawSize)
-		, LocalSize(0.0f, 0.0f)
-		, AccumulatedRenderTransform()
-		, bUsingLegacyConstructor(true)
-		, bHasRenderTransform(false)
-	{
-	}
+    // !!! DEPRECATED!!! 레거시 생성자, 제거되어야 함.
+    FPaintGeometry(const FVector2D& InDrawPosition, const FVector2D& InDrawSize, float InDrawScale)
+        : DrawPosition(InDrawPosition)
+        , DrawScale(InDrawScale)
+        , DrawSize(InDrawSize)
+        , LocalSize(0.0f, 0.0f)
+        , AccumulatedRenderTransform()
+        , bUsingLegacyConstructor(true)
+        , bHasRenderTransform(false)
+    {
+    }
 
-	/**
-	 * Special case method to append a layout transform to a paint geometry.
-	 * This is used in cases where the FGeometry was arranged in desktop space
-	 * and we need to undo the root desktop translation to get into window space.
-	 * If you find yourself wanting to use this function, ask someone if there's a better way.
-	 *
-	 * @param LayoutTransform	An additional layout transform to append to this paint geometry.
-	 */
-	void AppendTransform(const FSlateLayoutTransform& LayoutTransform)
-	{
-		FTransform2 LayoutTransform2x2 = FTransform2(LayoutTransform.GetScale(), LayoutTransform.GetTranslation());
-		AccumulatedRenderTransform = AccumulatedRenderTransform.Concatenate(LayoutTransform2x2);
-		DrawPosition = LayoutTransform.TransformPoint(DrawPosition);
-		DrawScale = LayoutTransform.GetScale() * DrawScale;
-	}
+    /**
+     * 레이아웃 변환을 PaintGeometry에 추가하는 특수 함수.
+     * 이 함수는 FGeometry가 데스크톱 공간에 배치되어 있고, 루트 데스크톱 변환을 취소하여 윈도우 공간으로 전환해야 할 때 사용됩니다.
+     * 만약 이 함수를 사용하려 한다면, 더 나은 방법이 있는지 문의하십시오.
+     *
+     * @param LayoutTransform    PaintGeometry에 추가할 추가 레이아웃 변환.
+     */
+    void AppendTransform(const FSlateLayoutTransform& LayoutTransform)
+    {
+        FTransform2 LayoutTransform2x2 = FTransform2(LayoutTransform.GetScale(), LayoutTransform.GetTranslation());
+        AccumulatedRenderTransform = AccumulatedRenderTransform.Concatenate(LayoutTransform2x2);
+        DrawPosition = LayoutTransform.TransformPoint(DrawPosition);
+        DrawScale = LayoutTransform.GetScale() * DrawScale;
+    }
 
-	/**
-	 * Special case method to replace the render transform on a paint geometry.
-	 *
-	 * @param RenderTransform	An additional layout transform to append to this paint geometry.
-	 */
-	void SetRenderTransform(const FSlateRenderTransform& RenderTransform)
-	{
-		AccumulatedRenderTransform = RenderTransform;
-	}
+    /**
+     * 레이아웃 변환 대신, 렌더 트랜스폼을 새로 지정하는 특수 함수.
+     *
+     * @param RenderTransform    PaintGeometry에 설정할 렌더 트랜스폼.
+     */
+    void SetRenderTransform(const FSlateRenderTransform& RenderTransform)
+    {
+        AccumulatedRenderTransform = RenderTransform;
+    }
 };
+
 
 
 class FGeometry
@@ -362,6 +390,7 @@ public:
 	}
 
 private:
+	// 생성자: 로컬 렌더 변환 및 피벗 보정을 포함하여 부모 누적 변환과 합성된 상태로 초기화합니다.
 	FGeometry(const FVector2D& InLocalSize, const FSlateLayoutTransform& InLocalLayoutTransform, const FSlateRenderTransform& InLocalRenderTransform, const FVector2D& InLocalRenderTransformPivot, const FSlateLayoutTransform& ParentAccumulatedLayoutTransform, const FSlateRenderTransform& ParentAccumulatedRenderTransform)
 		: LocalSize(InLocalSize)
 		, AbsoluteScale(1.0f)
@@ -404,6 +433,7 @@ private:
 		LocalPosition = InLocalLayoutTransform.GetTranslation();
     }
 
+	// 생성자: 렌더 변환 없이 레이아웃 변환만을 부모 누적 변환과 합성하여 초기화합니다.
 	FGeometry(
 		const FVector2D& InLocalSize,
 		const FSlateLayoutTransform& InLocalLayoutTransform,
@@ -437,24 +467,35 @@ public:
 		return !(*this == Other);
 	}
 
-	inline static FGeometry MakeRoot(const FVector2D& InLocalSize, const FSlateLayoutTransform& InLayoutTransform)
+	//-------------------------------------------------------------------
+	// 주어진 로컬 공간 크기, 레이아웃 변환, 그리고 동일한 렌더 변환(identity render transform)을 사용하여
+	// 이 Geometry에 상대적인 자식 Geometry를 생성합니다.
+	// 예를 들어, 5x5 여백을 가진 위젯은 자식 내용에 대해 Translate(5,5)의 LayoutTransform과
+	// 자신의 크기보다 10 단위 작은 LocalSize를 가지는 Geometry를 생성합니다.
+	//
+	// @param LocalSize         로컬 공간에서 자식 Geometry의 크기.
+	// @param LayoutTransform   이 Geometry에 상대적인 새로운 자식의 레이아웃 변환.
+	//                          (자식의 레이아웃 공간에서 해당 위젯의 레이아웃 공간으로의 변환)
+	//
+	// @return                  새로운 자식 Geometry.
+	inline static FGeometry MakeRoot(const FVector2D& InLocalSize, const FSlateLayoutTransform& InLayoutTransform);
+
+    inline static FGeometry MakeRoot(const FVector2D& InLocalSize, const FSlateLayoutTransform& InLayoutTransform, const FSlateRenderTransform& InRenderTransform)
 	{
-		return FGeometry(InLocalSize, InLayoutTransform, FSlateLayoutTransform(), FSlateRenderTransform(), false);
+		return FGeometry(InLocalSize, InLayoutTransform, FSlateLayoutTransform(), FSlateRenderTransform(),
+		                 !InRenderTransform.IsIdentity());
 	}
 
-	inline static FGeometry MakeRoot(const FVector2D& InLocalSize, const FSlateLayoutTransform& InLayoutTransform, const FSlateRenderTransform& InRenderTransform)
-	{
-		return FGeometry(InLocalSize, InLayoutTransform, FSlateLayoutTransform(), FSlateRenderTransform(), !InRenderTransform.IsIdentity());
-	}
-
+	// 자식 위젯의 렌더 변환을 고려하여 자식 Geometry를 생성합니다.
 	inline FGeometry MakeChild(const FVector2D& InLocalSize, const FSlateLayoutTransform& LayoutTransform, const FSlateRenderTransform& RenderTransform, const FVector2D& RenderTransformPivot) const
 	{
-		return FGeometry(InLocalSize, LayoutTransform, RenderTransform, RenderTransformPivot, GetAccumulatedLayoutTransform(), GetAccumulatedRenderTransform());
+		return FGeometry(InLocalSize, LayoutTransform, RenderTransform, RenderTransformPivot,
+		                 GetAccumulatedLayoutTransform(), GetAccumulatedRenderTransform());
 	}
 
 	/**
 	 * Create a child geometry relative to this one with a given local space size, layout transform, and identity render transform.
-	 * For example, a widget with a 5x5 margin will create a geometry for it's child contents having a LayoutTransform of Translate(5,5) and a LocalSize 10 units smaller
+	 * For example, a widget with a 5x5 margin will create a geometry for it's child contents having a LayoutTransform of Translate(5,5) and a LocalSize 10 units smaller 
 	 * than it's own.
 	 *
 	 * @param LocalSize			The size of the child geometry in local space.
@@ -463,31 +504,46 @@ public:
 	 * @return					The new child geometry.
 	 */
 	inline FGeometry MakeChild(const FVector2D& InLocalSize, const FSlateLayoutTransform& LayoutTransform) const
-	{
-		return FGeometry(InLocalSize, LayoutTransform, GetAccumulatedLayoutTransform(), GetAccumulatedRenderTransform(), bHasRenderTransform);
-	}
-	inline FGeometry MakeChild(const FSlateRenderTransform& RenderTransform, const FVector2D& RenderTransformPivot = FVector2D(0.5f, 0.5f)) const
-	{
-		return FGeometry(GetLocalSize(), FSlateLayoutTransform(), RenderTransform, RenderTransformPivot, GetAccumulatedLayoutTransform(), GetAccumulatedRenderTransform());
-	}
-
+    {
+    	return FGeometry(InLocalSize, LayoutTransform, GetAccumulatedLayoutTransform(), GetAccumulatedRenderTransform(), bHasRenderTransform);
+    }
+	inline FGeometry MakeChild(const FSlateRenderTransform& RenderTransform, const FVector2D& RenderTransformPivot = FVector2f(0.5f, 0.5f)) const
+    {
+    	return FGeometry(GetLocalSize(), FSlateLayoutTransform(), RenderTransform, RenderTransformPivot, GetAccumulatedLayoutTransform(), GetAccumulatedRenderTransform());
+    }
+	/**
+	 * 주어진 로컬 공간 크기와 레이아웃 변환을 사용하여
+	 * 이 Geometry에 상대적인 자식 Geometry+위젯을 생성합니다.
+	 * 이 Geometry는 자식 위젯의 렌더 변환을 상속받습니다.
+	 * 예를 들어, 5x5 여백을 가진 위젯은 자식 내용에 대해 Translate(5,5)의 LayoutTransform과
+	 * 자신의 크기보다 10 단위 작은 LocalSize를 가지는 Geometry를 생성합니다.
+	 *
+	 * @param ChildWidget       이 Geometry가 생성되는 자식 위젯.
+	 * @param LayoutGeometry
+	 * @param LocalSize         로컬 공간에서 자식 Geometry의 크기.
+	 * @param LayoutTransform   이 Geometry에 상대적인 새로운 자식의 레이아웃 변환.
+	 *
+	 * @return                  새로운 자식 Geometry+위젯.
+	 */
 	FArrangedWidget MakeChild(const std::shared_ptr<SWidget>& ChildWidget, const FLayoutGeometry& LayoutGeometry) const;
 
 	/**
-	 * Create a child geometry+widget relative to this one with a given local space size and layout transform.
-	 * The Geometry inherits the child widget's render transform.
-	 * For example, a widget with a 5x5 margin will create a geometry for it's child contents having a LayoutTransform of Translate(5,5) and a LocalSize 10 units smaller
-	 * than it's own.
+	 * 주어진 로컬 공간 크기와 레이아웃 변환을 사용하여
+	 * 이 Geometry에 상대적인 자식 Geometry+위젯을 생성합니다.
+	 * 이 Geometry는 자식 위젯의 렌더 변환을 상속받습니다.
+	 * 예를 들어, 5x5 여백을 가진 위젯은 자식 내용에 대해 Translate(5,5)의 LayoutTransform과
+	 * 자신의 크기보다 10 단위 작은 LocalSize를 가지는 Geometry를 생성합니다.
 	 *
-	 * @param ChildWidget		The child widget this geometry is being created for.
-	 * @param LocalSize			The size of the child geometry in local space.
-	 * @param LayoutTransform	Layout transform of the new child relative to this Geometry.
+	 * @param ChildWidget       이 Geometry가 생성되는 자식 위젯.
+	 * @param LocalSize         로컬 공간에서 자식 Geometry의 크기.
+	 * @param LayoutTransform   이 Geometry에 상대적인 새로운 자식의 레이아웃 변환.
 	 *
-	 * @return					The new child geometry+widget.
+	 * @return                  새로운 자식 Geometry+위젯.
 	 */
 	FArrangedWidget MakeChild(const std::shared_ptr<SWidget>& ChildWidget, const FVector2D& InLocalSize, const FSlateLayoutTransform& LayoutTransform) const;
 
 
+	// FPaintGeometry를 생성하여 반환합니다.
 	inline FPaintGeometry ToPaintGeometry() const
 	{
 		return FPaintGeometry(GetAccumulatedLayoutTransform(), GetAccumulatedRenderTransform(), LocalSize, bHasRenderTransform);
@@ -521,50 +577,53 @@ public:
 	}
 
 	/**
-	 * Create a paint geometry relative to this one that whose local space is "inflated" by the specified amount in each direction.
-	 * The paint geometry inherits the widget's render transform.
+	 * 지정된 만큼 각 방향으로 로컬 공간이 "확장(inflate)"된 이 Geometry에 상대적인
+	 * 페인트 Geometry를 생성합니다.
+	 * 페인트 Geometry는 위젯의 렌더 변환을 상속받습니다.
 	 *
-	 * @param InflateAmount	Amount by which to "inflate" the geometry in each direction around the center point. Effectively defines a layout transform offset and an inflation of the LocalSize.
+	 * @param InflateAmount   중심점을 기준으로 각 방향으로 Geometry를 "확장"할 양.
+	 *                        이는 레이아웃 변환 오프셋과 LocalSize의 확장을 효과적으로 정의합니다.
 	 *
-	 * @return				The new paint geometry derived from this one.
+	 * @return                이 Geometry로부터 파생된 새로운 페인트 Geometry.
 	 */
 	inline FPaintGeometry ToInflatedPaintGeometry(const FVector2D& InflateAmount) const
 	{
-		// This essentially adds (or subtracts) a border around the widget. We scale the size then offset by the border amount.
-		// Note this is not scaling child widgets, so the scale is not changing.
+		// 이 방식은 위젯 주변에 (또는 위젯 내부로) 여백(border)을 추가하는 효과와 같습니다.
+		// 크기를 확장한 후, 여백만큼 오프셋을 적용합니다.
+		// 단, 이는 자식 위젯의 스케일에는 영향을 주지 않습니다.
 		FVector2D NewSize = LocalSize + InflateAmount * 2;
 		return ToPaintGeometry(NewSize, FSlateLayoutTransform(FVector2D(-InflateAmount.X, -InflateAmount.Y) ));
 	}
 
 	/**
-	 * Absolute coordinates could be either desktop or window space depending on what space the root of the widget hierarchy is in.
+	 * 절대 좌표는 위젯 계층의 루트가 위치한 공간에 따라 데스크탑 공간이나 윈도우 공간일 수 있습니다.
 	 *
-	 * @return true if the provided location in absolute coordinates is within the bounds of this geometry.
+	 * @return 절대 좌표의 위치가 이 Geometry의 경계 내에 있으면 true를 반환합니다.
 	 */
 	inline bool IsUnderLocation(const FVector2D& AbsoluteCoordinate) const
 	{
-		// this render transform invert is a little expensive. We might consider caching it?
+		// 이 렌더 변환의 역변환은 다소 비용이 많이 듭니다. 캐싱하는 방안을 고려할 수 있습니다.
 		FSlateRotatedRect Rect = FSlateRotatedRect::TransformRect(GetAccumulatedRenderTransform(), FSlateRotatedRect(FSlateRect(FVector2D(0.0f, 0.0f), LocalSize)));
 		return Rect.IsUnderLocation(AbsoluteCoordinate);
 	}
 
 	/**
-	 * Absolute coordinates could be either desktop or window space depending on what space the root of the widget hierarchy is in.
+	 * 절대 좌표는 위젯 계층의 루트가 위치한 공간에 따라 데스크탑 공간이나 윈도우 공간일 수 있습니다.
 	 *
-	 * @return Transforms AbsoluteCoordinate into the local space of this Geometry.
+	 * @return 절대 좌표를 이 Geometry의 로컬 공간으로 변환합니다.
 	 */
 	inline FVector2D AbsoluteToLocal(const FVector2D& AbsoluteCoordinate) const
 	{
-		// this render transform invert is a little expensive. We might consider caching it.
+		// 이 렌더 변환의 역변환은 다소 비용이 많이 듭니다. 캐싱하는 방안을 고려할 수 있습니다.
 		return GetAccumulatedRenderTransform().Inverse().TransformPoint(AbsoluteCoordinate);
 	}
 
 	/**
-	 * Translates local coordinates into absolute coordinates
+	 * 로컬 좌표를 절대 좌표로 변환합니다.
 	 *
-	 * Absolute coordinates could be either desktop or window space depending on what space the root of the widget hierarchy is in.
+	 * 절대 좌표는 위젯 계층의 루트가 위치한 공간에 따라 데스크탑 공간이나 윈도우 공간일 수 있습니다.
 	 *
-	 * @return  Absolute coordinates
+	 * @return 절대 좌표
 	 */
 	inline FVector2D LocalToAbsolute(const FVector2D& LocalCoordinate) const
 	{
@@ -572,10 +631,10 @@ public:
 	}
 
 	/**
-	 * Translates the local coordinates into local coordinates that after being transformed into absolute space will be rounded
-	 * to a whole number or approximately a whole number.  This is important for cases where you want to show a popup or a tooltip
-	 * and not have the window start on a half pixel, which can cause the contents to jitter in relation to each other as the tooltip
-	 * or popup moves around.
+	 * 로컬 좌표를 절대 공간으로 변환한 후, 반올림되어 정수 값 또는 근사값으로 나타내는
+	 * 로컬 좌표로 변환합니다.
+	 * 이는 팝업이나 툴팁을 표시할 때, 창이 반 픽셀 위치에서 시작하지 않아 내용들이
+	 * 서로 약간씩 어긋나는(jitter) 현상을 방지하는 데 중요합니다.
 	 */
 	inline FVector2D LocalToRoundedLocal(const FVector2D& LocalCoordinate) const
 	{
@@ -622,6 +681,7 @@ public:
 	FVector2D AbsolutePosition;
 	FVector2D LocalPosition;
 
+	// 로컬 크기에 누적 레이아웃 변환을 적용한 결과를 반환합니다.
 	inline FVector2D GetDrawSize() const
 	{
 		return FVector2D(GetAccumulatedLayoutTransform().TransformVector(LocalSize));
@@ -632,6 +692,7 @@ public:
 		return LocalSize;
 	}
 
+	// 누적 레이아웃 변환을 생성합니다.
 	inline FSlateLayoutTransform GetAccumulatedLayoutTransform() const
 	{
 		return FSlateLayoutTransform(AbsoluteScale, AbsolutePosition);
@@ -642,6 +703,7 @@ public:
 		return AccumulatedRenderTransform;
 	}
 
+	// 추가적인 레이아웃 변환을 누적 변환에 결합합니다.
 	inline void AppendTransform(const FSlateLayoutTransform& LayoutTransform)
 	{
 		FSlateLayoutTransform AccumulatedLayoutTransform = GetAccumulatedLayoutTransform().Concatenate(LayoutTransform);
@@ -655,16 +717,19 @@ public:
 		return AbsolutePosition;
 	}
 
+	// 로컬 크기에 누적 레이아웃 변환을 적용한 절대 크기를 반환합니다.
 	inline FVector2D GetAbsoluteSize() const
 	{
 		return GetAccumulatedLayoutTransform().TransformVector(LocalSize);
 	}
 
+	// 정규 좌표(0~1)를 로컬 크기에 곱하여 절대 좌표로 변환합니다.
 	inline FVector2D GetAbsolutePositionAtCoordinates(const FVector2D& NormalCoordinates) const
 	{
 		return GetAccumulatedRenderTransform().TransformPoint(FVector2D(NormalCoordinates.X * LocalSize.X, NormalCoordinates.Y * LocalSize.Y));
 	}
 
+	// 정규 좌표(0~1)를 로컬 크기에 곱하여 로컬 좌표를 계산합니다.
 	inline FVector2D GetLocalPositionAtCoordinates(const FVector2D& NormalCoordinates) const
 	{
 		return LocalPosition + FVector2D(NormalCoordinates.X * LocalSize.X, NormalCoordinates.Y * LocalSize.Y);
@@ -688,4 +753,3 @@ private:
 	FSlateRenderTransform AccumulatedRenderTransform;
 	bool bHasRenderTransform;
 };
-

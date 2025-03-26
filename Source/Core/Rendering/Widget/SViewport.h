@@ -6,24 +6,30 @@ struct FArrangedWidget;
 
 class SViewport : public SWidget
 {
+	using Super = SWidget;
 public:
-	SViewport();
+	SViewport(FVector2D InViewportSize = FVector2D(0, 0));
 	virtual ~SViewport();
 
-	void Construct();
-
-	/** SViewport은 키보드 포커스를 원합니다. */
-	virtual bool SupportsKeyboardFocus() const override { return true; }
+	/**
+	 * 뷰포트의 크기를 업데이트합니다.
+	 * 보통 부모 위젯이나 창의 크기가 변경되었을 때 호출됩니다.
+	 *
+	 * @param NewSize   새로 적용할 뷰포트 크기.
+	 */
+	void UpdateViewportSize(const FVector2D& NewSize);
 
 	/**
-	* 이 위젯을 표시하기 위해 필요한 이상적인 크기를 계산합니다.
+	 * 뷰포트에 연결된 렌더 타깃에 콘텐츠를 렌더링합니다.
+	 */
+	void RenderViewport();
+
+	/**
+	* Checks to see if this widget is the current mouse captor
 	*
-	* @return 원하는 너비와 높이를 반환합니다.
+	* @return  True if this widget has captured the mouse
 	*/
-	virtual FVector2D ComputeDesiredSize(float) const override
-	{
-		return ViewportSize;
-	}
+	bool HasMouseCapture() const;
 
 	/**
 	* 이 뷰포트에서 렌더링 및 입출력을 위해 사용할 인터페이스를 설정합니다.
@@ -56,24 +62,13 @@ public:
 	*/
 	void OnWindowClosed(const std::shared_ptr<SWindow>& InWindowBeingClosed);
 
-	// TODO: 델리게이트
-	///**
-	// * 뷰포트의 최상위 창이 활성화될 때 호출되는 델리게이트
-	// */
-	//FReply OnViewportActivated(const FWindowActivateEvent& InActivateEvent);
-
-	///**
-	// * 뷰포트의 최상위 창이 비활성화될 때 호출되는 델리게이트
-	// */
-	//void OnViewportDeactivated(const FWindowActivateEvent& InActivateEvent);
-
 	/** @return 이 뷰포트가 백버퍼에 직접 렌더링하는지 여부를 반환합니다. */
 	bool ShouldRenderDirectly() const { return bRenderDirectlyToWindow; }
 
 	/**
 	* 이 뷰포트가 백버퍼에 직접 렌더링할 수 있는지 설정합니다. (고급 사용용)
 	*
-	* @param	bInRenderDirectlyToWindow 백버퍼에 직접 렌더링할 수 있는지 여부
+	* @param bInRenderDirectlyToWindow 백버퍼에 직접 렌더링할 수 있는지 여부
 	*/
 	void SetRenderDirectlyToWindow(const bool bInRenderDirectlyToWindow);
 
@@ -85,29 +80,26 @@ public:
 	void SetActive(bool bActive);
 
 public:
-
 	// SWidget 인터페이스
 	// TODO: OnPaint
 	//virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, bool bParentEnabled) const override;
-	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
-	virtual FCursorReply OnCursorQuery(const FGeometry& MyGeometry, const FPointer& InPointer/*, const FPointerEvent& CursorEvent*/) const override;
+	virtual void Tick(const FGeometry& AllottedGeometry, const float InDeltaTime) override;
+	virtual FCursorReply OnCursorQuery(const FPointer& InPointer) const override;
 	virtual std::optional<std::shared_ptr<SWidget>> OnMapCursor(const FCursorReply& CursorReply) const override;
-	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointer& InPointer/*, const FPointerEvent& MouseEvent*/) override;
-	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointer& InPointer/*, const FPointerEvent& MouseEvent*/) override;
-	virtual void OnMouseEnter(const FGeometry& MyGeometr, const FPointer& InPointery/*, const FPointerEvent& MouseEvent*/) override;
-	virtual void OnMouseLeave(const FPointer& InPointer/*const FPointerEvent& MouseEvent*/) override;
-	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointer& InPointer/*, const FPointerEvent& MouseEvent*/) override;
-	virtual FReply OnMouseWheel(const FGeometry& MyGeometry, const FPointer& InPointer/*, const FPointerEvent& MouseEvent*/) override;
-	virtual FReply OnMouseButtonDoubleClick(const FGeometry& MyGeometry, const FPointer& InPointer/*, const FPointerEvent& MouseEvent*/) override;
-	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const EKeyCode& InKeyCode/*, const FKeyEvent& KeyEvent*/) override;
-	virtual FReply OnKeyUp(const FGeometry& MyGeometry, const EKeyCode& InKeyCode/*, const FKeyEvent& KeyEvent*/) override;
-	virtual FReply OnKeyChar(const FGeometry& MyGeometry, const EKeyCode& InKeyCode/*, const FCharacterEvent& CharacterEvent*/) override;
-	virtual FReply OnFocusReceived(const FGeometry& MyGeometry/*, const FFocusEvent& InFocusEvent*/) override;
-	virtual void OnFocusLost(/*const FFocusEvent& InFocusEvent*/) override;
+	virtual FReply OnMouseButtonDown(EMouseButton InMouseButton, const FPointer& InPointer) override;
+	virtual FReply OnMouseButtonUp(EMouseButton InMouseButton, const FPointer& InPointer) override;
+	virtual void OnMouseEnter(const FPointer& InPointer) override;
+	virtual void OnMouseLeave(const FPointer& InPointer) override;
+	virtual FReply OnMouseMove(const FPointer& InPointer) override;
+	virtual FReply OnMouseWheel(const FPointer& InPointer) override;
+	virtual FReply OnMouseButtonDoubleClick(const FPointer& InPointer) override;
+	virtual FReply OnKeyDown(const EKeyCode& InKeyCode) override;
+	virtual FReply OnKeyUp(const EKeyCode& InKeyCode) override;
+	virtual FReply OnKeyChar(const EKeyCode& InKeyCode) override;
+	virtual FReply OnFocusReceived() override;
+	virtual void OnFocusLost() override;
 	virtual void OnFinishedPointerInput() override;
 	virtual void OnArrangeChildren(const FGeometry& AllottedGeometry, TArray<FArrangedWidget>& ArrangedChildren) const override;
-	//virtual std::optional<FVirtualPointerPosition> TranslateMouseCoordinateForCustomHitTestChild(const SWidget& ChildWidget, const FGeometry& MyGeometry, const FVector2D ScreenSpaceMouseCoordinate, const FVector2D LastScreenSpaceMouseCoordinate) const override;
-
 protected:
 	/** 뷰포트의 렌더링 및 입출력 구현 인터페이스. */
 	std::weak_ptr<ISlateViewport> ViewportInterface;
@@ -116,28 +108,22 @@ private:
 	std::weak_ptr<SWindow> CachedParentWindow;
 
 	FVector2D ViewportSize;
-
 	/** 이 뷰포트가 창의 백버퍼에 직접 렌더링하는지 여부. */
 	bool bRenderDirectlyToWindow;
 };
 
-
 class SEditorViewport : public SWidget
 {
+	using Super = SWidget;
 public:
 	SEditorViewport();
 	virtual ~SEditorViewport(); 
 
 	void Construct();
 
-	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const EKeyCode& InKeyCode/*, const FKeyEvent& InKeyEvent*/) override;
-	virtual bool SupportsKeyboardFocus() const override;
-	virtual FReply OnFocusReceived(const FGeometry& MyGeometry/*, const FFocusEvent& InFocusEvent*/) override;
-	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
-	/**
-	* @return 뷰포트가 실시간으로 업데이트되고 있다면 true를 반환합니다.
-	*/
-	bool IsRealtime() const;
+	virtual FReply OnKeyDown(const EKeyCode& InKeyCode) override;
+	virtual FReply OnFocusReceived() override;
+	virtual void Tick(const FGeometry& AllottedGeometry,  const float InDeltaTime) override;
 
 	/** @return 뷰포트가 현재 보이고 있다면 true를 반환합니다. */
 	virtual bool IsVisible() const;
@@ -175,8 +161,6 @@ protected:
 	virtual void OnIncrementRotationGridSize() {};
 	virtual void OnDecrementRotationGridSize() {};
 
-	// TODO: 여기서 Command를 바인드해주는 듯?
-	//virtual void BindCommands();
 protected:
 	/** 뷰포트 클라이언트가 제공하는 씬을 렌더링하는 뷰포트 */
 	std::shared_ptr<FSceneViewport> SceneViewport;
@@ -194,7 +178,21 @@ protected:
 
 class SLevelViewport : public SEditorViewport
 {
+	using Super = SEditorViewport;
 public:
+	void Tick(const FGeometry& ParentGeometry, float DeltaTime) override;
+
+	FReply OnKeyDown(const EKeyCode& InKeyCode) override;
+	FReply OnFocusReceived() override;
+	void OnFocusLost() override;
+	FReply OnMouseButtonDown(EMouseButton InMouseButton, const FPointer& InPointer) override;
+	FReply OnMouseButtonUp(EMouseButton InMouseButton, const FPointer& InPointer) override;
+	FReply OnMouseMove(const FPointer& InPointer) override;
+	FReply OnMouseWheel(const FPointer& InPointer) override;
+
+	void OnMouseEnter(const FPointer& InPointer) override;
+	void OnMouseLeave(const FPointer& InPointer) override;
+	
 	SLevelViewport();
 	~SLevelViewport();
-}; 
+};
