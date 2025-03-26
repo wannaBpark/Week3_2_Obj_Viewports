@@ -2,6 +2,7 @@
 #include "Core/Container/Array.h"
 #include "Core/Container/String.h"
 #include "Object/Mesh/StaticMesh.h"
+#include "MaterialEditor.h"
 class UStaticMeshComponent;
 
 class FStaticMeshInspector
@@ -30,6 +31,8 @@ private:
 
 	TArray<class UMaterial*> ComponentMaterials;
 	TArray<FObjMaterialInfo> AllMaterials;
+	MaterialEditor MaterialEditor;
 
+	bool isMaterialEditorUpdated = false;
 };
 

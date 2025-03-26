@@ -78,8 +78,6 @@ PS_INPUT mainVS(VS_INPUT input)
     PS_INPUT output;
     
     float4 position = float4(input.position.xyz, 1.0f);
-    
-    input.normal = input.position.xyz;
 
     position = mul(position, Model);
     output.worldPos = position.xyz;
@@ -119,8 +117,11 @@ float4 ComputeLight(float3 normal, float2 uv, float3 worldPosition)
     // Diffuse 처리
     {
         float4 color = g_DiffuseMap.Sample(g_sampler0, float2(uv.x, uv.y));
-        float value = dot(-GlobalLight.Direction, normalize(normal));
-        diffuseColor = color * value * GlobalLight.Diffuse * Material.Diffuse;
+        float value = saturate(dot(-GlobalLight.Direction, normalize(normal))); // 음수 값 제거
+        
+        float diffuseBoost = lerp(1.0f, 1.3f, 1 - Material.Roughness);
+        
+        diffuseColor = color * value * GlobalLight.Diffuse * Material.Diffuse * diffuseBoost;
     }
     
     // Specular 처리
@@ -134,11 +135,10 @@ float4 ComputeLight(float3 normal, float2 uv, float3 worldPosition)
         cameraPosition = normalize(cameraPosition);
         
         float value = saturate(dot(reflectionLight, cameraPosition));
-        float shininess = pow(1.f - Material.Roughness, 4.f) * 128.f;
+        float shininess = lerp(64.0f, 1.0f, 1 - saturate(Material.Roughness));
         float specular = pow(value, shininess);
-        specular = smoothstep(0.0f, 1.0f, specular);
-        //float specular = pow(value, Material.Roughness);
         
+        specular *= lerp(1.0f, 0.1f, pow(1 - Material.Roughness, 2));
         
         specularColor = GlobalLight.Specular * Material.Specular * specular;
     }
@@ -174,27 +174,4 @@ PS_OUTPUT mainPS(PS_INPUT input)
     
     return output;
 }
-
-//float4 PS(VertexOutput input) : SV_TARGET
-//{
-//    float3 normal = normalize(input.WorldNormal);
-//    float3 lightDir = normalize(LightPosition - input.WorldPos);
-    
-//    // Diffuse Lighting
-//    float diffuseIntensity = saturate(dot(normal, lightDir));
-//    float3 diffuse = diffuseIntensity * DiffuseColor;
-
-//    // Specular Lighting (옵션)
-//    float3 viewDir = normalize(CameraPosition - input.WorldPos);
-//    float3 reflectDir = reflect(-lightDir, normal);
-//    float specularIntensity = pow(saturate(dot(viewDir, reflectDir)), SpecularPower);
-//    float3 specular = specularIntensity * SpecularColor;
-
-//    // Texture
-//    float4 texColor = DiffuseTexture.Sample(Sampler, input.TexCoord);
-
-//    float3 finalColor = (diffuse + specular) * texColor.rgb;
-
-//    return float4(finalColor, texColor.a);
-//}
 

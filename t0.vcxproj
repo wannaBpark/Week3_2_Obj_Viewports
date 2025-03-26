@@ -161,6 +161,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Core\Rendering\UI\MaterialEditor.cpp" />
     <ClCompile Include="Source\Core\Container\ObjectHash.cpp" />
     <ClCompile Include="Source\Core\Rendering\D3DViewports\SSpliter.cpp" />
     <ClCompile Include="Source\Factory\Factory.cpp" />
@@ -327,6 +328,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Core\Rendering\UI\MaterialEditor.h" />
     <ClInclude Include="Source\Assets\AssetDefine.h" />
     <ClInclude Include="Source\Core\Container\Map.h" />
     <ClInclude Include="Source\Core\Container\ObjectHash.h" />

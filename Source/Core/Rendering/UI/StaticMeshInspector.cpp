@@ -49,6 +49,7 @@ void FStaticMeshInspector::Update()
 	ImGui::Begin("Static Mesh Inspector");
 	UpdateStaticMeshCombo();
 	UpdateMaterialCombo();
+	MaterialEditor.Update();
 	ImGui::End();
 }
 
@@ -104,13 +105,26 @@ void FStaticMeshInspector::UpdateMaterialCombo()
 					Component->SetMaterial(i, MatInstance);
 					// 머티리얼 배열 Refresh
 					ComponentMaterials = Component->GetMaterials();
+
+					if (MaterialEditor.IsOpen() && !IsSelected)
+					{
+						MaterialEditor.Reset();
+						MaterialEditor.Init(ComponentMaterials[i]);
+					}
 				}
 				if (IsSelected)
 				{
 					ImGui::SetItemDefaultFocus();
 				}
+
 			}
 			ImGui::EndCombo();
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button(("Edit##" + std::to_string(i)).c_str()))
+		{
+			MaterialEditor.Open(ComponentMaterials[i]);
 		}
 	}
 }
