@@ -82,6 +82,8 @@ static const ConfigMapping ConfigMappings[] = {
 
 	CONFIG_MAPPING(EEC_EditorCameraSpeed, "EditorCameraSpeed", ECS_Camera),
 	CONFIG_MAPPING(EEC_EditorCameraSensitivity, "EditorCameraSensitivity", ECS_Camera)
+
+	
 	// !TODO : EngineConfig 추가시 추가
 };
 

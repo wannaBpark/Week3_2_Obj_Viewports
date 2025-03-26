@@ -338,7 +338,7 @@ void UEngine::InitWorld()
 #pragma region Viewport and Camera Settings
     SetViewportCameras();
 #pragma endregion
-	ACamera* Camera = Cameras[2].get();
+	ACamera* Camera = Cameras[2].get(); // 원근 카메라
     FEditorManager::Get().SetCamera(Camera);
 	FTransform CameraTransform = Camera->GetActorTransform();
     // Camera ini 세팅

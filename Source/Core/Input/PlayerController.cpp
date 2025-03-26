@@ -19,9 +19,9 @@ void APlayerController::HandleCameraMovement(float DeltaTime) {
     ACamera* Camera = FEditorManager::Get().GetInputCamera(); 
     float CamSpeed = Camera->CameraSpeed;
 
+    // 입력이 안 들어올 경우 
     if (APlayerInput::Get().IsPressedMouse(true) == false)
     {
-        // Camera->SetVelocity(NewVelocity);
         Camera->SetOrthoPivot(FVector::ZeroVector);
         return;
     }
@@ -49,8 +49,7 @@ void APlayerController::HandleCameraMovement(float DeltaTime) {
     // Orthogonal 카메라는 이동만 허용 
     else if (Camera->GetProjectionMode() == ECameraProjectionMode::Orthographic)
     {
-        FVector Delta = Camera->GetRight() * (DeltaPos.X * Camera->CameraSpeed * DeltaTime)
-            + Camera->GetUp() * (-DeltaPos.Y * Camera->CameraSpeed * DeltaTime);
+        FVector Delta = Camera->GetRight() * (DeltaPos.X * Camera->CameraSpeed * DeltaTime) + Camera->GetUp() * (-DeltaPos.Y * Camera->CameraSpeed * DeltaTime);
         FVector MoveDir = Camera->GetOrthoPivot() - Delta;
         Camera->SetOrthoPivot(-Delta);
         CameraTransform.Translate(MoveDir * DeltaTime * CamSpeed * 10.f);
