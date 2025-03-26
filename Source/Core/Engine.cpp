@@ -214,10 +214,10 @@ void UEngine::Run()
 		}
 
         //각 Actor에서 TickActor() -> PlayerTick() -> TickPlayerInput() 호출하는데 지금은 Message에서 처리하고 있다.
-        //APlayerInput::Get().TickPlayerInput(); //잘못된 위치. 위에 달린 주석대로 처리해야 정상 플레이어 액터 내에서만 처리해야할것같다.
+        APlayerInput::Get().TickPlayerInput(); //잘못된 위치. 위에 달린 주석대로 처리해야 정상 플레이어 액터 내에서만 처리해야할것같다.
         //
         //// TickPlayerInput
-        //APlayerController::Get().ProcessPlayerInput(DeltaTime);
+        APlayerController::Get().ProcessPlayerInput(DeltaTime);
         
 		// ui Update
         ui.Update();

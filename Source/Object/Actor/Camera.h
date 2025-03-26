@@ -26,7 +26,8 @@ public:
     ACamera();
     ACamera(FVector Position, FVector Rotation, ECameraProjectionMode::Type ProjMode); // Constructor : Set Orthographic Camera
 
-private:    
+private:
+    FVector Pivot = FVector::ZeroVector; // 모든 Orthogonal 카메라가 공유할 Pivot
     float Near;
     float Far;
     // 화면각  

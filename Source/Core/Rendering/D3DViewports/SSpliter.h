@@ -57,6 +57,12 @@ public:
         //UE_LOG("SSplitterH: Mouse Up, stop dragging");
     }
 
+    virtual void OnMouseDown(const FPoint& MousePos) override
+    {
+        if (SideLT) SideLT->OnMouseDown(MousePos);
+        if (SideRB) SideRB->OnMouseDown(MousePos);
+    }
+
     virtual void OnKeyDown(EKeyCode Key) override 
     {
         Super::OnKeyDown(Key);
@@ -91,6 +97,7 @@ public:
 
     virtual void OnMouseDown(const FPoint& MousePos) override
     {
+        Super::OnMouseDown(MousePos);
         // 경계 영역에서만 드래그 시작하도록
         if (IsOverBorder(MousePos))
         {

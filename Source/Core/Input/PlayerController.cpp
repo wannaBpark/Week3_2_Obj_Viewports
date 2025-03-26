@@ -23,7 +23,8 @@ void APlayerController::HandleCameraMovement(float DeltaTime) {
         return;
     }
 
-    ACamera* Camera = FEditorManager::Get().GetCamera();
+    // 현재 input대상이 되는 카메라를 가져옴
+    ACamera* Camera = FEditorManager::Get().GetInputCamera(); 
     
     //전프레임이랑 비교
     //x좌표 받아와서 x만큼 x축회전
