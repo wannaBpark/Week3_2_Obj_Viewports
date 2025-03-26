@@ -45,6 +45,7 @@ public:
 	TMap<FName, FObjMaterialInfo> GetMaterials() { return Materials; }
 	TArray<FName> GetGroupNames() { return GroupNames; }
 	TMap<FName, FSubMesh> GetSubMeshes() { return SubMeshes; }
+	TMap<FName, FName> GetMaterialPerGroup() { return MaterialPerGroup; }
 
 
 private:
@@ -57,8 +58,12 @@ private:
     TArray<FNormalVertex> Vertices;
     TArray<uint32> Indices;
 	TArray<FName> GroupNames;
+	// Key : 머티리얼 이름, Value : 머티리얼 정보
     TMap<FName, FObjMaterialInfo> Materials;
+	// Key : 그룹 이름, Value : 서브메시 정보
 	TMap<FName, FSubMesh> SubMeshes;
+	// Key : 그룹 이름, Value : 머티리얼 이름
+	TMap<FName, FName> MaterialPerGroup;
 
     uint32 VerticesNum;
     uint32 IndicesNum;

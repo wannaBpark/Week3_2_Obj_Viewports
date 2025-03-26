@@ -62,8 +62,9 @@ public:
         return GroupNames;
     }
 
-    TMap<FName, FObjMaterialInfo> GetMaterials() const { return MaterialsPerGroup; }
+    TMap<FName, FObjMaterialInfo> GetMaterials() const { return MaterialsMap; }
 	TArray<FVector> GetVertices() const { return Vertices; }
+	TMap<FName, FName> GetMaterialPerGroup() const { return MaterialPerGroup; }
 
 protected:
     FString FilePath;
@@ -86,6 +87,10 @@ protected:
     TArray<FVector> Vertices;
     TArray<FVector> Normals;
     TArray<FVector2D> UVs;
+	// key는 그룹이름, value는 Face정보
     TMap<FName, TArray<FFaceInfo>> FacesPerGroup;
-	TMap<FName, FObjMaterialInfo> MaterialsPerGroup;
+	// key = 이름, value = 머티리얼 정보
+	TMap<FName, FObjMaterialInfo> MaterialsMap;
+	// key = 그룹이름, value = 머티리얼 이름
+	TMap<FName, FName> MaterialPerGroup;
 };

@@ -2,6 +2,7 @@
 #include "Object/Actor/Actor.h"
 #include "../EEnum.h"
 #include "Object/ObjectMacro.h"
+#include "Core/Math/Vector.h"
 
 class AGizmoHandle : public AActor
 {
@@ -29,6 +30,8 @@ private:
 	virtual const char* GetTypeName() override;
 
 private:
-	void DoTransform(FTransform& AT, FVector Result, AActor* Actor);
+	void DoTransform(FTransform& AT, FVector Delta, AActor* Actor);
+	FVector CachedRayResult = FVector::ZeroVector;
+
 };
 

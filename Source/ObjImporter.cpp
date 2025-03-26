@@ -89,7 +89,7 @@ void FObjImporter::Clear()
     }
     FacesPerGroup.Empty();
 
-	MaterialsPerGroup.Empty();
+	MaterialsMap.Empty();
 }
 
 TArray<uint32> FObjImporter::ParseFaceInfoPoint(const std::string& line)
@@ -145,43 +145,43 @@ bool FObjImporter::LoadMTL(const FString& FileAbsolutePath)
 		{
 			iss >> currentMaterial;
             CurrentMaterialName = FName(currentMaterial);
-            MaterialsPerGroup[CurrentMaterialName].MaterialName = CurrentMaterialName;
+            MaterialsMap[CurrentMaterialName].MaterialName = CurrentMaterialName;
 			//MaterialsPerGroup[currentMaterial] = FObjMaterialInfo();            // newmtl 토큰 파싱 시에만 새로운 Material추가 (이름 = newmtl 다음 토큰)
 		}
 		else if (token == "Ka")
 		{
-			iss >> MaterialsPerGroup[CurrentMaterialName].Ambient.X >> MaterialsPerGroup[CurrentMaterialName].Ambient.Y >> MaterialsPerGroup[CurrentMaterialName].Ambient.Z;
-			MaterialsPerGroup[CurrentMaterialName].Ambient.W = 1.0f;
+			iss >> MaterialsMap[CurrentMaterialName].Ambient.X >> MaterialsMap[CurrentMaterialName].Ambient.Y >> MaterialsMap[CurrentMaterialName].Ambient.Z;
+			MaterialsMap[CurrentMaterialName].Ambient.W = 1.0f;
 		}
 		else if (token == "Kd")
 		{
-			iss >> MaterialsPerGroup[CurrentMaterialName].Diffuse.X >> MaterialsPerGroup[CurrentMaterialName].Diffuse.Y >> MaterialsPerGroup[CurrentMaterialName].Diffuse.Z;
-			MaterialsPerGroup[CurrentMaterialName].Diffuse.W = 1.0f;
+			iss >> MaterialsMap[CurrentMaterialName].Diffuse.X >> MaterialsMap[CurrentMaterialName].Diffuse.Y >> MaterialsMap[CurrentMaterialName].Diffuse.Z;
+			MaterialsMap[CurrentMaterialName].Diffuse.W = 1.0f;
 		}
 		else if (token == "Ks")
 		{
-			iss >> MaterialsPerGroup[CurrentMaterialName].Specular.X >> MaterialsPerGroup[CurrentMaterialName].Specular.Y >> MaterialsPerGroup[CurrentMaterialName].Specular.Z;
-			MaterialsPerGroup[CurrentMaterialName].Specular.W = 1.0f;
+			iss >> MaterialsMap[CurrentMaterialName].Specular.X >> MaterialsMap[CurrentMaterialName].Specular.Y >> MaterialsMap[CurrentMaterialName].Specular.Z;
+			MaterialsMap[CurrentMaterialName].Specular.W = 1.0f;
 		}
 		else if (token == "Ke")
 		{
-			iss >> MaterialsPerGroup[CurrentMaterialName].Emissive.X >> MaterialsPerGroup[CurrentMaterialName].Emissive.Y >> MaterialsPerGroup[CurrentMaterialName].Emissive.Z;
+			iss >> MaterialsMap[CurrentMaterialName].Emissive.X >> MaterialsMap[CurrentMaterialName].Emissive.Y >> MaterialsMap[CurrentMaterialName].Emissive.Z;
 		}
 		else if (token == "Ns")
 		{
-			iss >> MaterialsPerGroup[CurrentMaterialName].Shininess;
+			iss >> MaterialsMap[CurrentMaterialName].Shininess;
 		}
 		else if (token == "Ni")
 		{
-			iss >> MaterialsPerGroup[CurrentMaterialName].OpticalDensity;
+			iss >> MaterialsMap[CurrentMaterialName].OpticalDensity;
 		}
 		else if (token == "d")
 		{
-			iss >> MaterialsPerGroup[CurrentMaterialName].Opacity;
+			iss >> MaterialsMap[CurrentMaterialName].Opacity;
 		}
 		else if (token == "illum")
 		{
-			iss >> MaterialsPerGroup[CurrentMaterialName].Illum;
+			iss >> MaterialsMap[CurrentMaterialName].Illum;
 		}
 		else if (token == "map_Kd")
 		{
@@ -195,10 +195,10 @@ bool FObjImporter::LoadMTL(const FString& FileAbsolutePath)
 			// 절대 경로로 수정
 			fs::path TextureAbsolutePath = mtlPath / fs::path(texturePath);
 			//TextureAbsolutePath = fs::canonical(TextureAbsolutePath);
-			MaterialsPerGroup[CurrentMaterialName].TexturePath = FString(TextureAbsolutePath.string());
+			MaterialsMap[CurrentMaterialName].TexturePath = FString(TextureAbsolutePath.string());
 
             // 텍스쳐 이름은 경로를 제거하고 pure한 이름만 남긴다
-			MaterialsPerGroup[CurrentMaterialName].TextureName = FString(FPath::GetPureFilename(texturePath));
+			MaterialsMap[CurrentMaterialName].TextureName = FString(FPath::GetPureFilename(texturePath));
 		}
 	}
 
@@ -224,6 +224,8 @@ void FObjImporter::ReadFile()
 	std::string ObjStem = ObjPath.stem().string();
 
 	FString GroupName = "Default";
+
+    int GroupIdx = 0;
 
     std::string Line; // std::string을 참조해야하므로, FString 대신 std::string 사용
     while (std::getline(File, Line))
@@ -281,10 +283,14 @@ void FObjImporter::ReadFile()
             };
             UVs.Add(UV);
         }
+        else if (Key == "g")
+        {
+			GroupName = FString(Tokens[1] + TEXT("_") + std::to_string(GroupIdx++));
+        }
         else if (Key == "usemtl")
         {
-			GroupName = Tokens[1];
 			FacesPerGroup.Add(FName(GroupName), TArray<FFaceInfo>());
+			MaterialPerGroup.Add(FName(GroupName), FName(Tokens[1]));
         }
         else if (Key == "f")
         {

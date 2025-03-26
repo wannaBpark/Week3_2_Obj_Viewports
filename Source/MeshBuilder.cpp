@@ -26,6 +26,8 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 	// 그룹 이름과 머티리얼 Map을 가져온다
 	GroupNames = Reader.GetGroupNames();
 	Materials = Reader.GetMaterials();
+	MaterialPerGroup = Reader.GetMaterialPerGroup();
+
 
 	CreateTextureSRV();
     
@@ -125,7 +127,7 @@ bool FMeshBuilder::BuildMeshFromObj(const FString& ObjPath)
 		SubMesh.Index = SubMeshIndex++;
 		SubMesh.NumIndices = IndexCount;
 		SubMesh.GroupName = GroupName;
-		SubMesh.MaterialName = GroupName;
+		SubMesh.MaterialName = MaterialPerGroup[GroupName];
 		SubMeshes.Add(GroupName, SubMesh);
     }
 

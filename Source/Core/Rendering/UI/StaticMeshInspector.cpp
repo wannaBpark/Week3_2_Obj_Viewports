@@ -90,6 +90,8 @@ void FStaticMeshInspector::UpdateMaterialCombo()
 {
 	for (int i = 0; i < ComponentMaterials.Num(); i++)
 	{
+		if (ComponentMaterials[i] == nullptr)
+			continue;
 		MaterialNameStr = ComponentMaterials[i]->GetMaterialName().ToString();
 		const char* MaterialName = MaterialNameStr.c_char();
 		if (ImGui::BeginCombo(("Material" + std::to_string(i)).c_str(), MaterialName))

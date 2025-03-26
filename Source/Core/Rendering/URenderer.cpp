@@ -899,6 +899,7 @@ void URenderer::OnUpdateWindowSize(int Width, int Height)
             0.0f, 1.0f
         };
 
+
         CreateViewportInfos();
     }
 }
