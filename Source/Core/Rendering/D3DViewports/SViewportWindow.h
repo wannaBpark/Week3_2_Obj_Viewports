@@ -49,17 +49,13 @@ public:
             UEngine::Get().GetRenderer()->SetViewport(DXViewport);
             UEngine::Get().GetWorld()->Render();
             bRenderable = false;
-            // TickPlayerInput
-            //UEngine::Get().
-            // TODO : 내 윈도우를 hover하며 카메라조작하다가
-            // 다른 윈도우에 점유되면 안움직이도록 해야 함
         }
     }
 
     virtual void OnMouseDown(const FPoint& MousePos) override
     {
-        //UE_LOG("MOUSE Down By Viewport %d %d", Rect.X, Rect.Y);
-        if (IsHover(MousePos) /*&& !bIsAnyDragging*/)
+        // ImGui에 대한 마우스 클릭을 예외처리 합니다
+        if (IsHover(MousePos) && !ImGui::GetIO().WantCaptureMouse)
         {
             bIsDragging = bIsAnyDragging = true;
             FEditorManager::Get().SetInputCamera(this->Camera.get());

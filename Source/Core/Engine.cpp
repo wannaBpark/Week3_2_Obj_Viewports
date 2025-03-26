@@ -211,11 +211,8 @@ void UEngine::Run()
 		if (World)
 		{
 			World->Tick(DeltaTime);
-            // 변경 : 각 뷰포트가 모두 렌더 한 후
             RootWindow->Render();
             RootWindow->UpdateLayout();
-            
-
 		    World->LateTick(DeltaTime);
 		}
 
