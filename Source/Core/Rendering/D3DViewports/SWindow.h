@@ -66,6 +66,7 @@ public:
 	}
 	virtual void OnMouseUp(const FPoint& MousePos) { bIsDragging = false; }
 	virtual void OnKeyDown(EKeyCode Key) {}
-    
+	virtual void SetSplitRatio(float InSplitRatio) {}
+	virtual float GetSplitRatio() const { return 0.5f;  }
 };
 

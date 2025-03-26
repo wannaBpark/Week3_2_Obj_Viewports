@@ -23,7 +23,7 @@ void APlayerController::HandleCameraMovement(float DeltaTime) {
     if (APlayerInput::Get().IsPressedMouse(true) == false)
     {
         Camera->SetOrthoPivot(FVector::ZeroVector);
-        return;
+        return; 
     }
 
     // 현재 input대상이 되는 카메라를 가져옴
@@ -51,9 +51,9 @@ void APlayerController::HandleCameraMovement(float DeltaTime) {
     {
         FVector Delta = Camera->GetRight() * (DeltaPos.X * Camera->CameraSpeed * DeltaTime) + Camera->GetUp() * (-DeltaPos.Y * Camera->CameraSpeed * DeltaTime);
         FVector MoveDir = Camera->GetOrthoPivot() - Delta;
-        Camera->SetOrthoPivot(-Delta);
+        Camera->SetOrthoPivot(-Delta);              // Orthogonal 카메라가 움직일 delta 벡터
         CameraTransform.Translate(MoveDir * DeltaTime * CamSpeed * 10.f);
-        Camera->SetActorTransform(CameraTransform); //임시용
+        Camera->SetActorTransform(CameraTransform); 
         return;
     }
     

@@ -338,23 +338,37 @@ void UEngine::InitWorld()
 #pragma region Viewport and Camera Settings
     SetViewportCameras();
 #pragma endregion
+#pragma region Get SplitRatio Camera Transfrom From INI
+    using enum EEngineConfigValueType;
+    RootWindow->SetSplitRatio(EngineConfig->GetEngineConfigValue<float>(EEC_HorizontalSplitRatio));
+    RootWindow->GetSideLT()->SetSplitRatio(EngineConfig->GetEngineConfigValue<float>(EEC_TopVerticalSplitRatio));
+    RootWindow->GetSideRB()->SetSplitRatio(EngineConfig->GetEngineConfigValue<float>(EEC_BottomVerticalSplitRatio));
+    RootWindow->SaveSplitterInfo();
+    RootWindow->UpdateLayout();
+
+
+    UE_LOG("Load Split Ratio Value : %.2f %.2f %.2f", 
+        RootWindow->GetSplitRatio(), EngineConfig->GetEngineConfigValue<float>(EEC_TopVerticalSplitRatio),
+        EngineConfig->GetEngineConfigValue<float>(EEC_BottomVerticalSplitRatio)
+    );
+
 	ACamera* Camera = Cameras[2].get(); // 원근 카메라
     FEditorManager::Get().SetCamera(Camera);
 	FTransform CameraTransform = Camera->GetActorTransform();
     // Camera ini 세팅
-    float CamPosX = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraPosX);
-	float CamPosY = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraPosY);
-	float CamPosZ = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraPosZ);
+    float CamPosX = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraPosX);
+	float CamPosY = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraPosY);
+	float CamPosZ = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraPosZ);
 	CameraTransform.SetPosition(FVector(CamPosX, CamPosY, CamPosZ));
     
-	float CamRotX = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotX);
-	float CamRotY = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotY);
-	float CamRotZ = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotZ);
-	float CamRotW = EngineConfig->GetEngineConfigValue<float>(EEngineConfigValueType::EEC_EditorCameraRotW);
+	float CamRotX = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraRotX);
+	float CamRotY = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraRotY);
+	float CamRotZ = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraRotZ);
+	float CamRotW = EngineConfig->GetEngineConfigValue<float>(EEC_EditorCameraRotW);
     CameraTransform.SetRotation(FQuat(CamRotX, CamRotY, CamRotZ, CamRotW));
 
 	Camera->SetActorTransform(CameraTransform);
-
+#pragma endregion
 
     World->SpawnActor<AAxis>();
     APicker* Picker = World->SpawnActor<APicker>();
@@ -383,6 +397,7 @@ void UEngine::ShutdownWindow()
 
 	ui.Shutdown();
 
+    RootWindow->SaveSplitterInfo();
     EngineConfig->SaveAllConfig();
 	delete EngineConfig;
 
@@ -451,7 +466,7 @@ UObject* UEngine::GetObjectByUUID(uint32 InUUID) const
 
 void UEngine::SetViewportCameras()
 {
-#pragma region Multi Viewports               // 
+#pragma region Multi Viewports               
     auto topLeft = std::make_shared<SViewportWindow>();
     auto topRight = std::make_shared<SViewportWindow>();
     auto bottomLeft = std::make_shared<SViewportWindow>();
@@ -469,14 +484,13 @@ void UEngine::SetViewportCameras()
         static_cast<uint32>(ScreenHeight) // Height
         });
     RootWindow->UpdateLayout();
-    //UE_LOG("InScreen Resolution : %d %d", static_cast<uint32>(ScreenWidth), static_cast<uint32>(ScreenHeight));
 #pragma endregion
 
 #pragma region Multi Camera Initialization
-    FTransform ZY = FTransform(FVector(-5, 0, 1), FVector(0, 0, 0), FVector(1, 1, 1));
-    FTransform ZX = FTransform(FVector(0, 10, 1), FVector(0, 0, -90), FVector(1, 1, 1));
-    FTransform XY = FTransform(FVector(0, 0, 5), FVector(0,89.9,-89.9), FVector(1, 1, 1));
-    FTransform YX = FTransform(FVector(0, 0, -10), FVector(0, -89.9, -89.9), FVector(1, 1, 1));
+    FTransform ZY = FTransform(FVector(-5, 0, 1), FVector(0, 0,     0),   FVector(1, 1, 1));
+    FTransform ZX = FTransform(FVector(0, 10, 1), FVector(0, 0,   -90),   FVector(1, 1, 1));
+    FTransform XY = FTransform(FVector(0, 0, 5),  FVector(0, 89.9,-89.9), FVector(1, 1, 1));
+    FTransform YX = FTransform(FVector(0, 0, -10),FVector(0,-89.9,-89.9), FVector(1, 1, 1));
 
     ACamera* CamZY = World->SpawnActor<ACamera>(); CamZY->SetActorTransform(ZY); CamZY->SetProjectionMode(ECameraProjectionMode::Orthographic);
     ACamera* CamZX = World->SpawnActor<ACamera>(); CamZX->SetActorTransform(ZX); CamZX->SetProjectionMode(ECameraProjectionMode::Orthographic);
@@ -490,15 +504,8 @@ void UEngine::SetViewportCameras()
     Cameras.Add(std::make_shared<ACamera>(*CamXY));
     Cameras.Add(std::make_shared<ACamera>(*CamYX));
 
-    if (topLeft)     topLeft->SetCamera(Cameras[0], 0);
-    if (topRight)    topRight->SetCamera(Cameras[1] , 1);
-    if (bottomLeft)  bottomLeft->SetCamera(Cameras[2], 2);
-    if (bottomRight) bottomRight->SetCamera(Cameras[3], 3); 
-    // 원랜 0,1,2,3순서이지만 카메라 마지막 부분만 마우스 조작되는 관계로 0132로 해놓음
-    // TODO : 위에서 아래로 내려다보는 카메라 FIX
-    // TODO : Hover 후 키입력 시 카메라 모드 변경하도록
-
-    //FEditorManager::Get().SetCamera(CamPerspective);
+    topLeft->SetCamera(Cameras[0], 0);    topRight->SetCamera(Cameras[1], 1);
+    bottomLeft->SetCamera(Cameras[2], 2); bottomRight->SetCamera(Cameras[3], 3); 
 
 #pragma endregion
 }
