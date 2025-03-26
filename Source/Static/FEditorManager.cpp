@@ -53,6 +53,9 @@ void FEditorManager::SelectActor(AActor* NewActor)
         SelectedActor->Pick();
         GizmoHandle->SetActive(true);
         BoundingBoxComp->SetCanBeRendered(true);
+        USceneComponent* root = SelectedActor->GetRootComponent();
+        FVector NewSize = root->GetMax() - root->GetMin();
+        BoundingBoxComp->SetRelativeScale3D(NewSize);
 		StringComp->SetActive(true);
         std::string ActorUUID = "UID: " + std::to_string(NewActor->GetUUID());
         StringComp->SetCharComps(ActorUUID, "koverwatch.png");

@@ -3,7 +3,6 @@
 #include "Core/Engine.h"
 #include "Object/USceneComponent.h"
 #include "Primitive/PrimitiveVertices.h"
-#include "Core/Math/Plane.h"
 #include "Core/Rendering/RenderResource.h"
 #include "Object/ObjectMacro.h"
 
@@ -13,7 +12,7 @@
 
 class UBillboardUtilComponent;
 
-class UPrimitiveComponent : public USceneComponent, public FRenderResource
+class UPrimitiveComponent : public USceneComponent
 {
 	DECLARE_CLASS(UPrimitiveComponent, USceneComponent)
 	using Super = USceneComponent;
@@ -372,7 +371,8 @@ public:
 	void UpdateConstantData(URenderer*& Renderer) override;
 };
 
-class UBoundingBoxComp : public UPrimitiveComponent {
+class UBoundingBoxComp : public UPrimitiveComponent
+{
 	DECLARE_CLASS(UBoundingBoxComp, UPrimitiveComponent)
 	using Super = UPrimitiveComponent;
 

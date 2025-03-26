@@ -161,6 +161,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Core\Container\ObjectHash.cpp"/>
     <ClCompile Include="Source\Core\Rendering\UI\MaterialEditor.cpp" />
     <ClCompile Include="Source\Core\Container\ObjectHash.cpp" />
     <ClCompile Include="Source\Core\Rendering\D3DViewports\SSpliter.cpp" />
