@@ -156,6 +156,11 @@ BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FCameraPositionConstant)
     SHADER_PARAMETER(float, Padding)
 END_GLOBAL_SHADER_PARAMETER_STRUCT()
 
+BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FStaticPickingConstants)
+    SHADER_PARAMETER(FVector4, UUIDColor)
+    SHADER_PARAMETER(uint32, bIsPicked)
+END_GLOBAL_SHADER_PARAMETER_STRUCT()
+
 
 //struct FLightConstants {
 //    FMatrix Model;              // 오프셋: 0,    크기: 64바이트
