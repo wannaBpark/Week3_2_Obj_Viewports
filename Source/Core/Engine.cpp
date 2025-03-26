@@ -48,7 +48,7 @@ LRESULT UEngine::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         APlayerInput::Get().KeyDown(Key);
         if (EngineInstance.RootWindow) // RootWindow가 존재하고, 중복입력이 아닐때에만 키 이벤트 전달
         {
-            if ((Key == EKeyCode::F || Key == EKeyCode::_1) && !(lParam & 0x40000000))
+            if ((Key == EKeyCode::F || Key == EKeyCode::T) && !(lParam & 0x40000000))
             {
                 EngineInstance.RootWindow->OnKeyDown(Key);
             }
@@ -332,9 +332,16 @@ void UEngine::InitWorld()
 #pragma endregion
 #pragma region Get SplitRatio Camera Transfrom From INI
     using enum EEngineConfigValueType;
-    RootWindow->SetSplitRatio(EngineConfig->GetEngineConfigValue<float>(EEC_HorizontalSplitRatio));
-    RootWindow->GetSideLT()->SetSplitRatio(EngineConfig->GetEngineConfigValue<float>(EEC_TopVerticalSplitRatio));
-    RootWindow->GetSideRB()->SetSplitRatio(EngineConfig->GetEngineConfigValue<float>(EEC_BottomVerticalSplitRatio));
+    float HorizontalRatio = EngineConfig->GetEngineConfigValue<float>(EEC_HorizontalSplitRatio);
+    float TopRatio = EngineConfig->GetEngineConfigValue<float>(EEC_TopVerticalSplitRatio);
+    float BottomRatio = EngineConfig->GetEngineConfigValue<float>(EEC_BottomVerticalSplitRatio);
+    HorizontalRatio = max(HorizontalRatio, 0.1f);
+    TopRatio = max(TopRatio, 0.1f);
+    BottomRatio = max(BottomRatio, 0.1f);
+    RootWindow->SetSplitRatio(HorizontalRatio);
+    RootWindow->GetSideLT()->SetSplitRatio(TopRatio);
+    RootWindow->GetSideRB()->SetSplitRatio(BottomRatio);
+    
     RootWindow->SaveSplitterInfo();
     RootWindow->UpdateLayout();
 

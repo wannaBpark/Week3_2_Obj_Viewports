@@ -1,4 +1,6 @@
 #include "StaticMeshComponent.h"
+#include <cfloat>
+#include "Object/Actor/Actor.h"
 #include "Object/Mesh/ObjManager.h"
 #include "Object/Mesh/UStaticMesh.h"
 #include "Object/Material/Material.h"
@@ -10,6 +12,7 @@ void UStaticMeshComponent::Tick(float DeltaTime)
 
 void UStaticMeshComponent::Render()
 {
+	
 	UEngine::Get().GetRenderer()->RenderMesh(this);
 }
 
@@ -54,6 +57,28 @@ void UStaticMeshComponent::CreateVertexBuffer()
 
 	auto Vertices = StaticMesh->GetStaticMeshAsset()->Vertices;
 	int Size = Vertices.Num();
+
+	FVector VertexMin(FLT_MAX, FLT_MAX, FLT_MAX);
+	FVector VertexMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+	for (int vertexIndex = 0; vertexIndex < Size; ++vertexIndex)
+	{
+		const FVector& Position = Vertices[vertexIndex].Position;
+
+		VertexMin.X = FMath::Min(VertexMin.X, Position.X);
+		VertexMax.X = FMath::Max(VertexMax.X, Position.X);
+
+		VertexMin.Y = FMath::Min(VertexMin.Y, Position.Y);
+		VertexMax.Y = FMath::Max(VertexMax.Y, Position.Y);
+
+		VertexMin.Z = FMath::Min(VertexMin.Z, Position.Z);
+		VertexMax.Z = FMath::Max(VertexMax.Z, Position.Z);
+	}
+	AActor* owner = GetOwner();
+	USceneComponent* Root = owner->GetRootComponent();
+
+	Root->SetMinMax(VertexMin, VertexMax);
+	
 	VertexBuffer = UEngine::Get().GetRenderer()->CreateVertexBuffer(Vertices.GetData(), sizeof(FNormalVertex) * Size);
 }
 

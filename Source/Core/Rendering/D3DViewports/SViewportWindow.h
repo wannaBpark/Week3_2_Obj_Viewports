@@ -90,7 +90,7 @@ public:
             if (!bFullScreen && bIsAnyFullScreen) { return; }
             ToggleFullScreen();
         }
-        else if (Key == EKeyCode::_1) {
+        else if (Key == EKeyCode::T) {
             CycleCamera();
         }
     }

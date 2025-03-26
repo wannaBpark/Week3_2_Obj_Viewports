@@ -239,6 +239,7 @@ void URenderer::CreateConstantBuffer()
     idx = CreateConstantBuffer<FGlobalLightConstant>();           // Lighting 적용 Global light : 7
     idx = CreateConstantBuffer<FMaterialConstant>();           // Lighting 적용 material : 8
     idx = CreateConstantBuffer<FCameraPositionConstant>();           // Lighting 적용 camera position : 9
+    idx = CreateConstantBuffer<FStaticPickingConstants>();          // Static Mesh용 picking CBuffer : 10
     
     UE_LOG("constantbuffer size : %d", idx);
 }
@@ -946,6 +947,7 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
     ConstantBufferMap[7].Get(), // GlobalLightConstant
     ConstantBufferMap[9].Get(),  // CameraPositionConstant
     ConstantBufferMap[8].Get(), // MaterialConstant
+    ConstantBufferMap[10].Get(),
     };
     DeviceContext->PSSetConstantBuffers(0, _countof(psConstantBuffers), psConstantBuffers);
 
@@ -984,6 +986,29 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
     };
 
     UpdateBuffer(camPosConstant, 9);
+
+    FVector4 indexColor = APicker::EncodeUUID(MeshComp->GetUUID());
+    indexColor /= 255.0f;
+    bool bIsPicked;
+    if (MeshComp->GetOwner()->IsGizmoActor() == false)
+    {
+        if (MeshComp->GetOwner() == FEditorManager::Get().GetSelectedActor())
+        {
+            bIsPicked = true;
+            //UE_LOG("ispicked ");
+        }
+        else
+        {
+            bIsPicked = false;
+            //UE_LOG("bisunpicked ");
+        }
+    }
+    FStaticPickingConstants pickingConstant = {
+        .UUIDColor = indexColor,
+        .bIsPicked = bIsPicked,
+    };
+    UpdateBuffer(pickingConstant, 10);
+
 
     TMap<FName, FSubMesh>& SubMeshes = MeshComp->StaticMesh->GetStaticMeshAsset()->SubMeshes;
 

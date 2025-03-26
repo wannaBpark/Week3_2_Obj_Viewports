@@ -30,6 +30,8 @@ public:
 
 	void SetRelativeTransform(const FTransform& InTransform);
 
+	void SetRelativeScale3D(const FVector& InScale3D) { RelativeTransform.SetScale(InScale3D); }
+	
 	void Pick(bool bPicked);
 public:
 	bool IsPicked() const { return bIsPicked; }
@@ -54,4 +56,17 @@ public:
 	// UActorComponent을(를) 통해 상속됨
 	void LoadAndConstruct(const FActorComponentInfo Info) override;
 	FActorComponentInfo GetActorComponentInfo() override;
+
+public:
+	inline FVector GetMin() const {return Min;}
+	inline FVector GetMax() const { return Max;}
+	inline void SetMinMax(const FVector& InMin, const FVector& InMax)
+	{
+		Min = InMin;
+		Max = InMax;
+	}
+	
+protected:
+	FVector Min = FVector::ZeroVector;
+	FVector Max = FVector::ZeroVector;
 };

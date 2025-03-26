@@ -82,7 +82,10 @@ void APicker::LateTick(float DeltaTime)
         UActorComponent* PickedComponent = GetAcotrByPixelPicking(pt);
         //UActorComponent* PickedComponent = nullptr; // 테스트용 : 픽셀 피킹 없이 OBB 레이 잘 쏘도록 WIP
         if (PickedComponent != nullptr)
+        {
             if (SetSelectActor(PickedComponent)) return;
+        }
+
 
         // 검출된 오브젝트가 없을 시 RayTracing으로도 검사
         TArray<FHitResult> resultAll;
@@ -93,7 +96,9 @@ void APicker::LateTick(float DeltaTime)
         if (resultAll.Len() != 0 && resultAll[0].bBlockingHit) {
             PickedComponent = dynamic_cast<UActorComponent*>(resultAll[0].hitObject);
             if (PickedComponent != nullptr)
+            {
                 if (SetSelectActor(PickedComponent)) return;
+            }
         }
     }
 }
@@ -167,7 +172,8 @@ void APicker::PickWorldGizmo() {
 }
 
 
-bool APicker::SetSelectActor(const UActorComponent* actorComponent) {
+bool APicker::SetSelectActor(const UActorComponent* actorComponent) 
+{
     // null이라면 return false
     AActor* actor = actorComponent->GetOwner();
     if (actor == nullptr) return false;
