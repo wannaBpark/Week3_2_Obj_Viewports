@@ -130,11 +130,17 @@ public:
 
     ValueType& FindOrAdd(const KeyType& Key)
     {
-        if (ValueType* Value = Find(Key))
+        auto It = PrivateMap.find(Key);
+        if (It != PrivateMap.end())
         {
-            return *Value;
+            return It->second;
         }
-        return Emplace(Key);
+        else
+        {
+            // 기본 생성자로 값을 생성하여 삽입
+            auto Pair = PrivateMap.emplace(Key, ValueType());
+            return Pair.first->second;
+        }
     }
 
     // 크기 관련

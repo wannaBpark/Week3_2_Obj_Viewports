@@ -4,6 +4,8 @@
 #include <cctype>
 #include <type_traits>
 
+#include "Core/HAL/PlatformType.h"
+
 
 template <typename T>
 struct TCString

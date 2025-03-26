@@ -651,11 +651,7 @@ public:
 	* 초기 로드 후, disregard pool을 닫아서 새 객체가 GC를 사용할 수 있도록 합니다
 	*/
 	void CloseDisregardForGC();
-
-	bool IsOpenForDisregardForGC() const
-	{
-		return bOpenForDisregardForGC;
-	}
+	
 
 	bool DisregardForGCEnabled() const
 	{
@@ -1143,7 +1139,7 @@ public:
 	}
 
 	/** Returns an index to a new cluster */
-	int32 AllocateCluster(int32 InRootObjectIndex);
+	//int32 AllocateCluster(int32 InRootObjectIndex);
 
 	/** Frees the cluster at the specified index */
 	void FreeCluster(int32 InClusterIndex);

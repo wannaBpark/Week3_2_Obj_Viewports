@@ -258,10 +258,8 @@ public:
 
 	using Super::begin;
 	using Super::end;
-	using Super::GetAllocatedSize;
 	using Super::Find;
 	using Super::Num;
-	using Super::FindChecked;
 
 	FORCEINLINE void LockReadOnly()
 	{
@@ -468,7 +466,7 @@ void GetObjectsOfClass(const UClass* ClassToLookFor, TArray<UObject*>& Results, 
 		}
 	, bIncludeDerivedClasses, ExclusionFlags, ExclusionInternalFlags);
 
-	static_assert(Results.Num() <= UEngine::Get().GObjects.Num()); // otherwise we have a cycle in the outer chain, which should not be possible
+	// assert(Results.Num() <= UEngine::Get().GObjects.Num()); // otherwise we have a cycle in the outer chain, which should not be possible
 }
 
 

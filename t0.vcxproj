@@ -295,7 +295,6 @@
     <ClCompile Include="Source\Object\Actor\Sphere.cpp" />
     <ClCompile Include="Source\Core\Container\StringView.cpp" />
     <ClCompile Include="Source\Object\UObejctIterator.cpp" />
-    <ClCompile Include="Source\Object\UObjectArray.cpp" />
     <ClCompile Include="URaycastSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -470,7 +469,6 @@
     <ClInclude Include="Source\Core\Container\StringView.h" />
     <ClInclude Include="UColliders.h" />
     <ClInclude Include="Source\Object\UObejctIterator.h" />
-    <ClInclude Include="Source\Object\UObjectArray.h" />
     <ClInclude Include="URaycastSystem.h" />
   </ItemGroup>
   <ItemGroup>

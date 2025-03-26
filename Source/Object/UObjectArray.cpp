@@ -252,12 +252,12 @@ void FUObjectArray::RemoveUObjectDeleteListener(FUObjectDeleteListener* Listener
 
 void FUObjectArray::RemoveObjectFromDeleteListeners(UObjectBase* Object)
 {
-    int32 Index = Object->InternalIndex;
+    // int32 Index = Object->InternalIndex;
     // Iterate in reverse order so that when one of the listeners removes itself from the array inside of NotifyUObjectDeleted we don't skip the next listener.
-    for (int32 ListenerIndex = UObjectDeleteListeners.Num() - 1; ListenerIndex >= 0; --ListenerIndex)
-    {
-        UObjectDeleteListeners[ListenerIndex]->NotifyUObjectDeleted(Object, Index);
-    }
+    // for (int32 ListenerIndex = UObjectDeleteListeners.Num() - 1; ListenerIndex >= 0; --ListenerIndex)
+    // {
+    //     UObjectDeleteListeners[ListenerIndex]->NotifyUObjectDeleted(Object, Index);
+    // }
 }
 
 bool FUObjectArray::IsValid(const UObjectBase* Object) const
