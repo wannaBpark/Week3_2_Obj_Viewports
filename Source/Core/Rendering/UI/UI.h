@@ -99,4 +99,9 @@ private:
 
 	// staticmesh inspector
 	class FStaticMeshInspector* StaticMeshInspector = nullptr;
+
+public:
+	void OnStaticMeshImported(class FStaticMesh* NewStaticMesh);
+private:
+	void ImportFile();
 };

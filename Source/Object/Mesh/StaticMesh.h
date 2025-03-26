@@ -5,7 +5,7 @@
 #include "ObjImporter.h"
 #include "Core/Container/String.h"
 #include "Object/NameTypes.h"
-
+#include "Serialization/Archive.h"
 
 struct FNormalVertex
 {
@@ -14,6 +14,15 @@ struct FNormalVertex
 	FVector Tangent = FVector();
 	FVector4 Color = FVector4();
 	FVector2D UV = FVector2D();
+
+	void Serialize(FArchive& Ar) const
+	{
+		Ar << Position << Normal << Tangent << Color << UV;
+	}
+	void Deserialize(FArchive& Ar)
+	{
+		Ar >> Position >> Normal >> Tangent >> Color >> UV;
+	}
 };
 
 /*
@@ -32,6 +41,17 @@ struct FSubMesh
 
 	//uint32 TextureIndex = 0;
 	FName MaterialName = "Default";
+
+	void Serialize(FArchive& Ar) const
+	{
+		FString MaterialNameDebug = MaterialName.ToString();
+
+		Ar << GroupName << Index << StartIndex << NumIndices << MaterialName;
+	}
+	void Deserialize(FArchive& Ar)
+	{
+		Ar >> GroupName >> Index >> StartIndex >> NumIndices >> MaterialName;
+	}
 };
 /*
 * 가공된 메시 [실제] 데이터 구조체
@@ -41,7 +61,8 @@ struct FSubMesh
 */
 struct FStaticMesh
 {
-    FString PathFileName;
+    FString Name;
+	FString Path;
 
 	// 버텍스, 노말, uv, 탄젠트, 버텍스 컬러 정보
     TArray<FNormalVertex> Vertices;
@@ -52,6 +73,16 @@ struct FStaticMesh
 
 	// Submesh정보
 	TMap<FName, FSubMesh> SubMeshes;
+
+	void Serialize(FArchive& Ar) const
+	{
+		Ar << Name << Path << Vertices << Indices << GroupNames << SubMeshes;
+	}
+
+	void Deserialize(FArchive& Ar)
+	{
+		Ar >> Name >> Path >> Vertices >> Indices >> GroupNames >> SubMeshes;
+	}
 };
 
 // Obj파일의 Face정보를 저장하는 구조체. UV, Normal의 데이터가 없을 경우에 대비해 -1로 초기화
@@ -78,5 +109,18 @@ struct FObjMaterialInfo
 	FName TextureName;
 	uint32 TextureMapIndex;
 	FString TexturePath;
+
+	void Serialize(FArchive& Ar) const
+	{
+		FString DebugMaterialName = MaterialName.ToString();
+
+		Ar << MaterialName << Ambient << Diffuse << Specular << Emissive << 
+			Shininess << Opacity << OpticalDensity << Illum << TextureName << TextureMapIndex << TexturePath;
+	}
+	void Deserialize(FArchive& Ar)
+	{
+		Ar >> MaterialName >> Ambient >> Diffuse >> Specular >> Emissive >>
+			Shininess >> Opacity >> OpticalDensity >> Illum >> TextureName >> TextureMapIndex >> TexturePath;
+	}
 };
 

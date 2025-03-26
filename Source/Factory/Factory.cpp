@@ -6,6 +6,22 @@
 
 namespace fs = std::filesystem;
 
+bool FFactory::ImportFile(const FString& FilePath)
+{
+	std::unique_ptr<FFactory> Factory = CreateFactory(FilePath);
+
+	if (Factory)
+	{
+		// 해당 확장자에 맞는 Factory가 존재한다면 Import
+		// FilePath를 상대경로로 만들어줘야 함
+		
+		return Factory->Import(FilePath);
+	}
+
+	UE_LOG("Unsupported File type");
+	return false;
+}
+
 std::unique_ptr<FFactory> FFactory::CreateFactory(const FString& InExtenstion)
 {
 	FString Extension = GetFileExtension(InExtenstion);

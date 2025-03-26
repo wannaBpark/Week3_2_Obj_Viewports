@@ -122,15 +122,15 @@ TArray<uint32> FObjImporter::ParseFaceInfoPoint(const std::string& line)
 	return Infos;
 }
 #include <filesystem>
+#include <Factory/Path.h>
 namespace fs = std::filesystem;
 
-bool FObjImporter::LoadMTL(const FString& filename)
+bool FObjImporter::LoadMTL(const FString& FileAbsolutePath)
 {
-    FString FileName = TEXT("Assets/") + filename;
-	std::ifstream file(*FileName);
+	std::ifstream file(*FileAbsolutePath);
+	fs::path mtlPath = fs::path(*FileAbsolutePath).parent_path();
 	if (!file.is_open()) return false;
 
-	fs::path mtlPath = fs::path(*FileName).parent_path();
 	std::string currentMaterial;
 	std::string line;
 
@@ -185,15 +185,20 @@ bool FObjImporter::LoadMTL(const FString& filename)
 		}
 		else if (token == "map_Kd")
 		{
+            // 이 경로는 Import하는 시점의 texture의 Path
+            // 텍스쳐가 mtl과 같은 폴더에 존재할 경우 상대경로, 아니라면 pc의 절대경로가 된다
+            // 상대 경로라면, 절대 경로로 수정이 필요하다
+            // 즉, Texture를 textures 폴더로 옮긴 후 해당 폴더의 경로로 수정되어야 한다.
 			std::string texturePath;
 			std::getline(iss >> std::ws, texturePath);
-			fs::path fullPath = fs::path(texturePath);
-			if (fullPath.is_relative())
-			{
-				fullPath = mtlPath / fullPath;
-			}
-			MaterialsPerGroup[CurrentMaterialName].TexturePath = FString(fullPath.string());
-			MaterialsPerGroup[CurrentMaterialName].TextureName = FString(texturePath);
+
+			// 절대 경로로 수정
+			fs::path TextureAbsolutePath = mtlPath / fs::path(texturePath);
+			//TextureAbsolutePath = fs::canonical(TextureAbsolutePath);
+			MaterialsPerGroup[CurrentMaterialName].TexturePath = FString(TextureAbsolutePath.string());
+
+            // 텍스쳐 이름은 경로를 제거하고 pure한 이름만 남긴다
+			MaterialsPerGroup[CurrentMaterialName].TextureName = FString(FPath::GetPureFilename(texturePath));
 		}
 	}
 
@@ -213,6 +218,10 @@ void FObjImporter::ReadFile()
     {
         File.open(*FilePath);
     }
+    // 원본 obj파일 경로 파싱
+    fs::path ObjPath(FilePath.c_char());
+    fs::path ObjDirectory = ObjPath.parent_path();
+	std::string ObjStem = ObjPath.stem().string();
 
 	FString GroupName = "Default";
 
@@ -234,8 +243,13 @@ void FObjImporter::ReadFile()
         // 사용할 머티리얼 파일 로드
         if (Key == "mtllib")
         {
-			FString MtlFileName = FString(Tokens[1].c_str());
-			LoadMTL(MtlFileName);
+            // !NOTE : Mtl은 Obj와 같은 경로에 있어야 한다!
+            // 여기서 같은 경로
+            fs::path MtlFileName(Tokens[1]);
+			fs::path MtlFilePath = ObjDirectory / MtlFileName;
+            MtlFilePath = fs::canonical(MtlFilePath);
+
+			LoadMTL(MtlFilePath.string());
         }
 
         if (Key == "v")

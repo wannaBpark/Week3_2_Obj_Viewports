@@ -13,15 +13,19 @@
 class FObjManager
 {
 public:
-	static FStaticMesh* LoadObjStaticMeshAsset(const FString& PathFileName, TArray<FObjMaterialInfo>* OutMaterials = nullptr);
+	// obj로부터 import
+	static FStaticMesh* ImportObjStaticMeshAsset(const FString& PathFileName, TArray<FObjMaterialInfo>* OutMaterials = nullptr);
+	// tsmesh로부터 Load
+	static FStaticMesh* LoadObjStaticMeshAsset(const FString& PathFileName);
 	static class UStaticMesh* LoadObjStaticMesh(const FString& PathFileName);
 
 	static class UMaterial* LoadMaterial(const FName& MaterialName);
 	static void ReleaseResources();
 
-	static TMap<FName, FStaticMesh*>& GetObjStaticMeshMap() { return ObjStaticMeshMap; }
+	static TMap<FString, FStaticMesh*>& GetObjStaticMeshMap() { return ObjStaticMeshMap; }
 	static TMap<FName, FObjMaterialInfo>& GetMaterialMap() { return MaterialMap; }
 private:
-	static TMap<FName, FStaticMesh*> ObjStaticMeshMap;
+	static TMap<FString, FStaticMesh*> ObjStaticMeshMap;
 	static TMap<FName, FObjMaterialInfo> MaterialMap;
+	static FString GetNameFromPath(const FString& FilePath);
 };

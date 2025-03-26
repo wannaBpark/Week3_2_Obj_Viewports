@@ -162,7 +162,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core\Rendering\UI\MaterialEditor.cpp" />
-    <ClCompile Include="Source\Core\Container\ObjectHash.cpp">
+    <ClCompile Include="Source\Core\Container\ObjectHash.cpp" />
     <ClCompile Include="Source\Core\Rendering\D3DViewports\SSpliter.cpp" />
     <ClCompile Include="Source\Factory\Factory.cpp" />
     <ClCompile Include="Source\Object\Mesh\StaticMesh.cpp" />
@@ -329,7 +329,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Core\Rendering\UI\MaterialEditor.h" />
+    <ClInclude Include="Source\Assets\AssetDefine.h" />
+    <ClInclude Include="Source\Core\Container\Map.h" />
+    <ClInclude Include="Source\Core\Container\ObjectHash.h" />
     <ClInclude Include="Source\Factory\Factory.h" />
+    <ClInclude Include="Source\Factory\Path.h" />
     <ClInclude Include="Source\Object\ActorComponent\ActorComponentInfo.h" />
     <ClInclude Include="Source\Object\Actor\ActorInfo.h" />
     <ClInclude Include="Source\Serialization\Archive.h" />
@@ -338,7 +342,6 @@
     <ClInclude Include="Source\Object\Mesh\ObjManager.h" />
     <ClInclude Include="Source\Core\EngineConfig.h" />
     <ClInclude Include="Source\Core\Container\IteratorAdapter.h" />
-    <ClInclude Include="Source\Core\Container\ObjectHash.h" />
     <ClInclude Include="Source\Core\FSceneManager.h" />
     <ClInclude Include="Source\Core\HAL\EnumClassFlags.h" />
     <ClInclude Include="Source\Core\Internationalization\BreakIterator.h" />
@@ -366,7 +369,6 @@
     <ClInclude Include="Source\Object\Actor\Cone.h" />
     <ClInclude Include="Source\Object\Actor\Cube.h" />
     <ClInclude Include="Source\Object\Actor\Actor.h" />
-    <ClInclude Include="Source\Core\Container\Map.h" />
     <ClInclude Include="Source\Core\Container\Pair.h" />
     <ClInclude Include="Source\Debug\DebugConsole.h" />
     <ClInclude Include="Source\Core\Container\Set.h" />
@@ -397,6 +399,7 @@
     <ClInclude Include="Source\Object\UtilComponent\UBillboardUtilComponent.h" />
     <ClInclude Include="Source\Object\UtilComponent\UStringComponent.h" />
     <ClInclude Include="Source\ObjImporter.h" />
+    <ClInclude Include="Source\Serialization\FWindowsBinHelper.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imconfig.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imgui.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imgui_impl_dx11.h" />
@@ -444,9 +447,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="t0.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

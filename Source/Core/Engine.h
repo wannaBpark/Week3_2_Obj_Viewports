@@ -106,6 +106,8 @@ private:
 
 private:
 	UI ui;
+public:
+	UI& GetUI() { return ui; }
 
 private:
     class UWorld* World;

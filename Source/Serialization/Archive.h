@@ -9,6 +9,7 @@
 
 class FArchive
 {
+	friend class FWindowsBinHelper;
 private:
 	std::stringstream Stream;
 
@@ -18,6 +19,12 @@ public:
 	{
 	}
 
+	bool IsEmpty()
+	{
+		return Stream.str().empty();
+	}
+
+private:
 	std::string SaveToBinary() 
 	{
 		auto PrevPos = Stream.tellg();
@@ -41,8 +48,30 @@ public:
 		Stream.seekp(0);  // 쓰기 위치 초기화
 	}
 
-#pragma region Operator Overload
+	void SaveToFile(const std::string& FilePath)
+	{
+		std::ofstream File(FilePath, std::ios::binary);
+		if (File.is_open())
+		{
+			File << SaveToBinary();
+			File.close();
+		}
+	}
 
+	void LoadFromFile(const std::string& FilePath)
+	{
+		std::ifstream File(FilePath, std::ios::binary);
+		if (File.is_open())
+		{
+			std::stringstream Buffer;
+			Buffer << File.rdbuf();
+			LoadFromBinary(Buffer.str());
+			File.close();
+		}
+	}
+
+#pragma region Operator Overload
+public:
 	template <typename T>
 	typename std::enable_if_t<std::is_fundamental_v<T>, FArchive&> operator<<(const T& Value)
 	{
@@ -61,7 +90,9 @@ public:
 	FArchive& operator<<(const std::string& Value)
 	{
 		size_t Size = Value.size();
-		Stream << Size;
+		// 1. 크기를 바이너리로 저장
+		Stream.write(reinterpret_cast<const char*>(&Size), sizeof(size_t));
+		// 2. 문자열 데이터를 바이너리로 저장
 		Stream.write(Value.data(), Size);
 		return *this;
 	}
@@ -69,9 +100,11 @@ public:
 	FArchive& operator>>(std::string& Value)
 	{
 		size_t Size;
-		Stream >> Size;
+		// 1. 크기를 바이너리로 읽기
+		Stream.read(reinterpret_cast<char*>(&Size), sizeof(size_t));
+		// 3. 문자열 데이터 읽기
 		Value.resize(Size);
-		Stream.read(&Value[0], Size);
+		Stream.read(&Value[0], Size);  // C++11 이상: &Value[0] 대신 Value.data()도 가능
 		return *this;
 	}
 	// std::vector<T>
@@ -125,9 +158,9 @@ public:
 		{
 			Key KeyElement;
 			Value ValueElement;
-			*this >> KeyElement;
-			*this >> ValueElement;
-			Value[KeyElement] = ValueElement;
+			*this >> KeyElement;    
+			*this >> ValueElement; 
+			InValue.emplace(std::move(KeyElement), std::move(ValueElement)); 
 		}
 		return *this;
 	}

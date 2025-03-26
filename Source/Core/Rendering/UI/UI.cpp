@@ -34,6 +34,8 @@
 #include "JsonSaveHelper.h"
 #include <Object/StaticMeshComponent/StaticMeshComponent.h>
 #include "StaticMeshInspector.h"
+#include <Factory/Factory.h>
+#include <filesystem>
 
 #define INI_PATH "./editor.ini" // grid scale 저장할 ini 파일 경로
 
@@ -300,6 +302,10 @@ void UI::RenderPrimitiveSelection()
     if (ImGui::Button("Load Scene"))
     {
         World->LoadWorld(SceneNameInput);
+    }
+    if (ImGui::Button("Import"))
+    {
+        ImportFile();
     }
 	float GridScale = World->GetGridScale();
     if (ImGui::SliderFloat("Grid Scale", &GridScale, 0.1f, 100.0f)) {
@@ -720,6 +726,38 @@ void UI::GetCameraStartSpeed()
     GetPrivateProfileStringA("EditorSettings", "CameraStartSpeed", "1.0", buffer.data(), buffer.size(), INI_PATH);
     ACamera* Camera = FEditorManager::Get().GetCamera();
     Camera->CameraSpeed = std::stof(buffer.data());
+}
+
+void UI::OnStaticMeshImported(FStaticMesh* NewStaticMesh)
+{
+	if (StaticMeshInspector != nullptr)
+	{
+		StaticMeshInspector->OnNewStaticMeshImported(NewStaticMesh);
+	}
+}
+
+void UI::ImportFile()
+{
+	// !NOTE : ANSICHAR 기반
+	OPENFILENAMEA ofn;
+	char szFile[260] = { 0 };
+
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = NULL;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "Any File\0*.*\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = NULL;
+	ofn.Flags = OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	if (GetOpenFileNameA(&ofn) == TRUE)
+	{
+        FFactory::ImportFile(ofn.lpstrFile);
+	}
 }
 
 
