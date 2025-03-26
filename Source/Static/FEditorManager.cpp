@@ -70,6 +70,11 @@ void FEditorManager::SetCamera(ACamera* NewCamera)
     Camera = NewCamera;
 }
 
+void FEditorManager::SetInputCamera(ACamera* NewInputCamera)
+{
+    InputCamera = NewInputCamera;
+}
+
 void FEditorManager::SetBoundingBox(UBoundingBoxComp* InBoundingBoxComp)
 {
     BoundingBoxComp = InBoundingBoxComp;
@@ -82,8 +87,7 @@ void FEditorManager::SetStringComp(UStringComponent* InStringComp)
 
 void FEditorManager::SelectComponent(USceneComponent* NewSceneComponent)
 {
-    if (NewSceneComponent != nullptr)
-        SelectedComponent = NewSceneComponent;
+    SelectedComponent = NewSceneComponent;
 }
 
 

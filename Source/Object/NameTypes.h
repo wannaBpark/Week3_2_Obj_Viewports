@@ -14,6 +14,8 @@ struct FName
     int32 ComparisonIndex;
 public:
 
+	static bool Equals(FName A, FName B) = delete;
+	
 	FName() : DisplayIndex(0), ComparisonIndex(0) {}
     FName(const ANSICHAR* Name);
     FName(const WIDECHAR* Name);
@@ -21,8 +23,8 @@ public:
 
     
     FString ToString() const;
-	uint32 GetDisplayIndex() const const { DisplayIndex; }
-	uint32 GetComparisonIndex() const {	ComparisonIndex; }
+	uint32 GetDisplayIndex() const { return DisplayIndex; }
+	uint32 GetComparisonIndex() const {	return ComparisonIndex; }
 
     FORCEINLINE bool operator==(const FName& Other) const
     {

@@ -80,6 +80,7 @@ void APicker::LateTick(float DeltaTime)
 
         POINT pt = GetMousePoint();
         UActorComponent* PickedComponent = GetAcotrByPixelPicking(pt);
+        //UActorComponent* PickedComponent = nullptr; // 테스트용 : 픽셀 피킹 없이 OBB 레이 잘 쏘도록 WIP
         if (PickedComponent != nullptr)
             if (SetSelectActor(PickedComponent)) return;
 

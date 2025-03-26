@@ -1,6 +1,7 @@
 #pragma once
 #include "Object/UObject.h"
 #include "Object/Mesh/StaticMesh.h"
+#include "Object/ObjectMacro.h"
 
 /*
 * UStaticMeshComp에게 소유될 UObject
@@ -9,6 +10,7 @@
 */
 class UStaticMesh : public UObject
 {
+    DECLARE_CLASS(UStaticMesh, UObject)
 private:
     FStaticMesh* StaticMeshAsset;
     TMap<FString, class UMaterial*> Materials;
