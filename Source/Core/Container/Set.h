@@ -86,5 +86,17 @@ public:
         PrivateSet.rehash(PrivateSet.size());
     }
 
+    // Shrink: 사용 중인 요소만 남기고 메모리 압축
+    void Shrink()
+    {
+        SetType NewSet;
+        NewSet.reserve(PrivateSet.size());
 
+        for (const auto& Item : PrivateSet)
+        {
+            NewSet.insert(Item);
+        }
+
+        PrivateSet.swap(NewSet);
+    }
 };

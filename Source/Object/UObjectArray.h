@@ -2,7 +2,6 @@
 #include "atomic"
 #include "assert.h"
 #include "UObject.h"
-#include "Core/HAL/StackAllocator.h"
 #include "Core/Container/Array.h"
 #include "Core/EngineTypes.h"
 
@@ -56,10 +55,8 @@ public:
 	/** Decodes the cluster index from the ClusterRootIndex variable */
 	FORCEINLINE int32 GetClusterIndex() const
 	{
-		if (ClusterRootIndex < 0)
-		{
-			return -ClusterRootIndex - 1;
-		}
+		__assume(ClusterRootIndex < 0);
+		return -ClusterRootIndex - 1;
 	}
 
 	FORCEINLINE int32 GetSerialNumber() const
@@ -100,11 +97,16 @@ public:
 	FORCEINLINE bool ThisThreadAtomicallyClearedFlag(EInternalObjectFlags FlagToClear)
 	{
 		bool Result = false;
+		FlagToClear &= ~EInternalObjectFlags_ReachabilityFlags;
+		FlagToClear |= EInternalObjectFlags::RefCounted;
+		if (!!(FlagToClear &EInternalObjectFlags_RootFlags))
 		{
 			Result = ClearRootFlags(FlagToClear);
+		}
+		else
+		{
 			Result = AtomicallyClearFlag_ForGC(FlagToClear);
 		}
-
 		return Result;
 	}
 
@@ -127,10 +129,16 @@ public:
 	FORCEINLINE bool ThisThreadAtomicallySetFlag(EInternalObjectFlags FlagToSet)
 	{
 		bool Result = false;
+		FlagToSet &= ~EInternalObjectFlags_ReachabilityFlags; // reachability flags can only be cleared by GC through *_ForGC functions
+		FlagToSet &= ~EInternalObjectFlags::RefCounted; // refcounted flag is internal and must only be set by AddRef/ReleaseRef.
+		if (!!(FlagToSet & EInternalObjectFlags_RootFlags))
 		{
 			Result = SetRootFlags(FlagToSet);
+		}
+		else
+		{
 			Result = AtomicallySetFlag_ForGC(FlagToSet);
-		};
+		}
 		return Result;
 	}
 
@@ -158,7 +166,7 @@ public:
 
 	FORCEINLINE bool IsUnreachable() const
 	{
-		return !!(GetFlagsInternal() & int32(EInternalObjectFlags::Unreachable));
+		return !!(GetFlagsInternal() & static_cast<int32>(EInternalObjectFlags::Unreachable));
 	}
 
 	bool IsMaybeUnreachable() const;
@@ -177,7 +185,7 @@ public:
 	}
 	FORCEINLINE bool IsGarbage() const
 	{
-		return !!(GetFlagsInternal() & int32(EInternalObjectFlags::Garbage));
+		return !!(GetFlagsInternal() & static_cast<int32>(EInternalObjectFlags::Garbage));
 	}
 
 	FORCEINLINE void SetPendingKill()
@@ -205,7 +213,7 @@ public:
 	}
 	FORCEINLINE bool IsRootSet() const
 	{
-		return !!(GetFlagsInternal() & int32(EInternalObjectFlags::RootSet));
+		return !!(GetFlagsInternal() & static_cast<int32>(EInternalObjectFlags::RootSet));
 	}
 
 	FORCEINLINE int32 GetRefCount() const
@@ -293,7 +301,7 @@ private:
 			}
 			int32 NewValue = StartValue | static_cast<int32>(FlagToSet);
 			int32 expected = StartValue;
-			if (Flags.compare_exchange_strong(StartValue, NewValue, std::memory_order_relaxed))
+			if (Flags.compare_exchange_strong(expected, NewValue, std::memory_order_relaxed))
 			{
 				bIChangedIt = true;
 				break;
@@ -685,7 +693,7 @@ public:
 		{
 			if (!bEvenIfGarbage && ObjectItem->HasAnyFlags(EInternalObjectFlags::Garbage))
 			{
-				ObjectItem = nullptr;;
+				ObjectItem = nullptr;
 			}
 		}
 		return ObjectItem;
@@ -1025,9 +1033,9 @@ private:
 	int32 MaxObjectsNotConsideredByGC;
 
 	/** If true this is the intial load and we should load objects int the disregarded for GC range.	*/
-	bool bOpenForDisregardForGC;
+	bool OpenForDisregardForGC;
 	/** Array of all live objects.											*/
-	FUObjectArray ObjObjects;
+	TUObjectArray ObjObjects;
 
 	/** Available object indices.											*/
 	TArray<int32> ObjAvailableList;
@@ -1047,19 +1055,20 @@ private:
 
 public:
 	/** INTERNAL USE ONLY: gets the internal FUObjectItem array */
-	FUObjectArray& GetObjectItemArrayUnsafe()
+	TUObjectArray& GetObjectItemArrayUnsafe()
 	{
 		return ObjObjects;
 	}
 
-	const FUObjectArray& GetObjectItemArrayUnsafe() const
+	const TUObjectArray& GetObjectItemArrayUnsafe() const
 	{
 		return ObjObjects;
 	}
 
 	SIZE_T GetAllocatedSize() const
 	{
-		return ObjObjects.GetAllocatedSize() + ObjAvailableList.GetAllocatedSize() + UObjectCreateListeners.GetAllocatedSize() + UObjectDeleteListeners.GetAllocatedSize();
+		return ObjObjects.GetAllocatedSize() + ObjAvailableList.Len() * sizeof(int32) + UObjectCreateListeners.Len() *
+			sizeof(FUObjectCreateListener*) + UObjectDeleteListeners.Len() * sizeof(FUObjectDeleteListener*);
 	}
 
 	SIZE_T GetDeleteListenersAllocatedSize(int32* OutNumListeners = nullptr) const
@@ -1081,4 +1090,115 @@ public:
 
 	void DumpUObjectCountsToLog() const;
 };
+
+/** UObject cluster. Groups UObjects into a single unit for GC. */
+struct FUObjectCluster
+{
+	FUObjectCluster()
+		: RootIndex(INDEX_NONE)
+		, bNeedsDissolving(false)
+	{}
+
+	/** Root object index */
+	int32 RootIndex;
+	/** Objects that belong to this cluster */
+	TArray<int32> Objects;
+	/** Other clusters referenced by this cluster */
+	TArray<int32> ReferencedClusters;
+	/** Objects that could not be added to the cluster but still need to be referenced by it */
+	TArray<int32> MutableObjects;
+	/** List of clusters that direcly reference this cluster. Used when dissolving a cluster. */
+	TArray<int32> ReferencedByClusters;
+#if WITH_VERSE_VM || defined(__INTELLISENSE__)
+	/** All verse cells are considered mutable.  They will just be added directly to verse gc when the cluster is marked */
+	TArray<Verse::VCell*> MutableCells;
+#endif
+
+	/** Cluster needs dissolving, probably due to PendingKill reference */
+	bool bNeedsDissolving;
+};
+
+class FUObjectClusterContainer
+{
+	/** List of all clusters */
+	TArray<FUObjectCluster> Clusters;
+	/** List of available cluster indices */
+	TArray<int32> FreeClusterIndices;
+	/** Number of allocated clusters */
+	int32 NumAllocatedClusters;
+	/** Clusters need dissolving, probably due to PendingKill reference */
+	bool bClustersNeedDissolving;
+
+	/** Dissolves a cluster */
+	void DissolveCluster(FUObjectCluster& Cluster);
+
+public:
+
+	FUObjectClusterContainer();
+
+	FORCEINLINE FUObjectCluster& operator[](int32 Index)
+	{
+		static_assert(Index < 0 || Index >= Clusters.Num());
+		return Clusters[Index];
+	}
+
+	/** Returns an index to a new cluster */
+	int32 AllocateCluster(int32 InRootObjectIndex);
+
+	/** Frees the cluster at the specified index */
+	void FreeCluster(int32 InClusterIndex);
+
+	/**
+	* Gets the cluster the specified object is a root of or belongs to.
+	* @Param ClusterRootOrObjectFromCluster Root cluster object or object that belongs to a cluster
+	*/
+	FUObjectCluster* GetObjectCluster(UObject* ClusterRootOrObjectFromCluster);
+
+
+	/** 
+	 * Dissolves a cluster and all clusters that reference it 
+	 * @Param ClusterRootOrObjectFromCluster Root cluster object or object that belongs to a cluster
+	 */
+	void DissolveCluster(UObject* ClusterRootOrObjectFromCluster);
+
+	/** 
+	 * Dissolve all clusters marked for dissolving 
+	 * @param bForceDissolveAllClusters if true, dissolves all clusters even if they're not marked for dissolving
+	 */
+	void DissolveClusters(bool bForceDissolveAllClusters = false);
+
+	/** Dissolve the specified cluster and all clusters that reference it */
+	void DissolveClusterAndMarkObjectsAsUnreachable(FUObjectItem* RootObjectItem);
+
+	/*** Returns the minimum cluster size as specified in ini settings */
+	int32 GetMinClusterSize() const;
+
+	/** Gets the clusters array (for internal use only!) */
+	TArray<FUObjectCluster>& GetClustersUnsafe() 
+	{ 
+		return Clusters;  
+	}
+
+	/** Returns the number of currently allocated clusters */
+	int32 GetNumAllocatedClusters() const
+	{
+		return NumAllocatedClusters;
+	}
+
+	/** Lets the FUObjectClusterContainer know some clusters need dissolving */
+	void SetClustersNeedDissolving()
+	{
+		bClustersNeedDissolving = true;
+	}
+	
+	/** Checks if any clusters need dissolving */
+	bool ClustersNeedDissolving() const
+	{
+		return bClustersNeedDissolving;
+	}
+};
+
+/** Global UObject allocator							*/
+extern FUObjectArray GUObjectArray;
+extern FUObjectClusterContainer GUObjectClusters;
 

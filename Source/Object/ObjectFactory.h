@@ -6,6 +6,7 @@
 #include "Core/HAL//StackAllocator.h"
 #include "Object/UClass.h"
 #include "Core/Container/String.h"
+#include "Core/Container/ObjectHash.h"
 
 class UObject;
 
@@ -49,6 +50,7 @@ public:
         // Object 제거시 Index가 달라지기 때문에 임시 주석처리 <- RemoveSwap으로 해결 가능
         // NewObject->InternalIndex = UEngine::Get().GObjects.Add(NewObject);
         UEngine::Get().GObjects.Add(NewObject->GetUUID(), NewObject);
+        AddToHashMap(NewObject);
 
         return NewObject.get();
     }

@@ -130,19 +130,95 @@ void FUObjectArray::ResetSerialNumber(UObject* Object)
 }
 
 FUObjectArray::FUObjectArray()
+: ObjFirstGCIndex(0)
+, ObjLastNonGCIndex(INDEX_NONE)
+, MaxObjectsNotConsideredByGC(0)
+, OpenForDisregardForGC(true)
+//, PrimarySerialNumber(START_SERIAL_NUMBER)
 {
 }
 
-void FUObjectArray::AllcatedObjectPool(int32 MaxObjects, int32 MaxObjectsNotConsideredByGC, bool bPreAllocateArray)
+void FUObjectArray::AllcatedObjectPool(int32 InMaxUObjects, int32 InMaxObjectsNotConsideredByGC, bool bPreAllocateObjectArray)
 {
+    MaxObjectsNotConsideredByGC = InMaxObjectsNotConsideredByGC;
+
+    // GObjFirstGCIndex is the index at which the garbage collector will start for the mark phase.
+    // If disregard for GC is enabled this will be set to an invalid value so that later we
+    // know if disregard for GC pool has already been closed (at least once)
+    ObjFirstGCIndex = DisregardForGCEnabled() ? -1 : 0;
+
+    // Pre-size array.
+    static_assert(ObjObjects.Num() != 0);
+    if (InMaxUObjects <= 0)
+    {
+        UE_LOG(TEXT("Max UObject count is invalid. It must be a number that is greater than 0."));
+    }
+    ObjObjects.PreAllocate(InMaxUObjects, bPreAllocateObjectArray);
+
+    if (MaxObjectsNotConsideredByGC > 0)
+    {
+        ObjObjects.AddRange(MaxObjectsNotConsideredByGC);
+    }
 }
 
 void FUObjectArray::DisableDisregardForGC()
 {
+    OpenForDisregardForGC = true;
 }
 
 void FUObjectArray::OpenDisregardForGC()
 {
+    static_assert(OpenForDisregardForGC == false);
+
+    // // Make sure all classes that have been loaded/created so far are properly initialized
+    // if (!IsEngineExitRequested())
+    // {
+    //     ProcessNewlyLoadedUObjects();
+    //
+    //     UClass::AssembleReferenceTokenStreams();
+    //
+    //     if (GIsInitialLoad)
+    //     {
+    //         // Iterate over all objects and mark them to be part of root set.
+    //         int32 NumAlwaysLoadedObjects = 0;
+    //         int32 NumRootObjects = 0;
+    //         for (FThreadSafeObjectIterator It; It; ++It)
+    //         {
+    //             UObject* Object = *It;
+    //             if (Object->IsSafeForRootSet())
+    //             {
+    //                 NumRootObjects++;
+    //                 Object->AddToRoot();
+    //             }
+    //             else if (Object->IsRooted())
+    //             {
+    //                 Object->RemoveFromRoot();
+    //             }
+    //             NumAlwaysLoadedObjects++;
+    //         }
+    //
+    //         UE_LOG(LogUObjectArray, Log, TEXT("%i objects as part of root set at end of initial load."), NumAlwaysLoadedObjects);
+    //         if (GUObjectArray.DisregardForGCEnabled())
+    //         {
+    //             UE_LOG(LogUObjectArray, Log, TEXT("%i objects are not in the root set, but can never be destroyed because they are in the DisregardForGC set."), NumAlwaysLoadedObjects - NumRootObjects);
+    //         }
+    //
+    //         GUObjectAllocator.BootMessage();
+    //     }
+    // }
+    //
+    // // When disregard for GC pool is closed, make sure the first GC index is set after the last non-GC index.
+    // // We do allow here for some slack if MaxObjectsNotConsideredByGC > (ObjLastNonGCIndex + 1) so that disregard for GC pool
+    // // can be re-opened later.
+    // ObjFirstGCIndex = FMath::Max(ObjFirstGCIndex, ObjLastNonGCIndex + 1);
+    //
+    // UE_LOG(LogUObjectArray, Log, TEXT("CloseDisregardForGC: %d/%d objects in disregard for GC pool"), ObjLastNonGCIndex + 1, MaxObjectsNotConsideredByGC);	
+    //
+    // OpenForDisregardForGC = false;
+    // GIsInitialLoad = false;
+    //
+    // checkf(!DisregardForGCEnabled() || !GIsEditor, TEXT("Disregard For GC Set can't be enabled when running the editor"));
+    // checkf(DisregardForGCEnabled() || (ObjFirstGCIndex == 0 && ObjLastNonGCIndex == -1), TEXT("Disregard for GC Set is not properly disabled (FirstGCIndex = %d, LastNonGCIndex = %d"), ObjFirstGCIndex, ObjLastNonGCIndex);
 }
 
 void FUObjectArray::CloseDisregardForGC()
@@ -171,10 +247,17 @@ void FUObjectArray::AddUObjectDeleteListener(FUObjectDeleteListener* Listener)
 
 void FUObjectArray::RemoveUObjectDeleteListener(FUObjectDeleteListener* Listener)
 {
+
 }
 
 void FUObjectArray::RemoveObjectFromDeleteListeners(UObjectBase* Object)
 {
+    int32 Index = Object->InternalIndex;
+    // Iterate in reverse order so that when one of the listeners removes itself from the array inside of NotifyUObjectDeleted we don't skip the next listener.
+    for (int32 ListenerIndex = UObjectDeleteListeners.Num() - 1; ListenerIndex >= 0; --ListenerIndex)
+    {
+        UObjectDeleteListeners[ListenerIndex]->NotifyUObjectDeleted(Object, Index);
+    }
 }
 
 bool FUObjectArray::IsValid(const UObjectBase* Object) const
@@ -189,4 +272,8 @@ void FUObjectArray::ShutdownUObjectArray()
 int32 FUObjectArray::AllocateSerialNumber(int32 Index)
 {
     return int32();
+}
+
+void FUObjectArray::DumpUObjectCountsToLog() const
+{
 }
