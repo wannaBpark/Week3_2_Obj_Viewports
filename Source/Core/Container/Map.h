@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <unordered_map>
 #include <utility>
 #include <algorithm>
@@ -14,34 +14,11 @@ public:
     using PairType = TPair<const KeyType, ValueType>;
     using MapType = std::unordered_map<KeyType, ValueType, std::hash<KeyType>, std::equal_to<KeyType>, Allocator>;
     using SizeType = typename MapType::size_type;
+    using Iterator = typename MapType::iterator;
+    using ConstIterator = typename MapType::const_iterator;
 
 private:
     MapType PrivateMap;
-
-    class Iterator
-    {
-    private:
-        typename MapType::iterator InnerIt;
-    public:
-        Iterator(typename MapType::iterator it) : InnerIt(it) {}
-        PairType& operator*() { return reinterpret_cast<PairType&>(*InnerIt); }
-        PairType* operator->() { return reinterpret_cast<PairType*>(&(*InnerIt)); }
-        Iterator& operator++() { ++InnerIt; return *this; }
-        bool operator!=(const Iterator& other) const { return InnerIt != other.InnerIt; }
-    };
-
-    class ConstIterator
-    {
-    private:
-        typename MapType::const_iterator InnerIt;
-    public:
-        ConstIterator(typename MapType::const_iterator it) : InnerIt(it) {}
-        const PairType& operator*() const { return reinterpret_cast<const PairType&>(*InnerIt); }
-        const PairType* operator->() const { return reinterpret_cast<const PairType*>(&(*InnerIt)); }
-        ConstIterator& operator++() { ++InnerIt; return *this; }
-        bool operator!=(const ConstIterator& other) const { return InnerIt != other.InnerIt; }
-    };
-
 public:
     // TPair를 반환하는 커스텀 반복자
     Iterator begin() noexcept { return Iterator(PrivateMap.begin()); }

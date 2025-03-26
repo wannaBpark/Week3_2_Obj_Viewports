@@ -24,15 +24,18 @@ class ACamera : public AActor
 
 public:
     ACamera();
-
+    ACamera(FVector Position, FVector Rotation, ECameraProjectionMode::Type ProjMode); // Constructor : Set Orthographic Camera
 
 private:    
     float Near;
     float Far;
-    // 화면각
+    // 화면각  
     float FieldOfView;
     // orthographic 사용 시 view범위
     float ViewportSize;
+    float AspectRatio;
+    float Width;
+    float Height;
 
 public:
     const float MaxYDegree = 89.8f;
@@ -47,13 +50,20 @@ public:
 
     void SetFieldOfVew(float Fov);
     void SetViewportSize(float inViewprotSize);
+    void SetViewportSize(float InWidth, float InHeight);
     void SetFar(float Far);
     void SetNear(float Near);
+    void SetProjectionMode(ECameraProjectionMode::Type InMode);
+    void SetAspectRatio(float InAspectRatio) { AspectRatio = InAspectRatio; }
     
     float GetFieldOfView() const;
     float GetViewportSize() const;
     float GetNear() const;
     float GetFar() const;
+    float GetAspectRatio() const;
+    float GetWidth() const;
+    float GetHeight() const;
+    ECameraProjectionMode::Type GetProjectionMode() const;
 
         
     FVector GetForward() const

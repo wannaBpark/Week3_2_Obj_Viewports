@@ -14,6 +14,8 @@
 #include "Object/ActorComponent/Colliders/ICollider.h"
 
 #include "Object/ObjectMacro.h"
+#include "Serialization/Archive.h"
+#include "Core/Container/Set.h"
 
 enum class EViewModeIndex : uint32
 {
@@ -80,6 +82,12 @@ public:
 	float GridScale = 1.0f;
 	uint8 ViewMode = 0;
 	
+public:
+	// !NOTE : Actor들의 ActorInfo를 받아와서 생성
+	void Serialize(FArchive& Ar) const;
+	void Deserialize(FArchive& Ar);
+	AActor* MakeActor(const FActorInfo& Info);
+
 protected:
 	TArray<AActor*> Actors;
 	TArray<UPrimitiveComponent*> ZIgnoreRenderComponents;

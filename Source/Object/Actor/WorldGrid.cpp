@@ -5,8 +5,8 @@
 
 AWorldGrid::AWorldGrid()
 {
-
 	bCanEverTick = true;
+	bIsGizmo = true;
 
 	UWorldGridComp* CubeComponent = AddComponent<UWorldGridComp>();
 	RootComponent = CubeComponent;

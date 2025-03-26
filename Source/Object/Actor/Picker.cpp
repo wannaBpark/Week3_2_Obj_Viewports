@@ -190,3 +190,9 @@ bool APicker::SetSelectActor(const UActorComponent* actorComponent) {
     return true;
 }
 
+bool APicker::SetSelectedComponent(USceneComponent* actorComponent)
+{
+    FEditorManager::Get().SelectComponent(actorComponent);
+    return true;
+}
+

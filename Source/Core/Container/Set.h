@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include "Array.h"
 #include "ContainerAllocator.h"
+#include "Serialization/Archive.h"
 
 
 template <typename T, typename Allocator = FDefaultAllocator<T>>
@@ -98,5 +99,14 @@ public:
         }
 
         PrivateSet.swap(NewSet);
+    }
+
+    inline void Serialize(FArchive& ar) const
+    {
+		ar << PrivateSet;
+    }
+    inline void Deserialize(FArchive& ar)
+    {
+        ar >> PrivateSet;
     }
 };

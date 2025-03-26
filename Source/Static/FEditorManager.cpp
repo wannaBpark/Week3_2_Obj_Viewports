@@ -61,6 +61,7 @@ void FEditorManager::SelectActor(AActor* NewActor)
 		//GizmoTransform.SetPosition(Pos);
 		//GizmoHandle->SetActorTransform(GizmoTransform);
         //GizmoHandle
+        SelectedComponent = nullptr;
 	}
 }
 
@@ -77,6 +78,11 @@ void FEditorManager::SetBoundingBox(UBoundingBoxComp* InBoundingBoxComp)
 void FEditorManager::SetStringComp(UStringComponent* InStringComp)
 {
     StringComp = InStringComp;
+}
+
+void FEditorManager::SelectComponent(USceneComponent* NewSceneComponent)
+{
+    SelectedComponent = NewSceneComponent;
 }
 
 

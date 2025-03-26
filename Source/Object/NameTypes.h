@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Core/HAL/PlatformType.h"
+#include "Core/Container/String.h"
+#include <xhash>
 
 class FString;
 
@@ -24,6 +26,21 @@ public:
 	uint32 GetDisplayIndex() const { DisplayIndex; }
 	uint32 GetComparisonIndex() const {	ComparisonIndex; }
 
-    FORCEINLINE bool operator==(const FName& Other) const;
-	
+    FORCEINLINE bool operator==(const FName& Other) const
+    {
+		return ComparisonIndex == Other.ComparisonIndex;
+    }
+
+	FORCEINLINE bool operator==(const FName& Other) const;
+};
+
+// FName의 해시 함수
+template <>
+struct std::hash<FName>
+{
+	size_t operator()(const FName& InName) const
+	{
+		// 해시 계산 로직
+		return std::hash<FString::BaseStringType>()(*InName.ToString());
+	}
 };

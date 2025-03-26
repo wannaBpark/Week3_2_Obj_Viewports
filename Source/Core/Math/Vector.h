@@ -1,5 +1,6 @@
 #pragma once
 #include "MathUtility.h"
+#include "Serialization/Archive.h"
 
 
 struct FVector
@@ -54,6 +55,16 @@ public:
 
     bool operator==(const FVector& Other) const;
     bool operator!=(const FVector& Other) const;
+
+    void Serialize(FArchive& ar) const
+    {
+		ar << X << Y << Z;
+    }
+
+    void Deserialize(FArchive& ar)
+    {
+        ar >> X >> Y >> Z;
+    }
 };
 
 inline float FVector::DotProduct(const FVector& A, const FVector& B)
@@ -207,7 +218,7 @@ inline bool FVector::operator!=(const FVector& Other) const
     return X != Other.X || Y != Other.Y || Z != Other.Z;
 }
 
-struct alignas(16) FVector4 : public FVector
+struct FVector4 : public FVector
 {
     using FVector::X;
     using FVector::Y;
@@ -226,6 +237,16 @@ struct alignas(16) FVector4 : public FVector
     FVector4& operator/=(float Scalar);
     FVector4& operator*(const FVector& V3);
     FVector4& operator*(const FVector4& V4);
+
+	void Serialize(FArchive& ar) const
+	{
+		ar << X << Y << Z << W;
+	}
+
+	void Deserialize(FArchive& ar)
+	{
+		ar >> X >> Y >> Z >> W;
+	}
 };
 
 inline FVector4& FVector4::operator/=(float Scalar)
@@ -234,3 +255,26 @@ inline FVector4& FVector4::operator/=(float Scalar)
     return *this;
 }
 
+struct FVector2D
+{
+	float X, Y;
+
+	FVector2D() : X(0), Y(0) {}
+	FVector2D(float InX, float InY) : X(InX), Y(InY) {}
+
+	static const FVector2D ZeroVector;
+	static const FVector2D OneVector;
+
+    // Serialize
+	void Serialize(FArchive& ar) const
+	{
+		ar << X << Y;
+	}
+	// Deserialize
+	void Deserialize(FArchive& ar)
+	{
+		ar >> X >> Y;
+	}
+	// Operator Overload
+
+};

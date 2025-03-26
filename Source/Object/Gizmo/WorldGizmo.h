@@ -11,6 +11,8 @@ public:
 	AWorldGizmo();
 	virtual void Tick(float DeltaTime) override;
 
+	virtual const char* GetTypeName() override;
+
 private:
 	TArray<class UCylinderComp*> CylinderComponents;
 	//TArray<AWorldText*> CharComponents;

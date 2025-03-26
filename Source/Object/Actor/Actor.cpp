@@ -28,7 +28,6 @@ void AActor::Tick(float DeltaTime)
 {
 	for (auto& Component : Components)
 	{
-		auto Name = *Component->GetFName().ToString();
 		if (Component->CanEverTick())
 		{
 			Component->Tick(DeltaTime);
@@ -162,3 +161,33 @@ void AActor::SetUseVertexColor(bool bUseVertexColor)
 		}
 	}
 }
+
+void AActor::LoadAndConstruct(const TArray<FActorComponentInfo>& InfoArray)
+{
+	// 이 시점에 액터의 생성자를 통과하여 컴포넌트들은 다 생성되어있는 상태임. InfoArray의 크기와 Components의 크기는 같아야함
+	// 또한 InfoArray와 Components의 순서는 같아야함
+
+	if (InfoArray.Num() != Components.Num())
+	{
+		UE_LOG("InfoArray.Num() != Components.Num()");
+		return;
+	}
+
+	for (int i = 0; i < InfoArray.Num(); i++)
+	{
+		Components[i]->LoadAndConstruct(InfoArray[i]);
+	}
+}
+
+FActorInfo AActor::GetActorInfo()
+{
+	FActorInfo Info;
+	Info.Type = GetTypeName();
+	Info.ActorTransform = GetActorTransform();
+	for (UActorComponent* Component : Components)
+	{
+		Info.ComponentInfos.Add(Component->GetActorComponentInfo());
+	}
+	return Info;
+}
+

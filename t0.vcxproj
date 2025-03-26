@@ -238,9 +238,18 @@
       <AdditionalOptions>/utf-8 </AdditionalOptions>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Source\Factory\Factory.cpp" />
+    <ClCompile Include="Source\Object\Mesh\StaticMesh.cpp" />
+    <ClCompile Include="Source\Serialization\Archive.cpp" />
+    <ClCompile Include="Source\Object\Material\Material.cpp" />
+    <ClCompile Include="Source\Object\Actor\ATarzan.cpp" />
+    <ClCompile Include="Source\Core\Container\ObjectIterator.cpp" />
+    <ClCompile Include="Source\Object\Mesh\ObjManager.cpp" />
+    <ClCompile Include="Source\Core\EngineConfig.cpp" />
     <ClCompile Include="Source\Core\FSceneManager.cpp" />
     <ClCompile Include="Source\Core\Rendering\SubUVManager.cpp" />
     <ClCompile Include="Source\Core\Rendering\TextAtlasManager.cpp" />
+    <ClCompile Include="Source\MeshBuilder.cpp" />
     <ClCompile Include="Source\Object\Actor\Circle.cpp" />
     <ClCompile Include="Source\Object\Actor\SubUV.cpp" />
     <ClCompile Include="Source\Object\Actor\WorldGrid.cpp" />
@@ -278,9 +287,11 @@
     <ClCompile Include="Source\Object\NameTypes.cpp" />
     <ClCompile Include="Source\Object\Gizmo\WorldGizmo.cpp" />
     <ClCompile Include="Source\Object\ObjectFactory.cpp" />
+    <ClCompile Include="Source\Object\StaticMeshComponent\MeshComponent.cpp" />
     <ClCompile Include="Source\Object\UClass.cpp" />
     <ClCompile Include="Source\Object\UtilComponent\UBillboardUtilComponent.cpp" />
     <ClCompile Include="Source\Object\UtilComponent\UStringComponent.cpp" />
+    <ClCompile Include="Source\ObjImporter.cpp" />
     <ClCompile Include="Source\ThirdParty\ImGui\imgui.cpp" />
     <ClCompile Include="Source\ThirdParty\ImGui\imgui_demo.cpp" />
     <ClCompile Include="Source\ThirdParty\ImGui\imgui_draw.cpp" />
@@ -293,6 +304,9 @@
     <ClCompile Include="Source\Object\PrimitiveComponent\UPrimitiveComponent.cpp" />
     <ClCompile Include="Source\Object\World\World.cpp" />
     <ClCompile Include="Source\Object\Actor\Sphere.cpp" />
+    <ClCompile Include="Source\Object\StaticMeshComponent\StaticMeshComponent.cpp" />
+    <ClCompile Include="Source\Core\Rendering\UI\StaticMeshInspector.cpp" />
+    <ClCompile Include="Source\Factory\StaticMeshFactory.cpp" />
     <ClCompile Include="Source\Core\Container\StringView.cpp" />
     <ClCompile Include="Source\Object\UObejctIterator.cpp" />
     <ClCompile Include="URaycastSystem.cpp" />
@@ -346,6 +360,13 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="Shaders\LitShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Shaders\PosTexPixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -364,6 +385,9 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="Shaders\ShaderMesh.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Shaders\ShaderTest.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -379,6 +403,15 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Factory\Factory.h" />
+    <ClInclude Include="Source\Object\ActorComponent\ActorComponentInfo.h" />
+    <ClInclude Include="Source\Object\Actor\ActorInfo.h" />
+    <ClInclude Include="Source\Serialization\Archive.h" />
+    <ClInclude Include="Source\Object\Material\Material.h" />
+    <ClInclude Include="Source\Object\Actor\ATarzan.h" />
+    <ClInclude Include="Source\Core\Container\ObjectIterator.h" />
+    <ClInclude Include="Source\Object\Mesh\ObjManager.h" />
+    <ClInclude Include="Source\Core\EngineConfig.h" />
     <ClInclude Include="Source\Core\Container\IteratorAdapter.h" />
     <ClInclude Include="Source\Core\Container\ObjectHash.h" />
     <ClInclude Include="Source\Core\FSceneManager.h" />
@@ -387,6 +420,9 @@
     <ClInclude Include="Source\Core\Internationalization\IBreakIterator.h" />
     <ClInclude Include="Source\Core\Rendering\SubUVManager.h" />
     <ClInclude Include="Source\Core\Rendering\TextAtlasManager.h" />
+    <ClInclude Include="Source\Core\Template\RemoveReference.h" />
+    <ClInclude Include="Source\Core\Template\Template.h" />
+    <ClInclude Include="Source\MeshBuilder.h" />
     <ClInclude Include="Source\Object\Actor\SubUV.h" />
     <ClInclude Include="Source\Object\Actor\WorldGrid.h" />
     <ClInclude Include="Circle.h" />
@@ -427,12 +463,15 @@
     <ClInclude Include="Source\Object\Actor\Triangle.h" />
     <ClInclude Include="Source\Object\Actor\WorldText.h" />
     <ClInclude Include="Source\Object\Gizmo\WorldGizmo.h" />
+    <ClInclude Include="Source\Object\Mesh\StaticMesh.h" />
     <ClInclude Include="Source\Object\NameTypes.h" />
     <ClInclude Include="Source\Object\ObjectFactory.h" />
     <ClInclude Include="Source\Object\ObjectMacro.h" />
     <ClInclude Include="Source\Object\UClass.h" />
+    <ClInclude Include="Source\Object\StaticMeshComponent\MeshComponent.h" />
     <ClInclude Include="Source\Object\UtilComponent\UBillboardUtilComponent.h" />
     <ClInclude Include="Source\Object\UtilComponent\UStringComponent.h" />
+    <ClInclude Include="Source\ObjImporter.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imconfig.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imgui.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imgui_impl_dx11.h" />
@@ -441,12 +480,13 @@
     <ClInclude Include="Source\ThirdParty\ImGui\imstb_rectpack.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imstb_textedit.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imstb_truetype.h" />
+    <ClInclude Include="Source\ThirdParty\iniparser.hpp" />
     <ClInclude Include="Source\ThirdParty\SimpleJSON\Json.hpp" />
-    <ClCompile Include="Source\Core\Rendering\UI.cpp" />
+    <ClCompile Include="Source\Core\Rendering\UI\UI.cpp" />
     <ClCompile Include="Source\Core\Rendering\URenderer.cpp" />
     <ClCompile Include="Source\Primitive\PrimitiveVertices.cpp" />
     <ClInclude Include="Source\Core\Engine.h" />
-    <ClInclude Include="Source\Core\Rendering\UI.h" />
+    <ClInclude Include="Source\Core\Rendering\UI\UI.h" />
     <ClInclude Include="Source\Core\Rendering\URenderer.h" />
     <ClCompile Include="Source\Object\Actor\Picker.cpp" />
     <ClInclude Include="Source\Object\Gizmo\GizmoHandle.h" />
@@ -466,6 +506,9 @@
     <ClInclude Include="Source\Object\Actor\Sphere.h" />
     <ClInclude Include="Source\ThirdParty\stb-master\stb_image.h" />
     <ClInclude Include="Source\ThirdParty\stb-master\stb_image_write.h" />
+    <ClInclude Include="Source\Object\StaticMeshComponent\StaticMeshComponent.h" />
+    <ClInclude Include="Source\Core\Rendering\UI\StaticMeshInspector.h" />
+    <ClInclude Include="Source\Factory\StaticMeshFactory.h" />
     <ClInclude Include="Source\Core\Container\StringView.h" />
     <ClInclude Include="UColliders.h" />
     <ClInclude Include="Source\Object\UObejctIterator.h" />
@@ -473,6 +516,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Textures\Explosion.PNG" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
