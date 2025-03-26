@@ -971,7 +971,7 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
         .Ambient = FVector4(0.1f, 0.1f, 0.1f, 1.f),
         .Diffuse = FVector4(1.f, 1.f, 1.f, 1.f),
         .Specular = FVector4(1.f, 1.f, 1.f, 1.f),
-        .Emissive = FVector4(0.f, 0.f, 0.f, 1.0f),
+        .Emissive = FVector4(1.f, 1.f, 1.f, 1.f),
         .Padding1 = 0,
         .Direction = FVector(1.f, -1.f, -1.f).GetSafeNormal(),
         .Padding = 0,
