@@ -105,6 +105,8 @@ private:
 
 private:
 	UI ui;
+public:
+	UI& GetUI() { return ui; }
 
 private:
     class UWorld* World;
@@ -122,6 +124,7 @@ private:
 public:
 	FEngineConfig* GetEngineConfig() const { return EngineConfig; }
     std::shared_ptr<ACamera> GetCameraByIdx(uint32 idx) { return Cameras[idx % Cameras.Num()]; }
+    // 3. ACamera::static FTransform DeltaTransform -> HandleCameraInput에서 현재 transform - 이전 Transform
 };
 
 template <typename ObjectType> requires std::derived_from<ObjectType, UObject>

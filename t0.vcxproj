@@ -324,7 +324,9 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Assets\AssetDefine.h" />
     <ClInclude Include="Source\Factory\Factory.h" />
+    <ClInclude Include="Source\Factory\Path.h" />
     <ClInclude Include="Source\Object\ActorComponent\ActorComponentInfo.h" />
     <ClInclude Include="Source\Object\Actor\ActorInfo.h" />
     <ClInclude Include="Source\Serialization\Archive.h" />
@@ -388,6 +390,7 @@
     <ClInclude Include="Source\Object\UtilComponent\UBillboardUtilComponent.h" />
     <ClInclude Include="Source\Object\UtilComponent\UStringComponent.h" />
     <ClInclude Include="Source\ObjImporter.h" />
+    <ClInclude Include="Source\Serialization\FWindowsBinHelper.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imconfig.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imgui.h" />
     <ClInclude Include="Source\ThirdParty\ImGui\imgui_impl_dx11.h" />

@@ -20,6 +20,8 @@
 #include <Object/Actor/ATarzan.h>
 #include "Core/Container/String.h"
 #include <ostream>
+#include <Serialization/FWindowsBinHelper.h>
+#include "Assets/AssetDefine.h"
 
 void UWorld::BeginPlay()
 {
@@ -207,7 +209,18 @@ void UWorld::SaveWorld()
 {
 	FArchive WorldAr;
 	WorldAr << *this;
-	WorldAr.SaveToFile("World.bin");
+	FString CurrentSceneName = ASSET_DEFAULT_SCENE_PATH + SceneName + TEXT(".tscene");
+	FWindowsBinHelper::SaveToBin(CurrentSceneName, WorldAr);
+
+}
+void UWorld::LoadWorld(const char* SceneName)
+{
+	FString SceneNameStr = ASSET_DEFAULT_SCENE_PATH + FString(SceneName) + TEXT(".tscene");
+	FArchive WorldAr;
+	if (FWindowsBinHelper::LoadFromBin(SceneNameStr, WorldAr))
+	{
+		WorldAr >> *this;
+	}
 }
 
 void UWorld::AddZIgnoreComponent(UPrimitiveComponent* InComponent)
@@ -216,12 +229,6 @@ void UWorld::AddZIgnoreComponent(UPrimitiveComponent* InComponent)
 	InComponent->SetIsOrthoGraphic(true);
 }
 
-void UWorld::LoadWorld(const char* SceneName)
-{
-	FArchive WorldAr;
-	WorldAr.LoadFromFile("World.bin");
-	WorldAr >> *this;
-}
 
 UWorldInfo UWorld::GetWorldInfo() const
 {

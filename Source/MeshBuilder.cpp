@@ -171,7 +171,7 @@ void FMeshBuilder::CreateTextureSRV()
 	for (auto& Material : Materials)
 	{
 		std::wstring fileName = Material.second.TextureName.ToString().c_wchar();
-		std::wstring filePath = L"Textures/" + fileName;
+		std::wstring filePath = Material.second.TexturePath.c_wchar();
 		uint32 index = UEngine::Get().GetRenderer()->CreateTextureSRVW(filePath.c_str());
 
 		Material.second.TextureMapIndex = index;

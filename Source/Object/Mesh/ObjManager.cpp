@@ -4,14 +4,18 @@
 #include "Core/Engine.h"
 #include "Object/ObjectFactory.h"
 #include "Object/Material/Material.h"
+#include <filesystem>
 #include "MeshBuilder.h"
+#include "Serialization/FWindowsBinHelper.h"
+#include <Assets/AssetDefine.h>
 
-TMap<FName, FStaticMesh*> FObjManager::ObjStaticMeshMap;
+TMap<FString, FStaticMesh*> FObjManager::ObjStaticMeshMap;
 TMap<FName, FObjMaterialInfo> FObjManager::MaterialMap;
 
-FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName, TArray<FObjMaterialInfo>* OutMaterials)
+FStaticMesh* FObjManager::ImportObjStaticMeshAsset(const FString& PathFileName, TArray<FObjMaterialInfo>* OutMaterials)
 {
-    FStaticMesh** MeshDataPtr = ObjStaticMeshMap.Find(PathFileName);
+	FString MeshNameStr = GetNameFromPath(PathFileName);
+    FStaticMesh** MeshDataPtr = ObjStaticMeshMap.Find(MeshNameStr);
 
 	if (MeshDataPtr)
 		return *MeshDataPtr;
@@ -20,7 +24,7 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName, TA
     MeshBuilder.BuildMeshFromObj(PathFileName);
 
 	FStaticMesh* MeshData = new FStaticMesh();
-	MeshData->PathFileName = PathFileName;
+	MeshData->Name = MeshNameStr;
 	MeshData->Vertices = MeshBuilder.GetVertices();
 	MeshData->Indices = MeshBuilder.GetIndices();
 	MeshData->GroupNames = MeshBuilder.GetGroupNames();
@@ -38,9 +42,55 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName, TA
 		}
 	}
 
-	ObjStaticMeshMap.Add(PathFileName, MeshData);
+	ObjStaticMeshMap.Add(GetNameFromPath(PathFileName), MeshData);
 
     return MeshData;
+}
+
+FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
+{
+	FString MeshNameStr = GetNameFromPath(PathFileName);
+	FStaticMesh** MeshDataPtr = ObjStaticMeshMap.Find(MeshNameStr);
+
+	if (MeshDataPtr)
+		return *MeshDataPtr;
+
+	FStaticMesh* StaticMesh = new FStaticMesh();
+
+	FArchive StaticMeshAr;
+	FWindowsBinHelper::LoadFromBin(PathFileName, StaticMeshAr);
+	if (StaticMeshAr.IsEmpty())
+	{
+		UE_LOG("%s Asset is Not Imported!!!!", *MeshNameStr);
+		return nullptr;
+	}
+	else
+	{
+		StaticMeshAr >> *StaticMesh;
+		ObjStaticMeshMap.Add(StaticMesh->Name, StaticMesh);
+	}
+
+
+	// Load Materials
+	for (auto& Kvp : StaticMesh->SubMeshes)
+	{
+		FArchive MaterialAr;
+		FString MaterialName = Kvp.second.MaterialName.ToString();
+		FString MaterialPath = ASSET_DEFAULT_MATERIAL_PATH + MaterialName + ASSET_DEFAULT_MATERIAL_EXTENSION;
+		FWindowsBinHelper::LoadFromBin(MaterialPath, StaticMeshAr);
+		if (!StaticMeshAr.IsEmpty())
+		{
+			FObjMaterialInfo MaterialInfo;
+			StaticMeshAr >> MaterialInfo;
+			
+			// 읽어온 텍스쳐를 SRV로 만들어서 인덱스를 저장
+			int idx = UEngine::Get().GetRenderer()->CreateTextureSRVW(MaterialInfo.TexturePath.c_wchar());
+			MaterialInfo.TextureMapIndex = idx;
+
+			MaterialMap.Add(Kvp.second.MaterialName, MaterialInfo);
+		}
+	}
+	return StaticMesh;
 }
 
 UStaticMesh* FObjManager::LoadObjStaticMesh(const FString& PathFileName)
@@ -53,6 +103,10 @@ UStaticMesh* FObjManager::LoadObjStaticMesh(const FString& PathFileName)
 			return Mesh;
     }
 	FStaticMesh* MeshAsset = LoadObjStaticMeshAsset(PathFileName);
+	if (MeshAsset == nullptr)
+	{
+		return nullptr;
+	}
 	UStaticMesh* StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>();
 	StaticMesh->SetStaticMeshAsset(MeshAsset);
 
@@ -88,4 +142,10 @@ void FObjManager::ReleaseResources()
 	{
 		delete Kvp.second;
 	};
+}
+
+FString FObjManager::GetNameFromPath(const FString& FilePath)
+{
+	std::filesystem::path path(FilePath.c_char());
+	return FString(path.stem().string().c_str()); 
 }

@@ -2,6 +2,7 @@
 
 #include "Core/HAL/PlatformType.h"
 #include "Core/Container/String.h"
+#include "Serialization/Archive.h"
 #include <xhash>
 
 class FString;
@@ -27,6 +28,19 @@ public:
     FORCEINLINE bool operator==(const FName& Other) const
     {
 		return ComparisonIndex == Other.ComparisonIndex;
+    }
+
+    void Serialize(FArchive& Ar) const
+    {
+		FString Name = ToString();
+        Ar << Name;
+    }
+
+    void Deserialize(FArchive& Ar)
+    {
+        FString NameStr;
+        Ar >> NameStr;
+		*this = FName(NameStr);
     }
 };
 
