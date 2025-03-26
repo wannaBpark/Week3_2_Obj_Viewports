@@ -23,7 +23,7 @@ void MaterialEditor::Update()
 
 	ImGui::Begin("Material Editor", &isOpen);
 
-	ImGui::Text("Material %s", TargetMaterial->MaterialName.ToString().c_wchar());
+	ImGui::Text("Material %s", TargetMaterial->MaterialName.ToString().c_char());
 	
 	// Ambient, Diffuse, Specular, Emissive
 	ImGui::ColorEdit4("Ambient", (float*)&TargetMaterial->Ambient);
@@ -63,7 +63,7 @@ void MaterialEditor::Update()
 	//	ImGui::EndCombo();
 	//}	
 
-	ImGui::Text("Texture %s", TargetMaterial->TextureName.ToString().c_wchar());
+	ImGui::Text("Texture %s", TargetMaterial->TextureName.ToString().c_char());
 
 
 	//ID3D11ShaderResourceView* SRV;
