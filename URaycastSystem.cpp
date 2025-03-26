@@ -15,8 +15,24 @@ bool URaycastSystem::RaycastSingle(const FVector& Origin, const FVector& Directi
 {
     // 방향 벡터 정규화
     FVector NormalizedDirection = Direction.GetSafeNormal();
-
+    
+    UClass* colliderClass = collider->GetClass();
     // 콜라이더 타입에 따라 적절한 Raycast 함수 호출
+    /*if (colliderClass == USphereCollider::StaticClass())
+    {
+        USphereCollider* Spherecollider = dynamic_cast<USphereCollider*>(collider);
+        return RayToSphere(Origin, NormalizedDirection, *Spherecollider, MaxDistance, OutHit);
+    }
+    else if (colliderClass == UBoxCollider::StaticClass())
+    {
+        UBoxCollider* BoxCollider = dynamic_cast<UBoxCollider*>(collider);
+        return RayToBox(Origin, NormalizedDirection, *BoxCollider, MaxDistance, OutHit);
+    }
+    else if (colliderClass == ULineCollider::StaticClass())
+    {
+        ULineCollider* LineCollider = dynamic_cast<ULineCollider*>(collider);
+        return RayToLine(Origin, NormalizedDirection, *LineCollider, MaxDistance, OutHit);
+    }*/
     if (USphereCollider* SphereCollider = dynamic_cast<USphereCollider*>(collider))
     {
         return RayToSphere(Origin, NormalizedDirection, *SphereCollider, MaxDistance, OutHit);

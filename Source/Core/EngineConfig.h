@@ -16,6 +16,7 @@ enum class EEngineConfigSectionType
 
 	ECS_Screen,
 	ECS_Camera,
+	ECS_Splitter,
 	ECS_Max,
 };
 
@@ -40,6 +41,10 @@ enum class EEngineConfigValueType
 	EEC_EditorCameraSpeed,
 	EEC_EditorCameraSensitivity,
 
+	EEC_HorizontalSplitRatio,
+	EEC_TopVerticalSplitRatio,
+	EEC_BottomVerticalSplitRatio,
+
 	EEC_Max,
 };
 
@@ -61,7 +66,8 @@ static const SectionMapping SectionMappings[] =
 {
 	SECTION_MAPPING(ECS_None, "NONE"),
 	SECTION_MAPPING(ECS_Screen, "Screen"),
-	SECTION_MAPPING(ECS_Camera, "Camera")
+	SECTION_MAPPING(ECS_Camera, "Camera"),
+	SECTION_MAPPING(ECS_Splitter, "Splitter")
 	// !TODO : EngineConfigSection 추가시 추가
 };
 
@@ -81,7 +87,11 @@ static const ConfigMapping ConfigMappings[] = {
 	CONFIG_MAPPING(EEC_EditorCameraRotW, "EditorCameraRotW", ECS_Camera),
 
 	CONFIG_MAPPING(EEC_EditorCameraSpeed, "EditorCameraSpeed", ECS_Camera),
-	CONFIG_MAPPING(EEC_EditorCameraSensitivity, "EditorCameraSensitivity", ECS_Camera)
+	CONFIG_MAPPING(EEC_EditorCameraSensitivity, "EditorCameraSensitivity", ECS_Camera),
+
+	CONFIG_MAPPING(EEC_HorizontalSplitRatio, "HorizontalSplitRatio", ECS_Splitter),
+	CONFIG_MAPPING(EEC_TopVerticalSplitRatio, "TopVerticalSplitRatio", ECS_Splitter),
+	CONFIG_MAPPING(EEC_BottomVerticalSplitRatio, "BottomVerticalSplitRatio", ECS_Splitter),
 	// !TODO : EngineConfig 추가시 추가
 };
 

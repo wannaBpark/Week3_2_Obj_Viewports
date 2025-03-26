@@ -291,7 +291,10 @@
     <ClCompile Include="Source\Object\Mesh\StaticMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Core\Container\ObjectHash.cpp">
+    <ClCompile Include="Source\Core\Container\ObjectHash.cpp">      
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\Rendering\D3DViewports\SSpliter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -622,6 +625,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\Core\Container\ObjectHash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\ActorComponent\ActorComponentInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Object\Actor\ActorInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
