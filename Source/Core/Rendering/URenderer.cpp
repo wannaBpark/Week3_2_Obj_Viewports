@@ -997,7 +997,7 @@ void URenderer::RenderMesh(UStaticMeshComponent* MeshComp)
                 .Diffuse = Mat->Diffuse,
                 .Specular = Mat->Specular,
                 .Emissive = Mat->Emissive,
-                .Roughness = 250 - Mat->Shininess,
+                .Roughness = 1.0f - (Mat->Shininess / 250.0f),
             };
 
             UpdateBuffer(matConstant, 8);
