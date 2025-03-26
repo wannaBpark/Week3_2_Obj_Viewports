@@ -161,6 +161,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Core\Rendering\D3DViewports\SSpliter.cpp" />
     <ClCompile Include="Source\Factory\Factory.cpp" />
     <ClCompile Include="Source\Object\Mesh\StaticMesh.cpp" />
     <ClCompile Include="Source\Serialization\Archive.cpp" />

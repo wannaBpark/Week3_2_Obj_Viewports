@@ -13,9 +13,11 @@ public:
     
     void SelectActor(AActor* NewActor);
 
-    inline ACamera* GetCamera() const {return Camera;}
+    inline ACamera* GetCamera() const { return Camera; }
+    inline ACamera* GetInputCamera() const {return (InputCamera == nullptr) ? Camera : InputCamera;}
 
-    void SetCamera(ACamera* NewCamera);
+    void SetCamera(ACamera* NewCamera); // Render대상 카메라를 설정합니다.
+    void SetInputCamera(ACamera* NewInputCamera);      // 움직일 대상인 카메라를 설정합니다.
 
     AGizmoHandle* GetGizmoHandle() const {return GizmoHandle;}
 
@@ -29,6 +31,7 @@ public:
     
 private:
     ACamera* Camera = nullptr;
+    ACamera* InputCamera = nullptr;
     AActor* SelectedActor = nullptr;
     AGizmoHandle* GizmoHandle = nullptr;
 	UStringComponent* StringComp = nullptr;

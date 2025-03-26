@@ -70,6 +70,11 @@ void FEditorManager::SetCamera(ACamera* NewCamera)
     Camera = NewCamera;
 }
 
+void FEditorManager::SetInputCamera(ACamera* NewInputCamera)
+{
+    InputCamera = NewInputCamera;
+}
+
 void FEditorManager::SetBoundingBox(UBoundingBoxComp* InBoundingBoxComp)
 {
     BoundingBoxComp = InBoundingBoxComp;

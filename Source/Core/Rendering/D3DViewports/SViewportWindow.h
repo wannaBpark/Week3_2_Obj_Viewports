@@ -7,8 +7,11 @@
 
 
 class SViewportWindow final : public SWindow {
+    using Super = SWindow;
 private:
+    // 모든 viewport는 dragging, 전체화면 여부를 공유하여 자신의 입력처리에 반영
     inline static bool bIsAnyFullScreen = false;
+    inline static bool bIsAnyDragging = false;
     inline static TArray<std::shared_ptr<ACamera>> AllCameras;
 
     D3D11_VIEWPORT DXViewport;
@@ -48,12 +51,35 @@ public:
             bRenderable = false;
             // TickPlayerInput
             //UEngine::Get().
+            // TODO : 내 윈도우를 hover하며 카메라조작하다가
+            // 다른 윈도우에 점유되면 안움직이도록 해야 함
+        }
+    }
+
+    virtual void OnMouseDown(const FPoint& MousePos) override
+    {
+        UE_LOG("MOUSE Down By Viewport %d %d", Rect.X, Rect.Y);
+        if (IsHover(MousePos) /*&& !bIsAnyDragging*/)
+        {
+            bIsDragging = bIsAnyDragging = true;
+            FEditorManager::Get().SetInputCamera(this->Camera.get());
+            UE_LOG("Set Camera By Viewport %d %d", Rect.X, Rect.Y);
         }
     }
 
     virtual void OnMouseMove(const FPoint& MousePos) override
     {
         bHovered = IsHover(MousePos);
+    }
+
+    virtual void OnMouseUp(const FPoint& MousePos) override
+    {
+        if (bIsDragging && bIsAnyDragging)  // 드래깅되고 있고, 점유된 화면만이 false로 변경
+        {
+            bIsAnyDragging = false;
+            UE_LOG("UNSET Camera By Viewport %d %d", Rect.X, Rect.Y);
+        }
+        bIsDragging = false;
     }
 
     virtual void OnKeyDown(EKeyCode Key) override
